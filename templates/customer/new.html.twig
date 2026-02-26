@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Add Customer - Floryn Garden{% endblock %}
+{% block page_title %}Add New Customer{% endblock %}
+
+{% block body %}
+<div class="px-4 sm:px-6 lg:px-8">
+  <!-- Breadcrumb -->
+  <div class="mb-6">
+    <nav class="flex" aria-label="Breadcrumb">
+      <ol class="flex items-center space-x-4">
+        <li>
+          <a href="{{ path('admin_dashboard') }}" class="text-gray-400 hover:text-gray-500">
+            <i class="fas fa-home"></i>
+          </a>
+        </li>
+        <li>
+          <div class="flex items-center">
+            <i class="fas fa-chevron-right text-gray-400 mr-4"></i>
+            <a href="{{ path('app_customer_index') }}" class="text-sm font-medium text-gray-500 hover:text-gray-700">Customers</a>
+          </div>
+        </li>
+        <li>
+          <div class="flex items-center">
+            <i class="fas fa-chevron-right text-gray-400 mr-4"></i>
+            <span class="text-sm font-medium text-gray-500">New Customer</span>
+          </div>
+        </li>
+      </ol>
+    </nav>
+
+    <div class="mt-4">
+      <h1 class="text-2xl font-bold text-gray-900 flex items-center">
+        <i class="fas fa-user-plus text-emerald-600 mr-3"></i>
+        Add New Customer
+      </h1>
+      <p class="mt-2 text-sm text-gray-600">Enter customer details to add them to your database.</p>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <div class="max-w-4xl">
+    {{ include('customer/_form.html.twig', {button_label: 'Create Customer'}) }}
+  </div>
+</div>
+{% endblock %}

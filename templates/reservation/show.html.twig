@@ -1,0 +1,316 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Reservation #{{ reservation.id }} - Floryn Garden{% endblock %}
+{% block page_title %}Reservation #{{ reservation.id }}{% endblock %}
+
+{% block body %}
+<div class="px-4 sm:px-6 lg:px-8">
+  <!-- Breadcrumb -->
+  <div class="mb-6">
+    <nav class="flex" aria-label="Breadcrumb">
+      <ol class="flex items-center space-x-4">
+        <li>
+          <a href="{{ path('admin_dashboard') }}" class="text-gray-400 hover:text-gray-500">
+            <i class="fas fa-home"></i>
+          </a>
+        </li>
+        <li>
+          <div class="flex items-center">
+            <i class="fas fa-chevron-right text-gray-400 mr-4"></i>
+            <a href="{{ path('app_reservation_index') }}" class="text-sm font-medium text-gray-500 hover:text-gray-700">Reservations</a>
+          </div>
+        </li>
+        <li>
+          <div class="flex items-center">
+            <i class="fas fa-chevron-right text-gray-400 mr-4"></i>
+            <span class="text-sm font-medium text-gray-500">#{{ reservation.id }}</span>
+          </div>
+        </li>
+      </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="mt-4 flex justify-between items-start">
+      <div class="flex items-center">
+        <div class="h-12 w-12 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center mr-4">
+          <i class="fas fa-receipt text-white text-lg"></i>
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">Reservation #{{ reservation.id }}</h1>
+          <p class="mt-1 text-sm text-gray-600">
+            {% if reservation.customer %}Placed by {{ reservation.customer.fullName }}{% endif %}
+            {% if reservation.dateReserved %} on {{ reservation.dateReserved|date('F j, Y') }}{% endif %}
+          </p>
+        </div>
+      </div>
+      <div class="flex space-x-3">
+        <a href="{{ path('app_reservation_edit', {'id': reservation.id}) }}"
+           class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200">
+          <i class="fas fa-edit mr-2"></i>Edit
+        </a>
+        <a href="{{ path('app_reservation_index') }}"
+           class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
+          <i class="fas fa-arrow-left mr-2"></i>Back to List
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Main Content -->
+    <div class="lg:col-span-2">
+      <!-- Order Details -->
+      <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+        <div class="px-6 py-4 bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-200">
+          <h3 class="text-lg font-medium text-amber-900 flex items-center">
+            <i class="fas fa-shopping-basket mr-2 text-amber-600"></i>
+            Order Items
+          </h3>
+        </div>
+        <div class="px-6 py-6">
+          {% if reservation.reservationDetails|length > 0 %}
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Flower</th>
+                    <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Qty</th>
+                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                  {% for detail in reservation.reservationDetails %}
+                    <tr class="hover:bg-gray-50">
+                      <td class="px-4 py-4">
+                        <div class="flex items-center">
+                          <div class="h-8 w-8 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 flex items-center justify-center mr-3">
+                            <i class="fas fa-leaf text-white text-xs"></i>
+                          </div>
+                          <div>
+                            <p class="text-sm font-medium text-gray-900">{{ detail.flower.name }}</p>
+                            <p class="text-xs text-gray-500">{{ detail.flower.category }}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="px-4 py-4 text-center text-sm text-gray-900">{{ detail.quantity }}</td>
+                      <td class="px-4 py-4 text-right text-sm text-gray-900">${{ detail.flower.price|number_format(2) }}</td>
+                      <td class="px-4 py-4 text-right text-sm font-semibold text-gray-900">${{ detail.subtotal|number_format(2) }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+                <tfoot class="bg-gray-50">
+                  <tr>
+                    <td colspan="3" class="px-4 py-4 text-right text-sm font-bold text-gray-900">Total</td>
+                    <td class="px-4 py-4 text-right text-lg font-bold text-emerald-600">${{ reservation.totalAmount|number_format(2) }}</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          {% else %}
+            <div class="text-center py-8">
+              <i class="fas fa-box-open text-gray-300 text-4xl mb-3"></i>
+              <p class="text-gray-500">No items in this reservation</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Customer Information -->
+      <div class="mt-6 bg-white shadow-lg rounded-lg overflow-hidden">
+        <div class="px-6 py-4 bg-gradient-to-r from-purple-50 to-indigo-50 border-b border-purple-200">
+          <h3 class="text-lg font-medium text-purple-900 flex items-center">
+            <i class="fas fa-user mr-2 text-purple-600"></i>
+            Customer Information
+          </h3>
+        </div>
+        <div class="px-6 py-6">
+          {% if reservation.customer %}
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="h-12 w-12 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center mr-4">
+                  <span class="text-white font-bold">{{ reservation.customer.fullName|first|upper }}</span>
+                </div>
+                <div>
+                  <h4 class="text-lg font-medium text-gray-900">{{ reservation.customer.fullName }}</h4>
+                  {% if reservation.customer.email %}
+                    <p class="text-sm text-gray-500"><i class="fas fa-envelope mr-1"></i> {{ reservation.customer.email }}</p>
+                  {% endif %}
+                  {% if reservation.customer.phone %}
+                    <p class="text-sm text-gray-500"><i class="fas fa-phone mr-1"></i> {{ reservation.customer.phone }}</p>
+                  {% endif %}
+                </div>
+              </div>
+              <a href="{{ path('app_customer_show', {'id': reservation.customer.id}) }}"
+                 class="inline-flex items-center text-sm text-purple-600 hover:text-purple-900">
+                View Profile <i class="fas fa-external-link-alt ml-1"></i>
+              </a>
+            </div>
+          {% else %}
+            <p class="text-gray-500 italic">No customer assigned</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Payment Information -->
+      {% if reservation.payment %}
+      <div class="mt-6 bg-white shadow-lg rounded-lg overflow-hidden">
+        <div class="px-6 py-4 bg-gradient-to-r from-green-50 to-emerald-50 border-b border-green-200">
+          <h3 class="text-lg font-medium text-green-900 flex items-center">
+            <i class="fas fa-credit-card mr-2 text-green-600"></i>
+            Payment Details
+          </h3>
+        </div>
+        <div class="px-6 py-6">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Amount Paid</dt>
+              <dd class="mt-1 text-lg font-bold text-green-600">${{ reservation.payment.amountPaid|number_format(2) }}</dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Payment Method</dt>
+              <dd class="mt-1">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                  {% if reservation.payment.paymentMethod == 'Credit Card' %}bg-blue-100 text-blue-800
+                  {% elseif reservation.payment.paymentMethod == 'Cash' %}bg-green-100 text-green-800
+                  {% else %}bg-gray-100 text-gray-800{% endif %}">
+                  {{ reservation.payment.paymentMethod }}
+                </span>
+              </dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Reference Number</dt>
+              <dd class="mt-1 font-mono text-sm text-gray-900">{{ reservation.payment.referenceNo }}</dd>
+            </div>
+          </div>
+          <div class="mt-4 pt-4 border-t border-gray-200">
+            <a href="{{ path('app_payment_show', {'id': reservation.payment.id}) }}"
+               class="text-green-600 hover:text-green-800 text-sm font-medium">
+              View Full Payment Details <i class="fas fa-external-link-alt ml-1"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Sidebar -->
+    <div class="lg:col-span-1 space-y-6">
+      <!-- Status Card -->
+      <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+        <div class="px-6 py-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-b border-blue-200">
+          <h3 class="text-lg font-medium text-blue-900 flex items-center">
+            <i class="fas fa-info-circle mr-2 text-blue-600"></i>
+            Status
+          </h3>
+        </div>
+        <div class="px-6 py-6 space-y-4">
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Reservation Status</dt>
+            <dd class="mt-2">
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                {% if reservation.reservationStatus == 'Confirmed' %}bg-green-100 text-green-800
+                {% elseif reservation.reservationStatus == 'Pending' %}bg-yellow-100 text-yellow-800
+                {% elseif reservation.reservationStatus == 'Cancelled' %}bg-red-100 text-red-800
+                {% elseif reservation.reservationStatus == 'Completed' %}bg-blue-100 text-blue-800
+                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                {% if reservation.reservationStatus == 'Confirmed' %}<i class="fas fa-check-circle mr-1"></i>
+                {% elseif reservation.reservationStatus == 'Pending' %}<i class="fas fa-clock mr-1"></i>
+                {% elseif reservation.reservationStatus == 'Cancelled' %}<i class="fas fa-times-circle mr-1"></i>
+                {% elseif reservation.reservationStatus == 'Completed' %}<i class="fas fa-flag-checkered mr-1"></i>
+                {% endif %}
+                {{ reservation.reservationStatus }}
+              </span>
+            </dd>
+          </div>
+          <div class="border-t border-gray-200 pt-4">
+            <dt class="text-sm font-medium text-gray-500">Payment Status</dt>
+            <dd class="mt-2">
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                {% if reservation.paymentStatus == 'Paid' %}bg-green-100 text-green-800
+                {% elseif reservation.paymentStatus == 'Pending' %}bg-yellow-100 text-yellow-800
+                {% elseif reservation.paymentStatus == 'Partial' %}bg-orange-100 text-orange-800
+                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                {{ reservation.paymentStatus }}
+              </span>
+            </dd>
+          </div>
+        </div>
+      </div>
+
+      <!-- Important Dates -->
+      <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+        <div class="px-6 py-4 bg-gradient-to-r from-indigo-50 to-violet-50 border-b border-indigo-200">
+          <h3 class="text-lg font-medium text-indigo-900 flex items-center">
+            <i class="fas fa-calendar-alt mr-2 text-indigo-600"></i>
+            Dates
+          </h3>
+        </div>
+        <div class="px-6 py-6 space-y-4">
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Date Reserved</dt>
+            <dd class="mt-1 text-sm text-gray-900">
+              {% if reservation.dateReserved %}
+                <div class="flex items-center">
+                  <i class="fas fa-calendar text-gray-400 mr-2"></i>
+                  {{ reservation.dateReserved|date('F j, Y') }}
+                </div>
+                <div class="text-xs text-gray-500 ml-6">{{ reservation.dateReserved|date('g:i A') }}</div>
+              {% else %}
+                <span class="text-gray-400 italic">Not recorded</span>
+              {% endif %}
+            </dd>
+          </div>
+          <div class="border-t border-gray-200 pt-4">
+            <dt class="text-sm font-medium text-gray-500">Pickup Date</dt>
+            <dd class="mt-1 text-sm text-gray-900">
+              {% if reservation.pickupDate %}
+                <div class="flex items-center">
+                  <i class="fas fa-truck text-gray-400 mr-2"></i>
+                  {{ reservation.pickupDate|date('F j, Y') }}
+                </div>
+              {% else %}
+                <span class="text-gray-400 italic">Not scheduled</span>
+              {% endif %}
+            </dd>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Summary -->
+      <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+        <div class="px-6 py-4 bg-gradient-to-r from-emerald-50 to-teal-50 border-b border-emerald-200">
+          <h3 class="text-lg font-medium text-emerald-900 flex items-center">
+            <i class="fas fa-receipt mr-2 text-emerald-600"></i>
+            Summary
+          </h3>
+        </div>
+        <div class="px-6 py-6 space-y-4">
+          <div class="flex justify-between items-center">
+            <dt class="text-sm font-medium text-gray-500">Items</dt>
+            <dd class="text-sm font-medium text-gray-900">{{ reservation.reservationDetails|length }}</dd>
+          </div>
+          <div class="flex justify-between items-center border-t border-gray-200 pt-4">
+            <dt class="text-sm font-medium text-gray-500">Total Amount</dt>
+            <dd class="text-xl font-bold text-emerald-600">${{ reservation.totalAmount|number_format(2) }}</dd>
+          </div>
+        </div>
+      </div>
+
+      <!-- Danger Zone -->
+      <div class="bg-white shadow-lg rounded-lg overflow-hidden border border-red-200">
+        <div class="px-6 py-4 bg-red-50 border-b border-red-200">
+          <h3 class="text-lg font-medium text-red-900 flex items-center">
+            <i class="fas fa-exclamation-triangle mr-2 text-red-600"></i>
+            Danger Zone
+          </h3>
+        </div>
+        <div class="px-6 py-6">
+          <p class="text-sm text-gray-600 mb-4">Permanently delete this reservation. This action cannot be undone.</p>
+          {{ include('reservation/_delete_form.html.twig') }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

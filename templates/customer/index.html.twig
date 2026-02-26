@@ -1,0 +1,242 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Customers - Floryn Garden{% endblock %}
+{% block page_title %}Customer Management{% endblock %}
+
+{% block body %}
+<div class="px-4 sm:px-6 lg:px-8">
+  <!-- Header -->
+  <div class="sm:flex sm:items-center mb-6">
+    <div class="sm:flex-auto">
+      <h1 class="text-2xl font-semibold text-gray-900">Customer Database</h1>
+      <p class="mt-2 text-sm text-gray-700">Manage your customer relationships and contact information.</p>
+    </div>
+    <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+      <a href="{{ path('app_customer_new') }}" 
+         class="inline-flex items-center justify-center rounded-md border border-transparent bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 sm:w-auto transition-colors duration-200">
+        <i class="fas fa-user-plus mr-2"></i>
+        Add New Customer
+      </a>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <i class="fas fa-users text-emerald-400 text-2xl"></i>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">Total Customers</dt>
+              <dd class="text-lg font-medium text-gray-900">{{ customers|length }}</dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <i class="fas fa-calendar-plus text-blue-400 text-2xl"></i>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">New This Month</dt>
+              <dd class="text-lg font-medium text-gray-900">
+                {% set thisMonth = 0 %}
+                {% for customer in customers %}
+                  {% if customer.dateRegistered and customer.dateRegistered|date('Y-m') == date()|date('Y-m') %}
+                    {% set thisMonth = thisMonth + 1 %}
+                  {% endif %}
+                {% endfor %}
+                {{ thisMonth }}
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <i class="fas fa-shopping-bag text-purple-400 text-2xl"></i>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">With Orders</dt>
+              <dd class="text-lg font-medium text-gray-900">
+                {% set withOrders = 0 %}
+                {% for customer in customers %}
+                  {% if customer.reservations|length > 0 %}
+                    {% set withOrders = withOrders + 1 %}
+                  {% endif %}
+                {% endfor %}
+                {{ withOrders }}
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Customers Table -->
+  <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h3 class="text-lg font-medium text-gray-900">All Customers</h3>
+    </div>
+    
+    {% if customers is not empty %}
+      <div class="overflow-x-auto">
+        <table id="customersTable" class="display nowrap min-w-full divide-y divide-gray-200" style="width:100%">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact Info</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Registered</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Orders</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            {% for customer in customers %}
+              <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0 h-12 w-12">
+                      <img class="h-12 w-12 rounded-full" 
+                           src="https://ui-avatars.com/api/?name={{ customer.fullName|url_encode }}&background=059669&color=fff" 
+                           alt="{{ customer.fullName }}">
+                    </div>
+                    <div class="ml-4">
+                      <div class="text-sm font-medium text-gray-900">{{ customer.fullName }}</div>
+                      <div class="text-sm text-gray-500">ID: {{ customer.id }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">
+                    <div class="flex items-center mb-1">
+                      <i class="fas fa-phone text-gray-400 mr-2 w-4"></i>
+                      <a href="tel:{{ customer.phone }}" class="hover:text-emerald-600">{{ customer.phone }}</a>
+                    </div>
+                    <div class="flex items-center">
+                      <i class="fas fa-envelope text-gray-400 mr-2 w-4"></i>
+                      <a href="mailto:{{ customer.email }}" class="hover:text-emerald-600">{{ customer.email }}</a>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="text-sm text-gray-900">{{ customer.address }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {% if customer.dateRegistered %}
+                    <div>{{ customer.dateRegistered|date('M j, Y') }}</div>
+                    <div class="text-xs text-gray-500">{{ customer.dateRegistered|date('g:i A') }}</div>
+                  {% else %}
+                    <span class="text-gray-400">Not recorded</span>
+                  {% endif %}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  {% if customer.reservations|length > 0 %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                      {{ customer.reservations|length }} orders
+                    </span>
+                  {% else %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                      No orders
+                    </span>
+                  {% endif %}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <div class="flex items-center space-x-2">
+                    <a href="{{ path('app_customer_show', {'id': customer.id}) }}" 
+                       class="text-emerald-600 hover:text-emerald-900 transition-colors duration-200">
+                      <i class="fas fa-eye"></i>
+                    </a>
+                    <a href="{{ path('app_customer_edit', {'id': customer.id}) }}" 
+                       class="text-blue-600 hover:text-blue-900 transition-colors duration-200">
+                      <i class="fas fa-edit"></i>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="text-center py-12">
+        <i class="fas fa-users text-gray-400 text-6xl mb-4"></i>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">No customers found</h3>
+        <p class="text-gray-500 mb-6">Get started by adding your first customer to the database.</p>
+        <a href="{{ path('app_customer_new') }}" 
+           class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+          <i class="fas fa-user-plus mr-2"></i>
+          Add Your First Customer
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  <script>
+    $(document).ready(function() {
+      $('#customersTable').DataTable({
+        pageLength: 10,
+        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
+        order: [[0, "asc"]],
+        search: { caseInsensitive: true },
+        dom: '<"flex flex-col md:flex-row justify-between items-center mb-4 gap-4"<"flex items-center gap-2"lB><"flex-1"f>>rtip',
+        buttons: [
+          {
+            extend: 'copy',
+            className: 'bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 text-sm'
+          },
+          {
+            extend: 'csv',
+            className: 'bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 text-sm'
+          },
+          {
+            extend: 'excel',
+            className: 'bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 text-sm'
+          },
+          {
+            extend: 'print',
+            className: 'bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 text-sm'
+          }
+        ],
+        responsive: true,
+        autoWidth: false,
+        columnDefs: [
+          { orderable: false, targets: -1 }
+        ],
+        language: {
+          search: "_INPUT_",
+          searchPlaceholder: "Search customers...",
+          lengthMenu: "_MENU_",
+          info: "Showing _START_ to _END_ of _TOTAL_ customers",
+          infoEmpty: "No customers found",
+          emptyTable: "No customers available in database",
+          paginate: {
+            first: "First",
+            last: "Last",
+            next: "Next",
+            previous: "Previous"
+          }
+        }
+      });
+    });
+  </script>
+{% endblock %}

@@ -3,7 +3,14 @@ framework:
     secret: '%env(APP_SECRET)%'
 
     # Note that the session will be started ONLY if you read or write from it.
-    session: true
+    session:
+        # lax is required for OAuth redirects to work on plain HTTP (127.0.0.1).
+        # SameSite=None requires Secure; without it browsers drop the session cookie,
+        # losing the OAuth state and producing "Invalid state parameter" errors.
+        # Switch back to none only when deploying behind HTTPS (e.g. ngrok/iframe).
+        cookie_samesite: lax
+        # set secure cookies automatically when using HTTPS (ngrok https)
+        cookie_secure: auto
 
     #esi: true
     #fragments: true

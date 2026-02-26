@@ -1,0 +1,258 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ supplier.supplierName }} - Floryn Garden{% endblock %}
+{% block page_title %}{{ supplier.supplierName }}{% endblock %}
+
+{% block body %}
+<div class="px-4 sm:px-6 lg:px-8">
+  <!-- Breadcrumb -->
+  <div class="mb-6">
+    <nav class="flex" aria-label="Breadcrumb">
+      <ol class="flex items-center space-x-4">
+        <li>
+          <a href="{{ path('admin_dashboard') }}" class="text-gray-400 hover:text-gray-500">
+            <i class="fas fa-home"></i>
+          </a>
+        </li>
+        <li>
+          <div class="flex items-center">
+            <i class="fas fa-chevron-right text-gray-400 mr-4"></i>
+            <a href="{{ path('app_supplier_index') }}" class="text-sm font-medium text-gray-500 hover:text-gray-700">Suppliers</a>
+          </div>
+        </li>
+        <li>
+          <div class="flex items-center">
+            <i class="fas fa-chevron-right text-gray-400 mr-4"></i>
+            <span class="text-sm font-medium text-gray-500">{{ supplier.supplierName }}</span>
+          </div>
+        </li>
+      </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="mt-4 flex justify-between items-start">
+      <div class="flex items-center">
+        <div class="h-14 w-14 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center mr-4">
+          <i class="fas fa-industry text-white text-xl"></i>
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">{{ supplier.supplierName }}</h1>
+          <p class="mt-1 text-sm text-gray-600">Supplier profile, contact details, and flower catalog</p>
+        </div>
+      </div>
+      <div class="flex space-x-3">
+        <a href="{{ path('app_supplier_edit', {'id': supplier.id}) }}"
+           class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200">
+          <i class="fas fa-edit mr-2"></i>Edit Supplier
+        </a>
+        <a href="{{ path('app_supplier_index') }}"
+           class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
+          <i class="fas fa-arrow-left mr-2"></i>Back to List
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Main Content -->
+    <div class="lg:col-span-2">
+      <!-- Contact Details -->
+      <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+        <div class="px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-200">
+          <h3 class="text-lg font-medium text-blue-900 flex items-center">
+            <i class="fas fa-address-card mr-2 text-blue-600"></i>
+            Contact Information
+          </h3>
+        </div>
+        <div class="px-6 py-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Supplier Name</dt>
+              <dd class="mt-1 text-lg font-semibold text-gray-900">{{ supplier.supplierName }}</dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Contact Person</dt>
+              <dd class="mt-1 flex items-center text-gray-900">
+                <i class="fas fa-user text-gray-400 mr-2"></i>
+                {{ supplier.contactPerson ?? 'Not specified' }}
+              </dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Phone</dt>
+              <dd class="mt-1 flex items-center text-gray-900">
+                <i class="fas fa-phone text-gray-400 mr-2"></i>
+                {% if supplier.phone %}
+                  <a href="tel:{{ supplier.phone }}" class="hover:text-blue-600 transition-colors">{{ supplier.phone }}</a>
+                {% else %}
+                  <span class="text-gray-400 italic">Not provided</span>
+                {% endif %}
+              </dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Email</dt>
+              <dd class="mt-1 flex items-center text-gray-900">
+                <i class="fas fa-envelope text-gray-400 mr-2"></i>
+                {% if supplier.email %}
+                  <a href="mailto:{{ supplier.email }}" class="hover:text-blue-600 transition-colors">{{ supplier.email }}</a>
+                {% else %}
+                  <span class="text-gray-400 italic">Not provided</span>
+                {% endif %}
+              </dd>
+            </div>
+            <div class="md:col-span-2">
+              <dt class="text-sm font-medium text-gray-500">Address</dt>
+              <dd class="mt-1 flex items-start text-gray-900">
+                <i class="fas fa-map-marker-alt text-gray-400 mr-2 mt-1"></i>
+                <span>{{ supplier.address ?? 'No address on file' }}</span>
+              </dd>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Flower Catalog -->
+      <div class="mt-6 bg-white shadow-lg rounded-lg overflow-hidden">
+        <div class="px-6 py-4 bg-gradient-to-r from-emerald-50 to-teal-50 border-b border-emerald-200">
+          <h3 class="text-lg font-medium text-emerald-900 flex items-center">
+            <i class="fas fa-leaf mr-2 text-emerald-600"></i>
+            Supplied Flowers
+            <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+              {{ supplier.flowers|length }}
+            </span>
+          </h3>
+        </div>
+        <div class="px-6 py-6">
+          {% if supplier.flowers|length > 0 %}
+            <div class="space-y-3">
+              {% for flower in supplier.flowers %}
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-100 hover:border-blue-200 transition-colors">
+                  <div class="flex items-center">
+                    <div class="h-10 w-10 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 flex items-center justify-center mr-4">
+                      <i class="fas fa-leaf text-white text-sm"></i>
+                    </div>
+                    <div>
+                      <p class="text-sm font-semibold text-gray-900">{{ flower.name }}</p>
+                      <p class="text-xs text-gray-500">{{ flower.category }}</p>
+                    </div>
+                  </div>
+                  <div class="flex items-center space-x-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                      {% if flower.freshnessStatus == 'Fresh' %}bg-green-100 text-green-800
+                      {% elseif flower.freshnessStatus == 'Good' %}bg-yellow-100 text-yellow-800
+                      {% else %}bg-red-100 text-red-800{% endif %}">
+                      {{ flower.freshnessStatus }}
+                    </span>
+                    <span class="text-sm font-medium text-gray-900">{{ flower.stockQuantity }} units</span>
+                    <span class="text-sm font-bold text-emerald-600">${{ flower.price|number_format(2) }}</span>
+                    <a href="{{ path('app_flower_show', {'id': flower.id}) }}"
+                       class="text-blue-600 hover:text-blue-900 transition-colors">
+                      <i class="fas fa-external-link-alt"></i>
+                    </a>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="text-center py-8">
+              <i class="fas fa-seedling text-gray-300 text-4xl mb-3"></i>
+              <p class="text-gray-500 font-medium">No flowers from this supplier</p>
+              <p class="text-sm text-gray-400">Add flowers and assign this supplier to see them here</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="lg:col-span-1 space-y-6">
+      <!-- Delivery Schedule -->
+      <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+        <div class="px-6 py-4 bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-200">
+          <h3 class="text-lg font-medium text-amber-900 flex items-center">
+            <i class="fas fa-truck mr-2 text-amber-600"></i>
+            Delivery Info
+          </h3>
+        </div>
+        <div class="px-6 py-6 space-y-4">
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Delivery Schedule</dt>
+            <dd class="mt-2">
+              {% if supplier.deliverySchedule %}
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                  {% if 'daily' in supplier.deliverySchedule|lower %}bg-green-100 text-green-800
+                  {% elseif 'weekly' in supplier.deliverySchedule|lower %}bg-blue-100 text-blue-800
+                  {% else %}bg-gray-100 text-gray-800{% endif %}">
+                  <i class="fas fa-clock mr-1"></i>
+                  {{ supplier.deliverySchedule }}
+                </span>
+              {% else %}
+                <span class="text-gray-400 italic">Not scheduled</span>
+              {% endif %}
+            </dd>
+          </div>
+          <div class="border-t border-gray-200 pt-4">
+            <dt class="text-sm font-medium text-gray-500">Date Added</dt>
+            <dd class="mt-1 text-sm text-gray-900">
+              {% if supplier.dateAdded %}
+                <div class="flex items-center">
+                  <i class="fas fa-calendar text-gray-400 mr-2"></i>
+                  {{ supplier.dateAdded|date('F j, Y') }}
+                </div>
+                <div class="text-xs text-gray-500 ml-6">
+                  ({{ date().diff(supplier.dateAdded).days }} days ago)
+                </div>
+              {% else %}
+                <span class="text-gray-400 italic">Not recorded</span>
+              {% endif %}
+            </dd>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+        <div class="px-6 py-4 bg-gradient-to-r from-purple-50 to-pink-50 border-b border-purple-200">
+          <h3 class="text-lg font-medium text-purple-900 flex items-center">
+            <i class="fas fa-chart-bar mr-2 text-purple-600"></i>
+            Quick Stats
+          </h3>
+        </div>
+        <div class="px-6 py-6 space-y-4">
+          <div class="flex justify-between items-center">
+            <dt class="text-sm font-medium text-gray-500">Supplier ID</dt>
+            <dd class="text-sm font-mono text-gray-900">#{{ supplier.id }}</dd>
+          </div>
+          <div class="flex justify-between items-center border-t border-gray-200 pt-4">
+            <dt class="text-sm font-medium text-gray-500">Total Flowers</dt>
+            <dd class="text-lg font-bold text-blue-600">{{ supplier.flowers|length }}</dd>
+          </div>
+          <div class="flex justify-between items-center border-t border-gray-200 pt-4">
+            <dt class="text-sm font-medium text-gray-500">Total Stock</dt>
+            <dd class="text-lg font-bold text-emerald-600">
+              {% set totalStock = 0 %}
+              {% for flower in supplier.flowers %}
+                {% set totalStock = totalStock + flower.stockQuantity %}
+              {% endfor %}
+              {{ totalStock }} units
+            </dd>
+          </div>
+        </div>
+      </div>
+
+      <!-- Danger Zone -->
+      <div class="bg-white shadow-lg rounded-lg overflow-hidden border border-red-200">
+        <div class="px-6 py-4 bg-red-50 border-b border-red-200">
+          <h3 class="text-lg font-medium text-red-900 flex items-center">
+            <i class="fas fa-exclamation-triangle mr-2 text-red-600"></i>
+            Danger Zone
+          </h3>
+        </div>
+        <div class="px-6 py-6">
+          <p class="text-sm text-gray-600 mb-4">Permanently delete this supplier. This action cannot be undone.</p>
+          {{ include('supplier/_delete_form.html.twig') }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

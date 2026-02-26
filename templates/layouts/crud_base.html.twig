@@ -1,0 +1,67 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<div class="px-4 sm:px-6 lg:px-8">
+  <!-- Breadcrumb -->
+  {% if breadcrumb is defined %}
+  <div class="mb-6">
+    <nav class="flex" aria-label="Breadcrumb">
+      <ol class="flex items-center space-x-4">
+        <li>
+          <div>
+            <a href="{{ path('admin_dashboard') }}" class="text-gray-400 hover:text-gray-500">
+              <i class="fas fa-home"></i>
+              <span class="sr-only">Home</span>
+            </a>
+          </div>
+        </li>
+        {% for item in breadcrumb %}
+        <li>
+          <div class="flex items-center">
+            <i class="fas fa-chevron-right text-gray-400 mr-4"></i>
+            {% if item.url is defined %}
+              <a href="{{ item.url }}" class="text-sm font-medium text-gray-500 hover:text-gray-700">{{ item.label }}</a>
+            {% else %}
+              <span class="text-sm font-medium text-gray-500">{{ item.label }}</span>
+            {% endif %}
+          </div>
+        </li>
+        {% endfor %}
+      </ol>
+    </nav>
+  </div>
+  {% endif %}
+
+  <!-- Header -->
+  {% if page_header is defined %}
+  <div class="mb-6">
+    <div class="{% if header_actions is defined %}sm:flex sm:items-center sm:justify-between{% endif %}">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900 flex items-center">
+          {% if page_icon is defined %}<i class="{{ page_icon }} mr-3"></i>{% endif %}
+          {{ page_header }}
+        </h1>
+        {% if page_description is defined %}
+          <p class="mt-2 text-sm text-gray-600">{{ page_description }}</p>
+        {% endif %}
+      </div>
+      
+      {% if header_actions is defined %}
+      <div class="mt-4 sm:mt-0 flex space-x-3">
+        {% for action in header_actions %}
+          <a href="{{ action.url }}" 
+             class="inline-flex items-center px-4 py-2 border {{ action.class|default('border-transparent bg-emerald-600 text-white hover:bg-emerald-700') }} shadow-sm text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors duration-200">
+            {% if action.icon is defined %}<i class="{{ action.icon }} mr-2"></i>{% endif %}
+            {{ action.label }}
+          </a>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Content -->
+  {% block crud_content %}{% endblock %}
+</div>
+{% endblock %}

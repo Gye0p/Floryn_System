@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DataTables Debug</title>
+    <script>
+        // Redirect to flowers page with console logging
+        console.log("Checking jQuery...");
+        if (window.jQuery) {
+            console.log("✅ jQuery loaded:", jQuery.fn.jquery);
+        } else {
+            console.error("❌ jQuery NOT loaded!");
+        }
+        
+        console.log("Checking DataTables...");
+        if (window.jQuery && window.jQuery.fn.DataTable) {
+            console.log("✅ DataTables loaded:", jQuery.fn.DataTable.version);
+        } else {
+            console.error("❌ DataTables NOT loaded!");
+        }
+        
+        // Redirect after 2 seconds
+        setTimeout(() => {
+            window.location.href = '/flower';
+        }, 2000);
+    </script>
+</head>
+<body>
+    <h1>Checking DataTables... Redirecting to /flower in 2 seconds...</h1>
+    <p>Check browser console (F12) for results</p>
+</body>
+</html>

@@ -1,0 +1,57 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Send Notification - Floryn Garden{% endblock %}
+{% block page_title %}Send Notification{% endblock %}
+
+{% block body %}
+<div class="px-4 sm:px-6 lg:px-8">
+  <!-- Breadcrumb -->
+  <div class="mb-6">
+    <nav class="flex" aria-label="Breadcrumb">
+      <ol class="flex items-center space-x-4">
+        <li>
+          <a href="{{ path('admin_dashboard') }}" class="text-gray-400 hover:text-gray-500">
+            <i class="fas fa-home"></i>
+          </a>
+        </li>
+        <li>
+          <div class="flex items-center">
+            <i class="fas fa-chevron-right text-gray-400 mr-4"></i>
+            <a href="{{ path('app_notification_log_index') }}" class="text-sm font-medium text-gray-500 hover:text-gray-700">Notifications</a>
+          </div>
+        </li>
+        <li>
+          <div class="flex items-center">
+            <i class="fas fa-chevron-right text-gray-400 mr-4"></i>
+            <span class="text-sm font-medium text-gray-500">New Notification</span>
+          </div>
+        </li>
+      </ol>
+    </nav>
+
+    <div class="mt-4">
+      <h1 class="text-2xl font-bold text-gray-900 flex items-center">
+        <i class="fas fa-plus-circle text-indigo-600 mr-3"></i>
+        Send New Notification
+      </h1>
+      <p class="mt-2 text-sm text-gray-600">Create and send a notification to customers.</p>
+    </div>
+  </div>
+
+  <!-- Form Container -->
+  <div class="max-w-4xl">
+    <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+      <div class="px-6 py-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-indigo-200">
+        <h3 class="text-lg font-medium text-indigo-900 flex items-center">
+          <i class="fas fa-bell mr-2 text-indigo-600"></i>
+          Notification Details
+        </h3>
+        <p class="text-sm text-indigo-700 mt-1">Fill in the notification information and message content</p>
+      </div>
+      <div class="p-6">
+        {{ include('notification_log/_form.html.twig') }}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

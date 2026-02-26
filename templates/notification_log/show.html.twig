@@ -1,0 +1,222 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Notification #{{ notification_log.id }} - Floryn Garden{% endblock %}
+{% block page_title %}Notification Details{% endblock %}
+
+{% block body %}
+<div class="px-4 sm:px-6 lg:px-8">
+  <!-- Breadcrumb -->
+  <div class="mb-6">
+    <nav class="flex" aria-label="Breadcrumb">
+      <ol class="flex items-center space-x-4">
+        <li>
+          <a href="{{ path('admin_dashboard') }}" class="text-gray-400 hover:text-gray-500">
+            <i class="fas fa-home"></i>
+          </a>
+        </li>
+        <li>
+          <div class="flex items-center">
+            <i class="fas fa-chevron-right text-gray-400 mr-4"></i>
+            <a href="{{ path('app_notification_log_index') }}" class="text-sm font-medium text-gray-500 hover:text-gray-700">Notifications</a>
+          </div>
+        </li>
+        <li>
+          <div class="flex items-center">
+            <i class="fas fa-chevron-right text-gray-400 mr-4"></i>
+            <span class="text-sm font-medium text-gray-500">#{{ notification_log.id }}</span>
+          </div>
+        </li>
+      </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="mt-4 flex justify-between items-start">
+      <div class="flex items-center">
+        <div class="h-12 w-12 rounded-full bg-gradient-to-br from-indigo-400 to-indigo-600 flex items-center justify-center mr-4">
+          <i class="fas fa-bell text-white text-lg"></i>
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">Notification #{{ notification_log.id }}</h1>
+          <p class="mt-1 text-sm text-gray-600">
+            {{ notification_log.dateSent ? 'Sent on ' ~ notification_log.dateSent|date('F j, Y g:i A') : 'Not yet sent' }}
+          </p>
+        </div>
+      </div>
+      <div class="flex space-x-3">
+        <a href="{{ path('app_notification_log_edit', {'id': notification_log.id}) }}"
+           class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200">
+          <i class="fas fa-edit mr-2"></i>Edit
+        </a>
+        <a href="{{ path('app_notification_log_index') }}"
+           class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
+          <i class="fas fa-arrow-left mr-2"></i>Back to List
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Main Content -->
+    <div class="lg:col-span-2">
+      <!-- Message Content -->
+      <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+        <div class="px-6 py-4 bg-gradient-to-r from-indigo-50 to-violet-50 border-b border-indigo-200">
+          <h3 class="text-lg font-medium text-indigo-900 flex items-center">
+            <i class="fas fa-envelope mr-2 text-indigo-600"></i>
+            Message Content
+          </h3>
+        </div>
+        <div class="px-6 py-6">
+          <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+            <p class="text-gray-800 whitespace-pre-wrap leading-relaxed">{{ notification_log.message }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recipient Information -->
+      <div class="mt-6 bg-white shadow-lg rounded-lg overflow-hidden">
+        <div class="px-6 py-4 bg-gradient-to-r from-purple-50 to-pink-50 border-b border-purple-200">
+          <h3 class="text-lg font-medium text-purple-900 flex items-center">
+            <i class="fas fa-user mr-2 text-purple-600"></i>
+            Recipient
+          </h3>
+        </div>
+        <div class="px-6 py-6">
+          {% if notification_log.customer %}
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="h-12 w-12 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center mr-4">
+                  <span class="text-white font-bold">{{ notification_log.customer.fullName|first|upper }}</span>
+                </div>
+                <div>
+                  <h4 class="text-lg font-medium text-gray-900">{{ notification_log.customer.fullName }}</h4>
+                  {% if notification_log.customer.email %}
+                    <p class="text-sm text-gray-500"><i class="fas fa-envelope mr-1"></i> {{ notification_log.customer.email }}</p>
+                  {% endif %}
+                  {% if notification_log.customer.phone %}
+                    <p class="text-sm text-gray-500"><i class="fas fa-phone mr-1"></i> {{ notification_log.customer.phone }}</p>
+                  {% endif %}
+                </div>
+              </div>
+              <a href="{{ path('app_customer_show', {'id': notification_log.customer.id}) }}"
+                 class="inline-flex items-center text-sm text-purple-600 hover:text-purple-900">
+                View Profile <i class="fas fa-external-link-alt ml-1"></i>
+              </a>
+            </div>
+          {% else %}
+            <p class="text-gray-500 italic">No customer assigned</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Related Reservation -->
+      {% if notification_log.reservation %}
+      <div class="mt-6 bg-white shadow-lg rounded-lg overflow-hidden">
+        <div class="px-6 py-4 bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-200">
+          <h3 class="text-lg font-medium text-amber-900 flex items-center">
+            <i class="fas fa-calendar-alt mr-2 text-amber-600"></i>
+            Related Reservation
+          </h3>
+        </div>
+        <div class="px-6 py-6">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <div class="h-10 w-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center mr-4">
+                <i class="fas fa-receipt text-white text-sm"></i>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-gray-900">Reservation #{{ notification_log.reservation.id }}</p>
+                <p class="text-xs text-gray-500">Total: ${{ notification_log.reservation.totalAmount|number_format(2) }}</p>
+              </div>
+            </div>
+            <a href="{{ path('app_reservation_show', {'id': notification_log.reservation.id}) }}"
+               class="text-amber-600 hover:text-amber-900 text-sm font-medium">
+              View Reservation <i class="fas fa-external-link-alt ml-1"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Sidebar -->
+    <div class="lg:col-span-1 space-y-6">
+      <!-- Status & Channel -->
+      <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+        <div class="px-6 py-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-b border-blue-200">
+          <h3 class="text-lg font-medium text-blue-900 flex items-center">
+            <i class="fas fa-info-circle mr-2 text-blue-600"></i>
+            Details
+          </h3>
+        </div>
+        <div class="px-6 py-6 space-y-4">
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Status</dt>
+            <dd class="mt-2">
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                {% if notification_log.status == 'Sent' or notification_log.status == 'Delivered' %}bg-green-100 text-green-800
+                {% elseif notification_log.status == 'Pending' or notification_log.status == 'Queued' %}bg-yellow-100 text-yellow-800
+                {% elseif notification_log.status == 'Processing' %}bg-blue-100 text-blue-800
+                {% else %}bg-red-100 text-red-800{% endif %}">
+                {% if notification_log.status == 'Sent' or notification_log.status == 'Delivered' %}<i class="fas fa-check-circle mr-1"></i>
+                {% elseif notification_log.status == 'Pending' or notification_log.status == 'Queued' %}<i class="fas fa-clock mr-1"></i>
+                {% elseif notification_log.status == 'Processing' %}<i class="fas fa-sync mr-1"></i>
+                {% else %}<i class="fas fa-times-circle mr-1"></i>{% endif %}
+                {{ notification_log.status }}
+              </span>
+            </dd>
+          </div>
+          <div class="border-t border-gray-200 pt-4">
+            <dt class="text-sm font-medium text-gray-500">Channel</dt>
+            <dd class="mt-2">
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                {% if notification_log.channel == 'Email' %}bg-blue-100 text-blue-800
+                {% elseif notification_log.channel == 'SMS' %}bg-green-100 text-green-800
+                {% elseif notification_log.channel == 'Push' %}bg-purple-100 text-purple-800
+                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                {% if notification_log.channel == 'Email' %}<i class="fas fa-envelope mr-1"></i>
+                {% elseif notification_log.channel == 'SMS' %}<i class="fas fa-sms mr-1"></i>
+                {% elseif notification_log.channel == 'Push' %}<i class="fas fa-mobile-alt mr-1"></i>
+                {% else %}<i class="fas fa-bell mr-1"></i>{% endif %}
+                {{ notification_log.channel }}
+              </span>
+            </dd>
+          </div>
+          <div class="border-t border-gray-200 pt-4">
+            <dt class="text-sm font-medium text-gray-500">Date Sent</dt>
+            <dd class="mt-1 text-sm text-gray-900">
+              {% if notification_log.dateSent %}
+                <div class="flex items-center">
+                  <i class="fas fa-calendar text-gray-400 mr-2"></i>
+                  {{ notification_log.dateSent|date('F j, Y') }}
+                </div>
+                <div class="text-xs text-gray-500 ml-6">{{ notification_log.dateSent|date('g:i A') }}</div>
+              {% else %}
+                <span class="text-gray-400 italic">Not sent yet</span>
+              {% endif %}
+            </dd>
+          </div>
+          <div class="border-t border-gray-200 pt-4">
+            <dt class="text-sm font-medium text-gray-500">Notification ID</dt>
+            <dd class="text-sm font-mono text-gray-900">#{{ notification_log.id }}</dd>
+          </div>
+        </div>
+      </div>
+
+      <!-- Danger Zone -->
+      <div class="bg-white shadow-lg rounded-lg overflow-hidden border border-red-200">
+        <div class="px-6 py-4 bg-red-50 border-b border-red-200">
+          <h3 class="text-lg font-medium text-red-900 flex items-center">
+            <i class="fas fa-exclamation-triangle mr-2 text-red-600"></i>
+            Danger Zone
+          </h3>
+        </div>
+        <div class="px-6 py-6">
+          <p class="text-sm text-gray-600 mb-4">Permanently delete this notification log. This action cannot be undone.</p>
+          {{ include('notification_log/_delete_form.html.twig') }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

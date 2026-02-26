@@ -1,0 +1,274 @@
+{{ form_start(form, {'attr': {'id': 'reservation-form', 'class': 'space-y-6'}}) }}
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+  {# Customer Selection #}
+  <div class="bg-white p-6 rounded-lg shadow-md">
+    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+      <i class="fas fa-user text-[#5E548E] mr-2"></i>Customer Information
+    </h3>
+    <div class="form-group">
+      {{ form_label(form.customer, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-2'}}) }}
+      {{ form_widget(form.customer, {'attr': {'class': 'form-select w-full rounded-md border-gray-300 shadow-sm focus:border-[#5E548E] focus:ring-[#5E548E]'}}) }}
+      {{ form_errors(form.customer) }}
+    </div>
+  </div>
+
+  {# Pickup Date #}
+  <div class="bg-white p-6 rounded-lg shadow-md">
+    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+      <i class="fas fa-calendar text-[#5E548E] mr-2"></i>Pickup Details
+    </h3>
+    <div class="form-group">
+      {{ form_label(form.pickupDate, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-2'}}) }}
+      {{ form_widget(form.pickupDate, {'attr': {'class': 'form-control w-full rounded-md border-gray-300 shadow-sm focus:border-[#5E548E] focus:ring-[#5E548E]'}}) }}
+      {{ form_errors(form.pickupDate) }}
+    </div>
+  </div>
+</div>
+
+{# Flowers Selection #}
+<div class="bg-white p-6 rounded-lg shadow-md">
+  <div class="flex justify-between items-center mb-4">
+    <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+      <i class="fas fa-leaf text-[#5E548E] mr-2"></i>Selected Flowers
+    </h3>
+    <button type="button" id="add-flower-btn" 
+            class="bg-[#5E548E] hover:bg-[#4C4375] text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center text-sm font-medium">
+      <i class="fas fa-plus mr-2"></i>Add Flower
+    </button>
+  </div>
+
+  <div id="flowers-container" class="space-y-4" data-prototype="{{ form_widget(form.reservationDetails.vars.prototype)|e('html_attr') }}" data-index="{{ form.reservationDetails|length > 0 ? form.reservationDetails|length : 0 }}">
+    {% if form.reservationDetails|length > 0 %}
+      {% for detail in form.reservationDetails %}
+        <div class="flower-item border border-gray-200 rounded-lg p-4 bg-gray-50">
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+            <div class="md:col-span-6">
+              {{ form_label(detail.flower, 'Flower', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-2'}}) }}
+              {{ form_widget(detail.flower, {'attr': {'class': 'form-select w-full flower-select rounded-md border-gray-300'}}) }}
+              {{ form_errors(detail.flower) }}
+            </div>
+            <div class="md:col-span-3">
+              {{ form_label(detail.quantity, 'Quantity', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-2'}}) }}
+              {{ form_widget(detail.quantity, {'attr': {'class': 'form-control w-full quantity-input rounded-md border-gray-300', 'min': 1}}) }}
+              {{ form_errors(detail.quantity) }}
+            </div>
+            <div class="md:col-span-2">
+              <div class="text-sm font-medium text-gray-700 mb-2">Subtotal</div>
+              <div class="text-lg font-bold text-[#5E548E] subtotal-display">₱0.00</div>
+            </div>
+            <div class="md:col-span-1 flex justify-end">
+              <button type="button" class="remove-flower-btn text-red-600 hover:text-red-800 transition-colors">
+                <i class="fas fa-trash text-xl"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+
+  <div id="empty-state" class="{% if form.reservationDetails|length > 0 %}hidden{% endif %} text-center py-8 text-gray-500">
+    <i class="fas fa-flower text-4xl mb-2 text-gray-300"></i>
+    <p>No flowers added yet. Click "Add Flower" to start.</p>
+  </div>
+
+  <div class="mt-6 p-4 bg-gradient-to-r from-[#5E548E] to-[#4C4375] rounded-lg text-white">
+    <div class="flex justify-between items-center">
+      <span class="text-lg font-semibold">Total Amount:</span>
+      <span id="total-amount" class="text-2xl font-bold">₱0.00</span>
+    </div>
+  </div>
+</div>
+
+{# Status Fields #}
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+  <div class="bg-white p-6 rounded-lg shadow-md">
+    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+      <i class="fas fa-credit-card text-[#5E548E] mr-2"></i>Payment Status
+    </h3>
+    <div class="form-group">
+      {{ form_widget(form.paymentStatus, {'attr': {'class': 'form-select w-full rounded-md border-gray-300'}}) }}
+      {{ form_errors(form.paymentStatus) }}
+    </div>
+  </div>
+
+  <div class="bg-white p-6 rounded-lg shadow-md">
+    <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+      <i class="fas fa-clipboard-check text-[#5E548E] mr-2"></i>Reservation Status
+    </h3>
+    <div class="form-group">
+      {{ form_widget(form.reservationStatus, {'attr': {'class': 'form-select w-full rounded-md border-gray-300'}}) }}
+      {{ form_errors(form.reservationStatus) }}
+    </div>
+  </div>
+</div>
+
+{# Action Buttons #}
+<div class="flex justify-end space-x-4 pt-4">
+  <a href="{{ path('app_reservation_index') }}" 
+     class="px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg transition-colors duration-200 font-medium">
+    <i class="fas fa-times mr-2"></i>Cancel
+  </a>
+  <button type="submit" 
+          class="px-6 py-3 bg-[#5E548E] hover:bg-[#4C4375] text-white rounded-lg transition-colors duration-200 font-medium">
+    <i class="fas fa-save mr-2"></i>{{ button_label|default('Save Reservation') }}
+  </button>
+</div>
+
+{{ form_end(form) }}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const container = document.getElementById('flowers-container');
+  const addButton = document.getElementById('add-flower-btn');
+  const totalDisplay = document.getElementById('total-amount');
+  const emptyState = document.getElementById('empty-state');
+  let index = parseInt(container.dataset.index) || 0;
+
+  const flowerPrices = {};
+  
+  // Cache flower prices
+  function cachePrices(select) {
+    select.querySelectorAll('option').forEach(option => {
+      if (option.value) {
+        const match = option.textContent.match(/₱([\d.]+)/);
+        if (match) {
+          flowerPrices[option.value] = parseFloat(match[1]);
+        }
+      }
+    });
+  }
+
+  // Initialize existing selects
+  document.querySelectorAll('.flower-select').forEach(cachePrices);
+
+  function calculateSubtotal(item) {
+    const select = item.querySelector('.flower-select');
+    const quantityInput = item.querySelector('.quantity-input');
+    const subtotalDisplay = item.querySelector('.subtotal-display');
+    
+    if (select && quantityInput && subtotalDisplay) {
+      const flowerId = select.value;
+      const quantity = parseInt(quantityInput.value) || 0;
+      const price = flowerPrices[flowerId] || 0;
+      const subtotal = price * quantity;
+      
+      subtotalDisplay.textContent = '₱' + subtotal.toFixed(2);
+    }
+  }
+
+  function calculateTotal() {
+    let total = 0;
+    document.querySelectorAll('.flower-item').forEach(item => {
+      const select = item.querySelector('.flower-select');
+      const quantityInput = item.querySelector('.quantity-input');
+      
+      if (select && quantityInput) {
+        const flowerId = select.value;
+        const quantity = parseInt(quantityInput.value) || 0;
+        const price = flowerPrices[flowerId] || 0;
+        total += price * quantity;
+      }
+    });
+    
+    totalDisplay.textContent = '₱' + total.toFixed(2);
+  }
+
+  function updateEmptyState() {
+    const hasItems = container.querySelectorAll('.flower-item').length > 0;
+    emptyState.classList.toggle('hidden', hasItems);
+  }
+
+  function attachItemEvents(item) {
+    const select = item.querySelector('.flower-select');
+    const quantityInput = item.querySelector('.quantity-input');
+    const removeBtn = item.querySelector('.remove-flower-btn');
+
+    if (select) {
+      cachePrices(select);
+      select.addEventListener('change', function() {
+        calculateSubtotal(item);
+        calculateTotal();
+      });
+    }
+
+    if (quantityInput) {
+      quantityInput.addEventListener('input', function() {
+        calculateSubtotal(item);
+        calculateTotal();
+      });
+    }
+
+    if (removeBtn) {
+      removeBtn.addEventListener('click', function() {
+        item.remove();
+        calculateTotal();
+        updateEmptyState();
+      });
+    }
+  }
+
+  // Initialize existing items
+  document.querySelectorAll('.flower-item').forEach(item => {
+    attachItemEvents(item);
+    calculateSubtotal(item);
+  });
+  calculateTotal();
+  updateEmptyState();
+
+  // Add new flower
+  addButton.addEventListener('click', function() {
+    const prototype = container.dataset.prototype;
+    const newForm = prototype.replace(/__name__/g, index);
+    
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = newForm;
+    
+    const div = document.createElement('div');
+    div.classList.add('flower-item', 'border', 'border-gray-200', 'rounded-lg', 'p-4', 'bg-gray-50');
+    
+    const flowerWidget = wrapper.querySelector('[id*="_flower"]').parentElement.innerHTML;
+    const quantityWidget = wrapper.querySelector('[id*="_quantity"]').parentElement.innerHTML;
+    
+    div.innerHTML = `
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+        <div class="md:col-span-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Flower</label>
+          ${flowerWidget}
+        </div>
+        <div class="md:col-span-3">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
+          ${quantityWidget}
+        </div>
+        <div class="md:col-span-2">
+          <div class="text-sm font-medium text-gray-700 mb-2">Subtotal</div>
+          <div class="text-lg font-bold text-[#5E548E] subtotal-display">₱0.00</div>
+        </div>
+        <div class="md:col-span-1 flex justify-end">
+          <button type="button" class="remove-flower-btn text-red-600 hover:text-red-800 transition-colors">
+            <i class="fas fa-trash text-xl"></i>
+          </button>
+        </div>
+      </div>
+    `;
+    
+    // Add proper classes
+    const select = div.querySelector('select');
+    const input = div.querySelector('input[type="number"]');
+    if (select) {
+      select.classList.add('flower-select', 'form-select', 'w-full', 'rounded-md', 'border-gray-300');
+    }
+    if (input) {
+      input.classList.add('quantity-input', 'form-control', 'w-full', 'rounded-md', 'border-gray-300');
+      input.setAttribute('min', '1');
+      input.value = 1;
+    }
+    
+    container.appendChild(div);
+    attachItemEvents(div);
+    updateEmptyState();
+    index++;
+  });
+});
+</script>

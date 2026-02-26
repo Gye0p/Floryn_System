@@ -1,0 +1,74 @@
+{% set currentRoute = app.request.attributes.get('_route') %}
+
+<aside class="flex flex-col h-full bg-gradient-to-b from-[#5E548E] to-[#4C4375] text-white shadow-2xl">
+  
+  {# ðŸŒ¸ Logo / System Name #}
+  <div class="flex items-center justify-center py-6 border-b border-white/20 shadow-sm">
+    <i class="fas fa-seedling text-white text-3xl mr-3 drop-shadow"></i>
+    <h1 class="text-xl font-semibold tracking-wide text-white">Floryn Garden</h1>
+  </div>
+
+  {# ðŸŒ¼ Navigation Links #}
+  <nav class="flex-1 overflow-y-auto mt-6 px-5 space-y-1">
+    {% set menu = [
+      {'route': 'admin_dashboard', 'icon': 'fa-chart-line', 'label': 'Dashboard'},
+      {'route': 'app_flower_index', 'icon': 'fa-leaf', 'label': 'Flowers'},
+      {'route': 'app_customer_index', 'icon': 'fa-users', 'label': 'Customers'},
+      {'route': 'app_supplier_index', 'icon': 'fa-truck', 'label': 'Suppliers'},
+      {'route': 'app_reservation_index', 'icon': 'fa-calendar-alt', 'label': 'Reservations'},
+      {'route': 'app_payment_index', 'icon': 'fa-credit-card', 'label': 'Payments'},
+      {'route': 'app_notification_log_index', 'icon': 'fa-bell', 'label': 'Notifications'},
+      {'route': 'app_reports_index', 'icon': 'fa-chart-bar', 'label': 'Reports'}
+    ] %}
+
+    {% for item in menu %}
+      <a href="{{ path(item.route) }}"
+         class="flex items-center px-4 py-3 rounded-lg transition-all duration-200 text-sm font-medium border-l-4
+         {% if currentRoute == item.route %}
+            bg-white/10 text-[#FFF8F0] border-[#FFF8F0] shadow-inner
+         {% else %}
+            border-transparent text-white/80 hover:bg-white/10 hover:text-[#FFF8F0] hover:border-[#FFF8F0]/70
+         {% endif %}">
+        <i class="fas {{ item.icon }} text-lg mr-3 min-w-[20px] icon-glow"></i>
+        <span class="tracking-wide">{{ item.label }}</span>
+      </a>
+    {% endfor %}
+
+    {# Admin Only Links #}
+    {% if is_granted('ROLE_ADMIN') %}
+      <div class="mt-6 mb-2 px-4 text-xs font-semibold text-white/50 uppercase tracking-wider">Administration</div>
+      
+      <a href="{{ path('app_user_index') }}"
+         class="flex items-center px-4 py-3 rounded-lg transition-all duration-200 text-sm font-medium border-l-4
+         {% if currentRoute == 'app_user_index' or currentRoute starts with 'app_user_' %}
+            bg-white/10 text-[#FFF8F0] border-[#FFF8F0] shadow-inner
+         {% else %}
+            border-transparent text-white/80 hover:bg-white/10 hover:text-[#FFF8F0] hover:border-[#FFF8F0]/70
+         {% endif %}">
+        <i class="fas fa-user-shield text-lg mr-3 min-w-[20px] icon-glow"></i>
+        <span class="tracking-wide">User Management</span>
+      </a>
+
+      <a href="{{ path('app_activity_log_index') }}"
+         class="flex items-center px-4 py-3 rounded-lg transition-all duration-200 text-sm font-medium border-l-4
+         {% if currentRoute == 'app_activity_log_index' %}
+            bg-white/10 text-[#FFF8F0] border-[#FFF8F0] shadow-inner
+         {% else %}
+            border-transparent text-white/80 hover:bg-white/10 hover:text-[#FFF8F0] hover:border-[#FFF8F0]/70
+         {% endif %}">
+        <i class="fas fa-history text-lg mr-3 min-w-[20px] icon-glow"></i>
+        <span class="tracking-wide">Activity Logs</span>
+      </a>
+    {% endif %}
+  </nav>
+
+  {# 🌺 Footer Section #}
+  <div class="mt-auto px-5 pb-6 border-t border-white/20 pt-4 space-y-2">
+    <a href="{{ path('app_profile') }}" class="flex items-center px-4 py-3 text-sm rounded-lg text-white/80 hover:bg-white/10 hover:text-[#FFF8F0] transition-all">
+      <i class="fas fa-user-circle text-lg mr-3 icon-glow"></i> Profile
+    </a>
+    <a href="{{ path('app_logout') }}" class="flex items-center px-4 py-3 text-sm rounded-lg text-white/80 hover:bg-white/10 hover:text-[#FFF8F0] transition-all">
+      <i class="fas fa-sign-out-alt text-lg mr-3 icon-glow"></i> Logout
+    </a>
+  </div>
+</aside>

@@ -1,0 +1,189 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ user.username }} - User Details{% endblock %}
+{% block page_title %}User Details{% endblock %}
+
+{% block body %}
+<div class="px-4 sm:px-6 lg:px-8">
+  <!-- Breadcrumb -->
+  <div class="mb-6">
+    <nav class="flex" aria-label="Breadcrumb">
+      <ol class="flex items-center space-x-4">
+        <li>
+          <a href="{{ path('admin_dashboard') }}" class="text-gray-400 hover:text-gray-500">
+            <i class="fas fa-home"></i>
+          </a>
+        </li>
+        <li>
+          <div class="flex items-center">
+            <i class="fas fa-chevron-right text-gray-400 mr-4"></i>
+            <a href="{{ path('app_user_index') }}" class="text-sm font-medium text-gray-500 hover:text-gray-700">User Management</a>
+          </div>
+        </li>
+        <li>
+          <div class="flex items-center">
+            <i class="fas fa-chevron-right text-gray-400 mr-4"></i>
+            <span class="text-sm font-medium text-gray-500">{{ user.username }}</span>
+          </div>
+        </li>
+      </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="mt-4 flex justify-between items-start">
+      <div class="flex items-center">
+        <div class="h-14 w-14 rounded-full bg-gradient-to-br from-[#5E548E] to-[#4C4375] flex items-center justify-center mr-4">
+          <span class="text-white text-xl font-bold">{{ user.username|first|upper }}</span>
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">{{ user.username }}</h1>
+          <div class="flex gap-2 mt-2">
+            {% for role in user.roles %}
+              {% if role == 'ROLE_ADMIN' %}
+                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
+                  <i class="fas fa-crown mr-1"></i>Admin
+                </span>
+              {% elseif role == 'ROLE_STAFF' %}
+                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                  <i class="fas fa-user-tie mr-1"></i>Staff
+                </span>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      <div class="flex space-x-3">
+        <a href="{{ path('app_user_edit', {'id': user.id}) }}"
+           class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200">
+          <i class="fas fa-edit mr-2"></i>Edit User
+        </a>
+        <a href="{{ path('app_user_index') }}"
+           class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
+          <i class="fas fa-arrow-left mr-2"></i>Back to List
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Main Content -->
+    <div class="lg:col-span-2">
+      <!-- Account Information -->
+      <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+        <div class="px-6 py-4 bg-gradient-to-r from-[#5E548E]/10 to-[#4C4375]/10 border-b border-[#5E548E]/20">
+          <h3 class="text-lg font-medium text-[#5E548E] flex items-center">
+            <i class="fas fa-id-card mr-2"></i>
+            Account Information
+          </h3>
+        </div>
+        <div class="px-6 py-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <dt class="text-sm font-medium text-gray-500">User ID</dt>
+              <dd class="mt-1 text-sm font-mono text-gray-900">#{{ user.id }}</dd>
+            </div>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Username</dt>
+              <dd class="mt-1 text-lg font-semibold text-gray-900">{{ user.username }}</dd>
+            </div>
+            <div class="md:col-span-2">
+              <dt class="text-sm font-medium text-gray-500">Assigned Roles</dt>
+              <dd class="mt-2 flex flex-wrap gap-2">
+                {% for role in user.roles %}
+                  {% if role == 'ROLE_ADMIN' %}
+                    <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium bg-purple-100 text-purple-800 border border-purple-200">
+                      <i class="fas fa-crown mr-2"></i>Administrator
+                    </span>
+                  {% elseif role == 'ROLE_STAFF' %}
+                    <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                      <i class="fas fa-user-tie mr-2"></i>Staff Member
+                    </span>
+                  {% elseif role == 'ROLE_USER' %}
+                    <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-800 border border-gray-200">
+                      <i class="fas fa-user mr-2"></i>User
+                    </span>
+                  {% endif %}
+                {% endfor %}
+              </dd>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Security Information -->
+      <div class="mt-6 bg-white shadow-lg rounded-lg overflow-hidden">
+        <div class="px-6 py-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-b border-blue-200">
+          <h3 class="text-lg font-medium text-blue-900 flex items-center">
+            <i class="fas fa-shield-alt mr-2 text-blue-600"></i>
+            Security
+          </h3>
+        </div>
+        <div class="px-6 py-6">
+          <div class="border-l-4 border-blue-500 bg-blue-50 p-4 rounded">
+            <div class="flex items-start">
+              <i class="fas fa-info-circle text-blue-600 mt-1 mr-3"></i>
+              <div>
+                <h4 class="font-semibold text-blue-900 mb-1">Account Security</h4>
+                <p class="text-sm text-blue-700">Password is stored securely using bcrypt hashing. You can reset this user's password through the edit page.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="lg:col-span-1 space-y-6">
+      <!-- Quick Actions -->
+      <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+        <div class="px-6 py-4 bg-gradient-to-r from-emerald-50 to-teal-50 border-b border-emerald-200">
+          <h3 class="text-lg font-medium text-emerald-900 flex items-center">
+            <i class="fas fa-bolt mr-2 text-emerald-600"></i>
+            Quick Actions
+          </h3>
+        </div>
+        <div class="px-6 py-6 space-y-3">
+          <a href="{{ path('app_user_edit', {'id': user.id}) }}"
+             class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200">
+            <i class="fas fa-edit mr-2"></i>Edit Account
+          </a>
+          <a href="{{ path('app_activity_log_index') }}"
+             class="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
+            <i class="fas fa-history mr-2"></i>View Activity Logs
+          </a>
+        </div>
+      </div>
+
+      <!-- Account Summary -->
+      <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+        <div class="px-6 py-4 bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-200">
+          <h3 class="text-lg font-medium text-amber-900 flex items-center">
+            <i class="fas fa-chart-pie mr-2 text-amber-600"></i>
+            Account Summary
+          </h3>
+        </div>
+        <div class="px-6 py-6 space-y-4">
+          <div class="flex justify-between items-center">
+            <dt class="text-sm font-medium text-gray-500">Account ID</dt>
+            <dd class="text-sm font-mono text-gray-900">#{{ user.id }}</dd>
+          </div>
+          <div class="flex justify-between items-center border-t border-gray-200 pt-4">
+            <dt class="text-sm font-medium text-gray-500">Role Count</dt>
+            <dd class="text-lg font-bold text-[#5E548E]">{{ user.roles|length }}</dd>
+          </div>
+          <div class="flex justify-between items-center border-t border-gray-200 pt-4">
+            <dt class="text-sm font-medium text-gray-500">Access Level</dt>
+            <dd class="text-sm font-medium">
+              {% if 'ROLE_ADMIN' in user.roles %}
+                <span class="text-purple-600">Full Access</span>
+              {% else %}
+                <span class="text-blue-600">Limited Access</span>
+              {% endif %}
+            </dd>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

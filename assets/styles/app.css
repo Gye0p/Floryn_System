@@ -1,3 +1,549 @@
+@import "tailwindcss";
+
+/* ----------------------------------------
+   🌸 Floryn Garden Brand Theme Styles
+---------------------------------------- */
+
 body {
-    background-color: skyblue;
+  font-family: 'Roboto', sans-serif;
+  color: #2E2E2E;
+  background-color: #FFF8F0; /* Cream White */
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+}
+
+/* Flash Message Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* ----------------------------------------
+   📊 Enhanced DataTables Styling
+---------------------------------------- */
+
+/* DataTables wrapper improvements */
+.dataTables_wrapper {
+  padding: 1rem;
+}
+
+/* Search box styling */
+.dataTables_wrapper .dataTables_filter input {
+  border: 2px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  margin-left: 0.5rem;
+  transition: all 0.2s;
+}
+
+.dataTables_wrapper .dataTables_filter input:focus {
+  outline: none;
+  border-color: #5E548E;
+  box-shadow: 0 0 0 3px rgba(94, 84, 142, 0.1);
+}
+
+/* Length menu styling */
+.dataTables_wrapper .dataTables_length select {
+  border: 2px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 0.5rem 2rem 0.5rem 1rem;
+  margin: 0 0.5rem;
+}
+
+/* Table header enhancements */
+table.dataTable thead th {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.75rem;
+  color: #6b7280;
+  background-color: #f9fafb;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+table.dataTable thead th:hover {
+  background-color: #f3f4f6;
+}
+
+/* Table row hover effect */
+table.dataTable tbody tr {
+  transition: all 0.15s ease;
+}
+
+table.dataTable tbody tr:hover {
+  background-color: #f9fafb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Pagination styling */
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  margin: 0 0.125rem;
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+  background: #5E548E;
+  color: white !important;
+  border-color: #5E548E;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+  background: #5E548E !important;
+  color: white !important;
+  border-color: #5E548E;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Info text styling */
+.dataTables_wrapper .dataTables_info {
+  color: #6b7280;
+  font-size: 0.875rem;
+  padding-top: 1rem;
+}
+
+/* Processing indicator */
+.dataTables_wrapper .dataTables_processing {
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 1rem 2rem;
+}
+
+/* Sorting icons enhancement */
+table.dataTable thead .sorting:before,
+table.dataTable thead .sorting_asc:before,
+table.dataTable thead .sorting_desc:before,
+table.dataTable thead .sorting_asc_disabled:before,
+table.dataTable thead .sorting_desc_disabled:before {
+  opacity: 0.3;
+}
+
+table.dataTable thead .sorting:after,
+table.dataTable thead .sorting_asc:after,
+table.dataTable thead .sorting_desc:after,
+table.dataTable thead .sorting_asc_disabled:after,
+table.dataTable thead .sorting_desc_disabled:after {
+  opacity: 0.3;
+}
+
+table.dataTable thead .sorting_asc:after,
+table.dataTable thead .sorting_desc:before {
+  opacity: 1;
+  color: #5E548E;
+}
+
+/* ----------------------------------------
+   🌿 Brand Color Palette
+   Primary: #5E548E (Lavender Purple)
+   Accent: #39A8C9 (Aqua Blue)
+   Background: #FFF8F0 (Cream White)
+---------------------------------------- */
+
+/* Sidebar */
+.sidebar {
+  background: linear-gradient(to bottom, #5E548E, #39A8C9);
+  color: #ffffff;
+}
+
+.sidebar a {
+  color: rgba(255, 255, 255, 0.85);
+  transition: all 0.3s ease;
+}
+
+.sidebar a:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.sidebar a.active {
+  background-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  border-left: 4px solid #FFF8F0;
+}
+
+/* Topbar */
+.topbar {
+  background-color: #ffffff;
+  color: #2E2E2E;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.topbar h1 {
+  color: #2E2E2E;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+}
+
+/* Topbar Icons */
+.topbar button {
+  transition: all 0.2s ease;
+}
+
+.topbar button:hover {
+  transform: translateY(-1px);
+}
+
+/* Buttons */
+.btn-primary {
+  background: linear-gradient(135deg, #5E548E, #39A8C9);
+  color: white;
+  border: none;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #39A8C9, #5E548E);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(94, 84, 142, 0.3);
+}
+
+.btn-secondary {
+  background: #EDE7F6;
+  color: #5E548E;
+  border: 1px solid #C5CAE9;
+}
+
+.btn-secondary:hover {
+  background: #D1C4E9;
+  color: #fff;
+}
+
+/* Cards */
+.card-enhanced {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(94, 84, 142, 0.08);
+  transition: all 0.3s ease;
+}
+
+.card-enhanced:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(57, 168, 201, 0.15);
+  border-color: #39A8C9;
+}
+
+/* Tables */
+.table-hover tbody tr:hover {
+  background-color: rgba(94, 84, 142, 0.05);
+}
+
+/* Form Inputs */
+input:focus, textarea:focus, select:focus {
+  border-color: #39A8C9 !important;
+  box-shadow: 0 0 0 3px rgba(57, 168, 201, 0.2) !important;
+  outline: none !important;
+}
+
+/* Scrollbar for sidebar */
+.overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Sidebar Icons */
+.sidebar i {
+  color: rgba(255, 255, 255, 0.9);
+  transition: color 0.3s ease;
+}
+
+.sidebar a:hover i,
+.sidebar a.active i {
+  color: #FFF8F0;
+}
+
+/* Notification Badge */
+.badge {
+  background-color: #39A8C9;
+  color: #fff;
+  border-radius: 9999px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Toast Notification */
+.toast {
+  background: linear-gradient(90deg, #5E548E, #39A8C9);
+  color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  opacity: 0;
+  transform: translateX(100%);
+  transition: all 0.3s ease-in-out;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Animation */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+/* ----------------------------------------
+   📊 DataTables Custom Styling - Floryn Garden Theme
+---------------------------------------- */
+
+/* DataTables Wrapper */
+.dataTables_wrapper {
+  padding: 1rem 1.5rem;
+}
+
+/* DataTables Search Box */
+.dataTables_filter {
+  float: right;
+  margin-bottom: 1rem;
+}
+
+.dataTables_filter label {
+  font-weight: 500;
+  color: #5E548E;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dataTables_filter input {
+  margin-left: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+  font-size: 0.875rem;
+}
+
+.dataTables_filter input:focus {
+  border-color: #39A8C9 !important;
+  box-shadow: 0 0 0 3px rgba(57, 168, 201, 0.15) !important;
+  outline: none;
+}
+
+/* DataTables Length Menu */
+.dataTables_length {
+  float: left;
+  margin-bottom: 1rem;
+}
+
+.dataTables_length label {
+  font-weight: 500;
+  color: #5E548E;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dataTables_length select {
+  margin: 0 0.5rem;
+  padding: 0.5rem 2rem 0.5rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.dataTables_length select:focus {
+  border-color: #39A8C9;
+  box-shadow: 0 0 0 3px rgba(57, 168, 201, 0.15);
+  outline: none;
+}
+
+/* DataTables Info */
+.dataTables_info {
+  padding-top: 1rem;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+/* DataTables Pagination */
+.dataTables_paginate {
+  padding-top: 1rem;
+  float: right;
+}
+
+.dataTables_paginate .paginate_button {
+  padding: 0.5rem 0.875rem;
+  margin: 0 0.125rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  color: #5E548E !important;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none !important;
+}
+
+.dataTables_paginate .paginate_button:hover {
+  background: #f3f4f6;
+  border-color: #39A8C9;
+  color: #39A8C9 !important;
+}
+
+.dataTables_paginate .paginate_button.current {
+  background: linear-gradient(135deg, #5E548E, #39A8C9) !important;
+  color: white !important;
+  border-color: #5E548E;
+  font-weight: 600;
+}
+
+.dataTables_paginate .paginate_button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* DataTables Sorting Icons */
+table.dataTable thead .sorting,
+table.dataTable thead .sorting_asc,
+table.dataTable thead .sorting_desc {
+  cursor: pointer;
+  position: relative;
+}
+
+table.dataTable thead .sorting:after,
+table.dataTable thead .sorting_asc:after,
+table.dataTable thead .sorting_desc:after {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.5;
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  font-size: 0.75rem;
+  color: #5E548E;
+}
+
+table.dataTable thead .sorting:after {
+  content: "\f0dc";
+  opacity: 0.3;
+}
+
+table.dataTable thead .sorting_asc:after {
+  content: "\f0de";
+  opacity: 1;
+  color: #39A8C9;
+}
+
+table.dataTable thead .sorting_desc:after {
+  content: "\f0dd";
+  opacity: 1;
+  color: #39A8C9;
+}
+
+/* Empty Table Message */
+.dataTables_empty {
+  text-align: center;
+  padding: 2rem !important;
+  color: #9ca3af;
+  font-style: italic;
+}
+
+/* Processing Indicator */
+.dataTables_processing {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(94, 84, 142, 0.9);
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  z-index: 1000;
+}
+
+/* DataTables Buttons Styling */
+.dt-buttons {
+  margin-bottom: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.dt-button {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  background: white;
+  color: #5E548E;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.dt-button:hover {
+  background: linear-gradient(135deg, #5E548E, #39A8C9);
+  color: white;
+  border-color: #5E548E;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.dt-button:active {
+  transform: translateY(0);
+}
+
+/* Responsive Tables */
+@media (max-width: 768px) {
+  .dataTables_wrapper .dataTables_filter,
+  .dataTables_wrapper .dataTables_length,
+  .dataTables_wrapper .dataTables_info,
+  .dataTables_wrapper .dataTables_paginate {
+    float: none;
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+  
+  .dataTables_filter input {
+    width: 100%;
+  }
+  
+  .dt-buttons {
+    justify-content: center;
+  }
 }

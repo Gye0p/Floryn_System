@@ -1,0 +1,128 @@
+{{ form_start(form, {'attr': {'class': 'space-y-6'}}) }}
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+  <!-- Left Column -->
+  <div class="space-y-6">
+    <!-- Customer Selection -->
+    <div>
+      {{ form_label(form.customer, 'Customer', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-2'}}) }}
+      <div class="relative">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <i class="fas fa-user text-gray-400"></i>
+        </div>
+        {{ form_widget(form.customer, {
+          'attr': {
+            'class': 'pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
+          }
+        }) }}
+      </div>
+      {{ form_errors(form.customer) }}
+    </div>
+
+    <!-- Channel Selection -->
+    <div>
+      {{ form_label(form.channel, 'Communication Channel', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-2'}}) }}
+      <div class="relative">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <i class="fas fa-share-alt text-gray-400"></i>
+        </div>
+        {{ form_widget(form.channel, {
+          'attr': {
+            'class': 'pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
+          }
+        }) }}
+      </div>
+      {{ form_errors(form.channel) }}
+    </div>
+
+    <!-- Date Sent -->
+    <div>
+      {{ form_label(form.dateSent, 'Send Date & Time', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-2'}}) }}
+      <div class="relative">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <i class="fas fa-calendar-alt text-gray-400"></i>
+        </div>
+        {{ form_widget(form.dateSent, {
+          'attr': {
+            'class': 'pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
+          }
+        }) }}
+      </div>
+      {{ form_errors(form.dateSent) }}
+      <p class="mt-1 text-sm text-gray-500">Leave blank for immediate sending</p>
+    </div>
+
+    <!-- Status -->
+    <div>
+      {{ form_label(form.status, 'Notification Status', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-2'}}) }}
+      <div class="relative">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <i class="fas fa-check-circle text-gray-400"></i>
+        </div>
+        {{ form_widget(form.status, {
+          'attr': {
+            'class': 'pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
+          }
+        }) }}
+      </div>
+      {{ form_errors(form.status) }}
+    </div>
+  </div>
+
+  <!-- Right Column -->
+  <div class="space-y-6">
+    <!-- Message Content -->
+    <div class="row-span-2">
+      {{ form_label(form.message, 'Message Content', {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-2'}}) }}
+      <div class="relative">
+        {{ form_widget(form.message, {
+          'attr': {
+            'class': 'block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm',
+            'rows': '8',
+            'placeholder': 'Enter your notification message here...'
+          }
+        }) }}
+      </div>
+      {{ form_errors(form.message) }}
+      <p class="mt-1 text-sm text-gray-500">Write a clear and concise message for the customer</p>
+    </div>
+  </div>
+</div>
+
+<!-- Message Templates -->
+<div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+  <div class="flex items-start">
+    <div class="flex-shrink-0">
+      <i class="fas fa-lightbulb text-indigo-400 text-lg"></i>
+    </div>
+    <div class="ml-3">
+      <h3 class="text-sm font-medium text-indigo-800">Message Templates</h3>
+      <div class="mt-2 text-sm text-indigo-700">
+        <p class="mb-2">Quick templates for common notifications:</p>
+        <ul class="list-disc list-inside space-y-1">
+          <li><strong>Order Confirmation:</strong> "Your order #[ORDER_ID] has been confirmed and is being processed."</li>
+          <li><strong>Delivery Update:</strong> "Your flowers are on their way! Expected delivery: [DATE]"</li>
+          <li><strong>Payment Reminder:</strong> "Gentle reminder: Payment for order #[ORDER_ID] is due."</li>
+          <li><strong>Special Offer:</strong> "Don't miss our seasonal flower collection! 20% off this week."</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Form Actions -->
+<div class="flex items-center justify-between pt-6 border-t border-gray-200">
+  <a href="{{ path('app_notification_log_index') }}" 
+     class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
+    <i class="fas fa-times mr-2"></i>
+    Cancel
+  </a>
+  
+  <button type="submit" 
+          class="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
+    <i class="fas fa-paper-plane mr-2"></i>
+    {{ button_label|default('Send Notification') }}
+  </button>
+</div>
+
+{{ form_end(form) }}
