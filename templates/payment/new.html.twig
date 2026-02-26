@@ -4,54 +4,27 @@
 {% block page_title %}Record Payment{% endblock %}
 
 {% block body %}
-<div class="px-4 sm:px-6 lg:px-8">
-  <!-- Breadcrumb -->
-  <div class="mb-6">
-    <nav class="flex" aria-label="Breadcrumb">
-      <ol class="flex items-center space-x-4">
-        <li>
-          <a href="{{ path('admin_dashboard') }}" class="text-gray-400 hover:text-gray-500">
-            <i class="fas fa-home"></i>
-          </a>
-        </li>
-        <li>
-          <div class="flex items-center">
-            <i class="fas fa-chevron-right text-gray-400 mr-4"></i>
-            <a href="{{ path('app_payment_index') }}" class="text-sm font-medium text-gray-500 hover:text-gray-700">Payments</a>
-          </div>
-        </li>
-        <li>
-          <div class="flex items-center">
-            <i class="fas fa-chevron-right text-gray-400 mr-4"></i>
-            <span class="text-sm font-medium text-gray-500">New Payment</span>
-          </div>
-        </li>
-      </ol>
-    </nav>
+<div class="page-wrapper px-4 sm:px-6 lg:px-8">
+  <nav class="breadcrumb">
+    <a href="{{ path('admin_dashboard') }}"><i class="fas fa-home"></i></a>
+    <span class="separator">/</span>
+    <a href="{{ path('app_payment_index') }}">Payments</a>
+    <span class="separator">/</span>
+    <span class="current">New Payment</span>
+  </nav>
 
-    <div class="mt-4">
-      <h1 class="text-2xl font-bold text-gray-900 flex items-center">
-        <i class="fas fa-plus-circle text-green-600 mr-3"></i>
-        Record New Payment
-      </h1>
-      <p class="mt-2 text-sm text-gray-600">Process a payment transaction and update records.</p>
+  <div class="page-header">
+    <div class="page-header-info">
+      <div class="avatar lg" style="background:linear-gradient(135deg,#22c55e,#16a34a);"><i class="fas fa-plus" style="font-size:20px;"></i></div>
+      <div>
+        <h1>Record New Payment</h1>
+        <p class="subtitle">Process a payment transaction and update financial records.</p>
+      </div>
     </div>
   </div>
 
-  <!-- Form Container -->
-  <div class="max-w-4xl">
-    <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-      <div class="px-6 py-4 bg-gradient-to-r from-green-50 to-emerald-50 border-b border-green-200">
-        <h3 class="text-lg font-medium text-green-900 flex items-center">
-          <i class="fas fa-credit-card mr-2 text-green-600"></i>
-          Payment Information
-        </h3>
-        <p class="text-sm text-green-700 mt-1">Fill in the payment details to record the transaction</p>
-      </div>
-      <div class="p-6">
-        {{ include('payment/_form.html.twig') }}
-      </div>
-    </div>
+  <div style="max-width:900px;">
+    {{ include('payment/_form.html.twig') }}
   </div>
 </div>
 {% endblock %}

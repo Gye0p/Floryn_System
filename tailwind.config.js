@@ -8,48 +8,66 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Floryn Garden Refined Color Palette
-        'lavender-purple': {
-          50: '#f7f5ff',
-          100: '#ebe8ff',
-          200: '#ddd6fe',
-          300: '#c4b5fd',
-          400: '#a78bfa',
-          500: '#5e548e', // Primary Color
-          600: '#4c46763',
-          700: '#3d3856',
-          800: '#2e2c47',
-          900: '#252239',
+        // Floryn Garden — actual palette used throughout the app
+        'navy': {
+          DEFAULT: '#293855',
+          50: '#f4f6f9',
+          100: '#e8edf2',
+          200: '#c9d3e1',
+          300: '#9baabe',
+          400: '#6b7e9a',
+          500: '#4a5f7d',
+          600: '#3a4d6a',
+          700: '#293855',
+          800: '#1e2d47',
+          900: '#16223a',
         },
-        'aqua-blue': {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#39a8c9', // Accent Color
-          500: '#0ea5e9',
-          600: '#0284c7',
-          700: '#0369a1',
-          800: '#075985',
-          900: '#0c4a6e',
+        'blue': {
+          DEFAULT: '#4265d6',
+          50: '#eaeefc',
+          100: '#d5defa',
+          200: '#abbdf5',
+          300: '#809bef',
+          400: '#567aea',
+          500: '#4265d6',
+          600: '#3554b8',
+          700: '#28439a',
+          800: '#1c327c',
+          900: '#10215e',
         },
-        'cream-white': '#FFF8F0', // Background
-        'charcoal-gray': '#2E2E2E', // High contrast text
+        'mint': {
+          DEFAULT: '#c2e7c9',
+          50: '#f0faf2',
+          100: '#e0f5e5',
+          200: '#c2e7c9',
+          300: '#95d4a2',
+          400: '#68c17b',
+          500: '#3daa57',
+          600: '#2d8a4e',
+          700: '#236a3c',
+          800: '#1a4a2a',
+          900: '#0f2a18',
+        },
       },
       fontFamily: {
-        heading: ['Poppins', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        body: ['Roboto', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        sans: ['Roboto', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        heading: ['Bricolage Grotesque', 'ui-serif', 'Georgia', 'serif'],
+        body: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       animation: {
         'slide-in': 'slideInFromLeft 0.3s ease-out',
+        'fade-in': 'fadeIn 0.3s ease-out',
       },
       keyframes: {
         slideInFromLeft: {
           '0%': { transform: 'translateX(-100%)' },
           '100%': { transform: 'translateX(0)' },
-        }
-      }
+        },
+        fadeIn: {
+          '0%': { opacity: '0', transform: 'translateY(-4px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+      },
     },
   },
   plugins: [

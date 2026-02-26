@@ -4,267 +4,159 @@
 {% block page_title %}Reservation Management{% endblock %}
 
 {% block body %}
-<div class="px-4 sm:px-6 lg:px-8">
-  <!-- Header -->
-  <div class="sm:flex sm:items-center mb-6">
-    <div class="sm:flex-auto">
-      <h1 class="text-2xl font-semibold text-gray-900">Order Reservations</h1>
-      <p class="mt-2 text-sm text-gray-700">Manage customer flower reservations, track pickup dates, and monitor payment status.</p>
+<div class="page-wrapper px-4 sm:px-6 lg:px-8">
+  <div class="page-header">
+    <div class="page-header-info">
+      <h1><i class="fas fa-calendar-alt" style="color:#4265d6;font-size:22px;"></i> Order Reservations</h1>
+      <p class="subtitle">Manage customer flower reservations, track pickup dates, and monitor payment status.</p>
     </div>
-    <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-      <a href="{{ path('app_reservation_new') }}" 
-         class="inline-flex items-center justify-center rounded-md border border-transparent bg-purple-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 sm:w-auto transition-colors duration-200">
-        <i class="fas fa-calendar-plus mr-2"></i>
-        New Reservation
-      </a>
+    <div class="page-header-actions">
+      <a href="{{ path('app_reservation_new') }}" class="btn btn-primary"><i class="fas fa-calendar-plus"></i> New Reservation</a>
     </div>
   </div>
 
-  <!-- Stats Cards -->
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-    <div class="bg-white overflow-hidden shadow rounded-lg">
-      <div class="p-5">
-        <div class="flex items-center">
-          <div class="flex-shrink-0">
-            <i class="fas fa-calendar-alt text-purple-400 text-2xl"></i>
-          </div>
-          <div class="ml-5 w-0 flex-1">
-            <dl>
-              <dt class="text-sm font-medium text-gray-500 truncate">Total Reservations</dt>
-              <dd class="text-lg font-medium text-gray-900">{{ reservations|length }}</dd>
-            </dl>
-          </div>
-        </div>
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-icon purple"><i class="fas fa-calendar-alt"></i></div>
+      <div class="stat-content">
+        <div class="stat-label">Total Reservations</div>
+        <div class="stat-value">{{ reservations|length }}</div>
       </div>
     </div>
-
-    <div class="bg-white overflow-hidden shadow rounded-lg">
-      <div class="p-5">
-        <div class="flex items-center">
-          <div class="flex-shrink-0">
-            <i class="fas fa-clock text-amber-400 text-2xl"></i>
-          </div>
-          <div class="ml-5 w-0 flex-1">
-            <dl>
-              <dt class="text-sm font-medium text-gray-500 truncate">Pending</dt>
-              <dd class="text-lg font-medium text-gray-900">
-                {% set pending = 0 %}
-                {% for reservation in reservations %}
-                  {% if reservation.reservationStatus == 'Pending' %}
-                    {% set pending = pending + 1 %}
-                  {% endif %}
-                {% endfor %}
-                {{ pending }}
-              </dd>
-            </dl>
-          </div>
-        </div>
+    <div class="stat-card">
+      <div class="stat-icon amber"><i class="fas fa-clock"></i></div>
+      <div class="stat-content">
+        <div class="stat-label">Pending</div>
+        <div class="stat-value">{% set pending = 0 %}{% for reservation in reservations %}{% if reservation.reservationStatus == 'Pending' %}{% set pending = pending + 1 %}{% endif %}{% endfor %}{{ pending }}</div>
       </div>
     </div>
-
-    <div class="bg-white overflow-hidden shadow rounded-lg">
-      <div class="p-5">
-        <div class="flex items-center">
-          <div class="flex-shrink-0">
-            <i class="fas fa-check-circle text-green-400 text-2xl"></i>
-          </div>
-          <div class="ml-5 w-0 flex-1">
-            <dl>
-              <dt class="text-sm font-medium text-gray-500 truncate">Completed</dt>
-              <dd class="text-lg font-medium text-gray-900">
-                {% set completed = 0 %}
-                {% for reservation in reservations %}
-                  {% if reservation.reservationStatus == 'Completed' %}
-                    {% set completed = completed + 1 %}
-                  {% endif %}
-                {% endfor %}
-                {{ completed }}
-              </dd>
-            </dl>
-          </div>
-        </div>
+    <div class="stat-card">
+      <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+      <div class="stat-content">
+        <div class="stat-label">Completed</div>
+        <div class="stat-value">{% set completed = 0 %}{% for reservation in reservations %}{% if reservation.reservationStatus == 'Completed' %}{% set completed = completed + 1 %}{% endif %}{% endfor %}{{ completed }}</div>
       </div>
     </div>
-
-    <div class="bg-white overflow-hidden shadow rounded-lg">
-      <div class="p-5">
-        <div class="flex items-center">
-          <div class="flex-shrink-0">
-            <i class="fas fa-dollar-sign text-emerald-400 text-2xl"></i>
-          </div>
-          <div class="ml-5 w-0 flex-1">
-            <dl>
-              <dt class="text-sm font-medium text-gray-500 truncate">Total Revenue</dt>
-              <dd class="text-lg font-medium text-gray-900">
-                ${% set totalRevenue = 0 %}
-                {% for reservation in reservations %}
-                  {% set totalRevenue = totalRevenue + reservation.totalAmount %}
-                {% endfor %}
-                {{ totalRevenue|number_format(2) }}
-              </dd>
-            </dl>
-          </div>
-        </div>
+    <div class="stat-card">
+      <div class="stat-icon blue"><i class="fas fa-dollar-sign"></i></div>
+      <div class="stat-content">
+        <div class="stat-label">Total Revenue</div>
+        <div class="stat-value">₱{% set totalRevenue = 0 %}{% for reservation in reservations %}{% set totalRevenue = totalRevenue + reservation.totalAmount %}{% endfor %}{{ totalRevenue|number_format(2) }}</div>
       </div>
     </div>
   </div>
 
-  <!-- Reservations Table -->
-  <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-200">
-      <h3 class="text-lg font-medium text-gray-900">All Reservations</h3>
+  {% if reservations is not empty %}
+  <div class="table-card"
+       data-controller="floryn-table"
+       data-floryn-table-page-size-value="10"
+       data-floryn-table-sort-col-value="2"
+       data-floryn-table-sort-dir-value="desc"
+       data-floryn-table-no-sort-cols-value="[6]"
+       data-floryn-table-entity-name-value="reservations">
+
+    <div class="table-card-header"><h3>All Reservations</h3></div>
+
+    <div class="fg-toolbar">
+      <div class="fg-toolbar-left">
+        <select class="fg-page-size" data-floryn-table-target="pageSize" data-action="floryn-table#onPageSizeChange">
+          <option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="-1">All</option>
+        </select>
+        <div class="fg-export-buttons">
+          <button type="button" class="fg-export-btn" data-action="floryn-table#exportCopy"><i class="fas fa-copy"></i> Copy</button>
+          <button type="button" class="fg-export-btn" data-action="floryn-table#exportCsv"><i class="fas fa-file-csv"></i> CSV</button>
+          <button type="button" class="fg-export-btn" data-action="floryn-table#exportExcel"><i class="fas fa-file-excel"></i> Excel</button>
+          <button type="button" class="fg-export-btn" data-action="floryn-table#exportPrint"><i class="fas fa-print"></i> Print</button>
+        </div>
+      </div>
+      <div class="fg-toolbar-right">
+        <select class="filter-select" data-floryn-table-target="columnFilter" data-col="5" data-action="floryn-table#onColumnFilter">
+          <option value="">All Status</option><option value="Pending">Pending</option><option value="Confirmed">Confirmed</option><option value="Completed">Completed</option><option value="Cancelled">Cancelled</option>
+        </select>
+        <select class="filter-select" data-floryn-table-target="columnFilter" data-col="4" data-action="floryn-table#onColumnFilter">
+          <option value="">All Payments</option><option value="Paid">Paid</option><option value="Unpaid">Unpaid</option>
+        </select>
+        <button type="button" class="btn-outline" data-action="floryn-table#resetFilters" style="padding:8px 14px;font-size:12px;"><i class="fas fa-redo"></i> Reset</button>
+        <div class="fg-search-wrap">
+          <i class="fas fa-search fg-search-icon"></i>
+          <input type="text" class="fg-search" placeholder="Search reservations..." data-floryn-table-target="search" data-action="input->floryn-table#onSearch">
+        </div>
+      </div>
     </div>
-    
-    {% if reservations is not empty %}
-      <div class="overflow-x-auto">
-        <table id="reservationsTable" class="display nowrap min-w-full divide-y divide-gray-200" style="width:100%">
-          <thead class="bg-gray-50">
+
+    <div class="overflow-x-auto">
+      <table class="fg-table min-w-full" style="width:100%" data-floryn-table-target="table">
+        <thead>
+          <tr><th>Reservation</th><th>Customer</th><th>Pickup Date</th><th>Amount</th><th>Payment</th><th>Status</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          {% for reservation in reservations %}
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reservation</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pickup Date</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              <td class="px-4 py-3">
+                <div class="flex items-center gap-3">
+                  <div class="avatar sm" style="background:linear-gradient(135deg,#9b59b6,#8e44ad);"><i class="fas fa-receipt" style="font-size:11px;"></i></div>
+                  <div>
+                    <div style="font-weight:600;color:var(--navy);font-size:13px;">#{{ reservation.id }}</div>
+                    <div style="font-size:11px;color:var(--muted);">{{ reservation.dateReserved ? reservation.dateReserved|date('M j, Y') : 'No date' }}</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-3">
+                <div class="flex items-center gap-2">
+                  <div class="avatar sm" style="background:linear-gradient(135deg,#7c5cbf,#9b59b6);font-size:10px;">{{ reservation.customer.fullName|first|upper }}</div>
+                  <div>
+                    <div style="font-weight:600;font-size:13px;color:var(--navy);">{{ reservation.customer.fullName }}</div>
+                    <div style="font-size:11px;color:var(--muted);">{{ reservation.customer.email }}</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-3" style="font-size:13px;">
+                {% if reservation.pickupDate %}
+                  {% set today = date() %}
+                  {% set pickupDays = date(reservation.pickupDate).diff(today).days %}
+                  <div>{{ reservation.pickupDate|date('M j, Y') }}</div>
+                  <div style="font-size:11px;" class="{% if pickupDays < 0 %}text-red-500{% elseif pickupDays == 0 %}text-amber-500{% elseif pickupDays <= 3 %}text-blue-500{% else %}text-gray-500{% endif %}">
+                    {% if pickupDays < 0 %}{{ pickupDays|abs }} days overdue{% elseif pickupDays == 0 %}Today{% else %}In {{ pickupDays }} days{% endif %}
+                  </div>
+                {% else %}<span style="color:var(--muted);">Not set</span>{% endif %}
+              </td>
+              <td class="px-4 py-3"><div style="font-weight:700;font-size:16px;color:var(--navy);">₱{{ reservation.totalAmount|number_format(2) }}</div></td>
+              <td class="px-4 py-3">
+                <span class="pill {% if reservation.paymentStatus == 'Paid' %}green{% else %}red{% endif %}">
+                  {% if reservation.paymentStatus == 'Paid' %}<i class="fas fa-check-circle" style="margin-right:3px;"></i>{% else %}<i class="fas fa-times-circle" style="margin-right:3px;"></i>{% endif %}
+                  {{ reservation.paymentStatus }}
+                </span>
+              </td>
+              <td class="px-4 py-3">
+                <span class="pill {% if reservation.reservationStatus == 'Completed' %}green{% elseif reservation.reservationStatus == 'Confirmed' %}blue{% elseif reservation.reservationStatus == 'Pending' %}yellow{% else %}red{% endif %}">{{ reservation.reservationStatus }}</span>
+              </td>
+              <td class="px-4 py-3 text-right">
+                <div class="row-actions">
+                  <a href="{{ path('app_reservation_show', {'id': reservation.id}) }}" class="row-action-btn" title="View"><i class="fas fa-eye"></i></a>
+                  <a href="{{ path('app_reservation_edit', {'id': reservation.id}) }}" class="row-action-btn" title="Edit"><i class="fas fa-edit"></i></a>
+                </div>
+              </td>
             </tr>
-          </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            {% for reservation in reservations %}
-              <tr class="hover:bg-gray-50">
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="flex items-center">
-                    <div class="flex-shrink-0 h-10 w-10">
-                      <div class="h-10 w-10 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center">
-                        <i class="fas fa-receipt text-white"></i>
-                      </div>
-                    </div>
-                    <div class="ml-4">
-                      <div class="text-sm font-medium text-gray-900">#{{ reservation.id }}</div>
-                      <div class="text-sm text-gray-500">{{ reservation.dateReserved ? reservation.dateReserved|date('M j, Y') : 'No date' }}</div>
-                    </div>
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="flex items-center">
-                    <img class="h-8 w-8 rounded-full" 
-                         src="https://ui-avatars.com/api/?name={{ reservation.customer.fullName|url_encode }}&background=7c3aed&color=fff" 
-                         alt="{{ reservation.customer.fullName }}">
-                    <div class="ml-3">
-                      <div class="text-sm font-medium text-gray-900">{{ reservation.customer.fullName }}</div>
-                      <div class="text-sm text-gray-500">{{ reservation.customer.email }}</div>
-                    </div>
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  {% if reservation.pickupDate %}
-                    {% set today = date() %}
-                    {% set pickupDays = date(reservation.pickupDate).diff(today).days %}
-                    <div class="text-sm text-gray-900">
-                      {{ reservation.pickupDate|date('M j, Y') }}
-                    </div>
-                    <div class="text-xs {% if pickupDays < 0 %}text-red-500{% elseif pickupDays == 0 %}text-amber-500{% elseif pickupDays <= 3 %}text-blue-500{% else %}text-gray-500{% endif %}">
-                      {% if pickupDays < 0 %}
-                        {{ pickupDays|abs }} days overdue
-                      {% elseif pickupDays == 0 %}
-                        Today
-                      {% else %}
-                        In {{ pickupDays }} days
-                      {% endif %}
-                    </div>
-                  {% else %}
-                    <span class="text-gray-400">Not set</span>
-                  {% endif %}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  <div class="font-bold text-lg">${{ reservation.totalAmount|number_format(2) }}</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                    {% if reservation.paymentStatus in ['Paid', 'Completed'] %}bg-green-100 text-green-800
-                    {% elseif reservation.paymentStatus == 'Pending' %}bg-yellow-100 text-yellow-800
-                    {% elseif reservation.paymentStatus == 'Partial' %}bg-blue-100 text-blue-800
-                    {% elseif reservation.paymentStatus == 'Refunded' %}bg-orange-100 text-orange-800
-                    {% else %}bg-red-100 text-red-800{% endif %}">
-                    {% if reservation.paymentStatus in ['Paid', 'Completed'] %}
-                      <i class="fas fa-check-circle mr-1"></i>
-                    {% elseif reservation.paymentStatus == 'Pending' %}
-                      <i class="fas fa-clock mr-1"></i>
-                    {% elseif reservation.paymentStatus == 'Partial' %}
-                      <i class="fas fa-hourglass-half mr-1"></i>
-                    {% elseif reservation.paymentStatus == 'Refunded' %}
-                      <i class="fas fa-undo mr-1"></i>
-                    {% else %}
-                      <i class="fas fa-times-circle mr-1"></i>
-                    {% endif %}
-                    {{ reservation.paymentStatus }}
-                  </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                    {% if reservation.reservationStatus == 'Completed' %}bg-green-100 text-green-800
-                    {% elseif reservation.reservationStatus == 'Confirmed' %}bg-blue-100 text-blue-800
-                    {% elseif reservation.reservationStatus == 'Pending' %}bg-yellow-100 text-yellow-800
-                    {% else %}bg-red-100 text-red-800{% endif %}">
-                    {{ reservation.reservationStatus }}
-                  </span>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <div class="flex items-center space-x-2">
-                    <a href="{{ path('app_reservation_show', {'id': reservation.id}) }}" 
-                       class="text-purple-600 hover:text-purple-900 transition-colors duration-200">
-                      <i class="fas fa-eye"></i>
-                    </a>
-                    <a href="{{ path('app_reservation_edit', {'id': reservation.id}) }}" 
-                       class="text-blue-600 hover:text-blue-900 transition-colors duration-200">
-                      <i class="fas fa-edit"></i>
-                    </a>
-                  </div>
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="fg-bottom-bar">
+      <div class="fg-info" data-floryn-table-target="info"></div>
+      <div class="fg-pagination" data-floryn-table-target="pagination"></div>
+    </div>
+
+  {% else %}
+    <div class="section-card">
+      <div class="empty-state">
+        <div class="empty-state-icon"><i class="fas fa-calendar-alt"></i></div>
+        <h3>No reservations found</h3>
+        <p>Start taking orders by creating your first reservation.</p>
+        <a href="{{ path('app_reservation_new') }}" class="btn btn-primary"><i class="fas fa-calendar-plus"></i> Create First Reservation</a>
       </div>
-    {% else %}
-      <div class="text-center py-12">
-        <i class="fas fa-calendar-alt text-gray-400 text-6xl mb-4"></i>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">No reservations found</h3>
-        <p class="text-gray-500 mb-6">Start taking orders by creating your first reservation.</p>
-        <a href="{{ path('app_reservation_new') }}" 
-           class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
-          <i class="fas fa-calendar-plus mr-2"></i>
-          Create First Reservation
-        </a>
-      </div>
-    {% endif %}
+    </div>
+  {% endif %}
   </div>
 </div>
-{% endblock %}
-
-{% block javascripts %}
-  {{ parent() }}
-  <script>
-    $(document).ready(function() {
-      $('#reservationsTable').DataTable({
-        pageLength: 10,
-        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
-        order: [[2, "desc"]], // Sort by reservation date descending (newest first)
-        search: { caseInsensitive: true },
-        dom: 'Blfrtip', // B=buttons, l=length, f=filter, r=processing, t=table, i=info, p=pagination
-        buttons: ['copy', 'csv', 'excel', 'print'],
-        responsive: true,
-        columnDefs: [
-          { orderable: false, targets: -1 }
-        ],
-        language: {
-          search: "Search reservations:",
-          lengthMenu: "Show _MENU_ reservations per page",
-          info: "Showing _START_ to _END_ of _TOTAL_ reservations",
-          infoEmpty: "Showing 0 to 0 of 0 reservations",
-          emptyTable: "No reservations available"
-        }
-      });
-    });
-  </script>
 {% endblock %}

@@ -1,37 +1,67 @@
-{# 🌸 Top Navigation Bar Partial - Perfectly Aligned with Sidebar #}
-<div class="w-full flex items-center justify-between bg-gradient-to-r from-[#5E548E] to-[#4C4375] shadow-lg border-b border-[#4C4375]/30 px-6 sticky top-0 z-30" style="height: 79px;">
+{# Floryn Garden — Top Navigation Bar #}
+<div class="w-full flex items-center justify-between bg-white px-8" style="height:64px;border-bottom:1px solid #e8edf2;">
 
-
-  {# 🌿 Left Section — Page Title & Menu (mobile toggle) #}
+  {# Left — Page Title #}
   <div class="flex items-center space-x-4">
-    <button class="md:hidden text-white hover:text-[#FFF8F0] transition duration-200">
+    <button class="md:hidden" style="color:#293855;" data-action="sidebar#toggle" type="button" aria-label="Toggle sidebar">
       <i class="fas fa-bars text-xl"></i>
     </button>
-    <h1 class="text-lg font-semibold text-white tracking-wide">
+    <h1 style="font-family:'Bricolage Grotesque',serif;font-size:22px;font-weight:600;color:#293855;">
       {% block page_title %}Dashboard{% endblock %}
     </h1>
   </div>
 
-  {# 🌺 Right Section — Notifications, Settings, Profile #}
-  <div class="flex items-center space-x-5">
+  {# Right — Search, Notifications, User #}
+  <div class="flex items-center gap-3">
+    {# Search Bar #}
+    <div class="relative" id="global-search-wrapper">
+      <form action="{{ path('app_search') }}" method="GET" class="flex items-center gap-2 rounded-lg px-3.5 py-2" style="background:#f9fafb;border:1px solid #dde3ec;width:260px;font-size:13px;color:#6b7a8d;">
+        <i class="fas fa-search" style="font-size:13px;color:#6b7a8d;"></i>
+        <input type="text"
+               name="q"
+               id="global-search-input"
+               placeholder="Search flowers, customers..."
+               autocomplete="off"
+               class="bg-transparent border-none outline-none flex-1"
+               style="font-size:13px;color:#293855;font-family:'Inter',sans-serif;width:100%;">
+        <kbd class="hidden sm:inline-block px-1.5 py-0.5 rounded text-xs" style="background:#e8edf2;color:#6b7a8d;font-size:10px;">Ctrl+K</kbd>
+      </form>
+      {# Dropdown results #}
+      <div id="global-search-dropdown"
+           class="absolute left-0 right-0 mt-1 rounded-xl shadow-xl border overflow-hidden hidden"
+           style="background:white;border-color:#e8edf2;z-index:9999;max-height:420px;overflow-y:auto;top:100%;">
+        <div id="global-search-results" class="py-1"></div>
+        <div id="global-search-loading" class="hidden py-4 text-center" style="font-size:13px;color:#6b7a8d;">
+          <i class="fas fa-spinner fa-spin"></i> Searching…
+        </div>
+        <div id="global-search-empty" class="hidden py-4 text-center" style="font-size:13px;color:#6b7a8d;">
+          No results found
+        </div>
+      </div>
+    </div>
 
-    {# Notification Icon #}
-    <a href="{{ path('app_notification_log_index') }}" class="relative p-2 text-white hover:bg-white/10 rounded-lg transition-all duration-200" title="View Notifications">
-      <i class="fas fa-bell text-lg"></i>
+    {# Notification #}
+    <a href="{{ path('app_notification_log_index') }}" 
+       class="relative flex items-center justify-center rounded-lg"
+       style="width:36px;height:36px;border:1px solid #dde3ec;background:white;font-size:16px;"
+       title="Notifications">
+      <i class="fas fa-bell" style="font-size:16px;color:#293855;"></i>
+      {% if unread_notification_count is defined and unread_notification_count > 0 %}
+      <div style="position:absolute;top:7px;right:7px;width:7px;height:7px;border-radius:50%;background:#e05858;border:1.5px solid white;"></div>
+      {% endif %}
     </a>
-    <div class="flex items-center ml-4 pl-4 border-l border-white/20">
-      <img src="https://ui-avatars.com/api/?name={{ app.user.username|url_encode }}&background=39A8C9&color=fff"
-           alt="User Avatar"
-           class="h-9 w-9 rounded-full border-2 border-white/40 shadow-sm" />
-      <div class="hidden sm:block ml-2 leading-tight">
-        <p class="text-sm font-medium text-white">
-          {% if is_granted('ROLE_ADMIN') %}
-            Administrator
-          {% else %}
-            Staff Member
-          {% endif %}
+
+    {# User Info #}
+    <div class="flex items-center gap-2 pl-3" style="border-left:1px solid #e8edf2;">
+      <div class="flex items-center justify-center rounded-full"
+           style="width:34px;height:34px;background:linear-gradient(135deg,#4265d6,#c2e7c9);font-size:12px;font-weight:600;color:white;">
+        {{ app.user.username|slice(0,2)|upper }}
+      </div>
+      <div class="hidden sm:block leading-tight">
+        <p style="font-size:13px;font-weight:500;color:#293855;">
+          {% if is_granted('ROLE_ADMIN') %}Administrator{% else %}Staff Member{% endif %}
         </p>
-        <p class="text-xs text-[#FFF8F0]/80">{{ app.user.username }}</p>
+        <p style="font-size:11px;color:#6b7a8d;">{{ app.user.username }}</p>
       </div>
     </div>
   </div>

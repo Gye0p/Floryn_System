@@ -4,228 +4,166 @@
 {% block page_title %}{{ customer.fullName }}{% endblock %}
 
 {% block body %}
-<div class="px-4 sm:px-6 lg:px-8">
-  <!-- Breadcrumb -->
-  <div class="mb-6">
-    <nav class="flex" aria-label="Breadcrumb">
-      <ol class="flex items-center space-x-4">
-        <li>
-          <a href="{{ path('admin_dashboard') }}" class="text-gray-400 hover:text-gray-500">
-            <i class="fas fa-home"></i>
-          </a>
-        </li>
-        <li>
-          <div class="flex items-center">
-            <i class="fas fa-chevron-right text-gray-400 mr-4"></i>
-            <a href="{{ path('app_customer_index') }}" class="text-sm font-medium text-gray-500 hover:text-gray-700">Customers</a>
-          </div>
-        </li>
-        <li>
-          <div class="flex items-center">
-            <i class="fas fa-chevron-right text-gray-400 mr-4"></i>
-            <span class="text-sm font-medium text-gray-500">{{ customer.fullName }}</span>
-          </div>
-        </li>
-      </ol>
-    </nav>
+<div class="page-wrapper px-4 sm:px-6 lg:px-8">
+  <nav class="breadcrumb">
+    <a href="{{ path('admin_dashboard') }}"><i class="fas fa-home"></i></a>
+    <span class="separator">/</span>
+    <a href="{{ path('app_customer_index') }}">Customers</a>
+    <span class="separator">/</span>
+    <span class="current">{{ customer.fullName }}</span>
+  </nav>
 
-    <!-- Header -->
-    <div class="mt-4 flex justify-between items-start">
-      <div class="flex items-center">
-        <div class="h-14 w-14 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center mr-4">
-          <span class="text-white text-xl font-bold">{{ customer.fullName|first|upper }}</span>
-        </div>
-        <div>
-          <h1 class="text-2xl font-bold text-gray-900">{{ customer.fullName }}</h1>
-          <p class="mt-1 text-sm text-gray-600">Customer profile and reservation history</p>
-        </div>
+  <div class="page-header">
+    <div class="page-header-info">
+      <div class="avatar lg" style="background:linear-gradient(135deg,#7c5cbf,#9b59b6);">{{ customer.fullName|first|upper }}</div>
+      <div>
+        <h1>{{ customer.fullName }}</h1>
+        <p class="subtitle">Customer profile and reservation history</p>
       </div>
-      <div class="flex space-x-3">
-        <a href="{{ path('app_customer_edit', {'id': customer.id}) }}"
-           class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200">
-          <i class="fas fa-edit mr-2"></i>Edit Customer
-        </a>
-        <a href="{{ path('app_customer_index') }}"
-           class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
-          <i class="fas fa-arrow-left mr-2"></i>Back to List
-        </a>
-      </div>
+    </div>
+    <div class="page-header-actions">
+      <a href="{{ path('app_customer_edit', {'id': customer.id}) }}" class="btn btn-primary"><i class="fas fa-edit"></i> Edit Customer</a>
+      <a href="{{ path('app_customer_index') }}" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Back to List</a>
     </div>
   </div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-    <!-- Main Information -->
-    <div class="lg:col-span-2">
-      <!-- Contact Details -->
-      <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-        <div class="px-6 py-4 bg-gradient-to-r from-purple-50 to-indigo-50 border-b border-purple-200">
-          <h3 class="text-lg font-medium text-purple-900 flex items-center">
-            <i class="fas fa-address-card mr-2 text-purple-600"></i>
-            Contact Information
-          </h3>
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Contact Information -->
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-icon purple"><i class="fas fa-address-card"></i></div>
+          <h3>Contact Information</h3>
         </div>
-        <div class="px-6 py-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <dt class="text-sm font-medium text-gray-500">Full Name</dt>
-              <dd class="mt-1 text-lg font-semibold text-gray-900">{{ customer.fullName }}</dd>
+        <div class="section-body">
+          <div class="detail-grid cols-2">
+            <div class="detail-item">
+              <div class="detail-label">Full Name</div>
+              <div class="detail-value large">{{ customer.fullName }}</div>
             </div>
-            <div>
-              <dt class="text-sm font-medium text-gray-500">Customer ID</dt>
-              <dd class="mt-1 text-sm font-mono text-gray-900">#{{ customer.id }}</dd>
+            <div class="detail-item">
+              <div class="detail-label">Customer ID</div>
+              <div class="detail-value mono">#{{ customer.id }}</div>
             </div>
-            <div>
-              <dt class="text-sm font-medium text-gray-500">Phone Number</dt>
-              <dd class="mt-1 flex items-center text-gray-900">
-                <i class="fas fa-phone text-gray-400 mr-2"></i>
-                <a href="tel:{{ customer.phone }}" class="hover:text-purple-600 transition-colors">{{ customer.phone ?? 'Not provided' }}</a>
-              </dd>
+            <div class="detail-item">
+              <div class="detail-label">Phone Number</div>
+              <div class="detail-value">
+                <i class="fas fa-phone" style="color:var(--muted);margin-right:6px;font-size:12px;"></i>
+                {% if customer.phone %}<a href="tel:{{ customer.phone }}" style="color:var(--blue);">{{ customer.phone }}</a>{% else %}<span style="color:var(--muted);font-style:italic;">Not provided</span>{% endif %}
+              </div>
             </div>
-            <div>
-              <dt class="text-sm font-medium text-gray-500">Email Address</dt>
-              <dd class="mt-1 flex items-center text-gray-900">
-                <i class="fas fa-envelope text-gray-400 mr-2"></i>
-                {% if customer.email %}
-                  <a href="mailto:{{ customer.email }}" class="hover:text-purple-600 transition-colors">{{ customer.email }}</a>
-                {% else %}
-                  <span class="text-gray-400 italic">Not provided</span>
-                {% endif %}
-              </dd>
+            <div class="detail-item">
+              <div class="detail-label">Email Address</div>
+              <div class="detail-value">
+                <i class="fas fa-envelope" style="color:var(--muted);margin-right:6px;font-size:12px;"></i>
+                {% if customer.email %}<a href="mailto:{{ customer.email }}" style="color:var(--blue);">{{ customer.email }}</a>{% else %}<span style="color:var(--muted);font-style:italic;">Not provided</span>{% endif %}
+              </div>
             </div>
-            <div class="md:col-span-2">
-              <dt class="text-sm font-medium text-gray-500">Address</dt>
-              <dd class="mt-1 flex items-start text-gray-900">
-                <i class="fas fa-map-marker-alt text-gray-400 mr-2 mt-1"></i>
-                <span>{{ customer.address ?? 'No address on file' }}</span>
-              </dd>
+            <div class="detail-item full">
+              <div class="detail-label">Address</div>
+              <div class="detail-value">
+                <i class="fas fa-map-marker-alt" style="color:var(--muted);margin-right:6px;font-size:12px;"></i>
+                {{ customer.address ?? 'No address on file' }}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Reservations History -->
-      <div class="mt-6 bg-white shadow-lg rounded-lg overflow-hidden">
-        <div class="px-6 py-4 bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-200">
-          <h3 class="text-lg font-medium text-amber-900 flex items-center">
-            <i class="fas fa-calendar-alt mr-2 text-amber-600"></i>
-            Reservation History
-            <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-              {{ customer.reservations|length }}
-            </span>
-          </h3>
+      <!-- Reservation History -->
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-icon amber"><i class="fas fa-calendar-alt"></i></div>
+          <h3>Reservation History</h3>
+          <span class="section-badge">{{ customer.reservations|length }}</span>
         </div>
-        <div class="px-6 py-6">
+        <div class="section-body">
           {% if customer.reservations|length > 0 %}
-            <div class="space-y-4">
-              {% for reservation in customer.reservations %}
-                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-100 hover:border-purple-200 transition-colors">
-                  <div class="flex items-center">
-                    <div class="h-10 w-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center mr-4">
-                      <i class="fas fa-receipt text-white text-sm"></i>
-                    </div>
-                    <div>
-                      <p class="text-sm font-semibold text-gray-900">Reservation #{{ reservation.id }}</p>
-                      <p class="text-xs text-gray-500">{{ reservation.dateReserved ? reservation.dateReserved|date('M j, Y') : 'No date' }}</p>
-                    </div>
-                  </div>
-                  <div class="flex items-center space-x-4">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                      {% if reservation.reservationStatus == 'Confirmed' %}bg-green-100 text-green-800
-                      {% elseif reservation.reservationStatus == 'Pending' %}bg-yellow-100 text-yellow-800
-                      {% elseif reservation.reservationStatus == 'Cancelled' %}bg-red-100 text-red-800
-                      {% else %}bg-gray-100 text-gray-800{% endif %}">
-                      {{ reservation.reservationStatus }}
-                    </span>
-                    <span class="text-sm font-bold text-gray-900">${{ reservation.totalAmount|number_format(2) }}</span>
-                    <a href="{{ path('app_reservation_show', {'id': reservation.id}) }}"
-                       class="text-purple-600 hover:text-purple-900 transition-colors">
-                      <i class="fas fa-external-link-alt"></i>
-                    </a>
-                  </div>
+            {% for reservation in customer.reservations %}
+              <div class="list-item">
+                <div class="list-item-avatar" style="background:linear-gradient(135deg,#f6ad55,#ed8936);"><i class="fas fa-receipt"></i></div>
+                <div class="list-item-content">
+                  <div class="list-item-title">Reservation #{{ reservation.id }}</div>
+                  <div class="list-item-subtitle">{{ reservation.dateReserved ? reservation.dateReserved|date('M j, Y') : 'No date' }}</div>
                 </div>
-              {% endfor %}
-            </div>
+                <div class="list-item-actions">
+                  <span class="pill {% if reservation.reservationStatus == 'Completed' %}green{% elseif reservation.reservationStatus == 'Confirmed' %}blue{% elseif reservation.reservationStatus == 'Pending' %}yellow{% else %}red{% endif %}">{{ reservation.reservationStatus }}</span>
+                  <span style="font-weight:700;color:var(--navy);margin:0 8px;">₱{{ reservation.totalAmount|number_format(2) }}</span>
+                  <a href="{{ path('app_reservation_show', {'id': reservation.id}) }}" class="btn btn-ghost" style="padding:4px 8px;font-size:12px;"><i class="fas fa-external-link-alt"></i></a>
+                </div>
+              </div>
+            {% endfor %}
           {% else %}
-            <div class="text-center py-8">
-              <i class="fas fa-calendar-times text-gray-300 text-4xl mb-3"></i>
-              <p class="text-gray-500 font-medium">No reservations yet</p>
-              <p class="text-sm text-gray-400">This customer hasn't made any reservations</p>
+            <div class="empty-state" style="padding:32px 16px;">
+              <div class="empty-state-icon"><i class="fas fa-calendar-times"></i></div>
+              <h3>No reservations yet</h3>
+              <p>This customer hasn't made any reservations</p>
             </div>
           {% endif %}
         </div>
       </div>
     </div>
 
-    <!-- Sidebar -->
-    <div class="lg:col-span-1 space-y-6">
-      <!-- Registration Info -->
-      <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-        <div class="px-6 py-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-b border-blue-200">
-          <h3 class="text-lg font-medium text-blue-900 flex items-center">
-            <i class="fas fa-calendar-check mr-2 text-blue-600"></i>
-            Registration
-          </h3>
+    <div class="space-y-6">
+      <!-- Registration -->
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-icon blue"><i class="fas fa-calendar-check"></i></div>
+          <h3>Registration</h3>
         </div>
-        <div class="px-6 py-6 space-y-4">
-          <div>
-            <dt class="text-sm font-medium text-gray-500">Date Registered</dt>
-            <dd class="mt-1 text-sm text-gray-900">
-              {% if customer.dateRegistered %}
-                <div class="flex items-center">
-                  <i class="fas fa-calendar text-gray-400 mr-2"></i>
+        <div class="section-body">
+          <div class="detail-grid cols-1">
+            <div class="detail-item">
+              <div class="detail-label">Date Registered</div>
+              <div class="detail-value">
+                {% if customer.dateRegistered %}
                   {{ customer.dateRegistered|date('F j, Y') }}
-                </div>
-                <div class="text-xs text-gray-500 ml-6">
-                  {{ customer.dateRegistered|date('g:i A') }}
-                </div>
-              {% else %}
-                <span class="text-gray-400 italic">Not recorded</span>
-              {% endif %}
-            </dd>
+                  <div style="font-size:12px;color:var(--muted);margin-top:2px;">{{ customer.dateRegistered|date('g:i A') }}</div>
+                {% else %}
+                  <span style="color:var(--muted);font-style:italic;">Not recorded</span>
+                {% endif %}
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Quick Stats -->
-      <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-        <div class="px-6 py-4 bg-gradient-to-r from-emerald-50 to-teal-50 border-b border-emerald-200">
-          <h3 class="text-lg font-medium text-emerald-900 flex items-center">
-            <i class="fas fa-chart-bar mr-2 text-emerald-600"></i>
-            Quick Stats
-          </h3>
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-icon green"><i class="fas fa-chart-bar"></i></div>
+          <h3>Quick Stats</h3>
         </div>
-        <div class="px-6 py-6 space-y-4">
-          <div class="flex justify-between items-center">
-            <dt class="text-sm font-medium text-gray-500">Total Reservations</dt>
-            <dd class="text-lg font-bold text-purple-600">{{ customer.reservations|length }}</dd>
-          </div>
-          <div class="flex justify-between items-center border-t border-gray-200 pt-4">
-            <dt class="text-sm font-medium text-gray-500">Total Spent</dt>
-            <dd class="text-lg font-bold text-emerald-600">
-              ${% set totalSpent = 0 %}
-              {% for reservation in customer.reservations %}
-                {% set totalSpent = totalSpent + reservation.totalAmount %}
-              {% endfor %}
-              {{ totalSpent|number_format(2) }}
-            </dd>
-          </div>
-          <div class="flex justify-between items-center border-t border-gray-200 pt-4">
-            <dt class="text-sm font-medium text-gray-500">Notifications Sent</dt>
-            <dd class="text-lg font-bold text-indigo-600">{{ customer.notificationLogs|length }}</dd>
+        <div class="section-body">
+          <div class="detail-grid cols-1">
+            <div class="detail-item">
+              <div class="detail-label">Total Reservations</div>
+              <div class="detail-value large">{{ customer.reservations|length }}</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Total Spent</div>
+              <div class="detail-value large" style="color:var(--blue);">
+                ₱{% set totalSpent = 0 %}{% for reservation in customer.reservations %}{% set totalSpent = totalSpent + reservation.totalAmount %}{% endfor %}{{ totalSpent|number_format(2) }}
+              </div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Notifications Sent</div>
+              <div class="detail-value large">{{ customer.notificationLogs|length }}</div>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Danger Zone -->
-      <div class="bg-white shadow-lg rounded-lg overflow-hidden border border-red-200">
-        <div class="px-6 py-4 bg-red-50 border-b border-red-200">
-          <h3 class="text-lg font-medium text-red-900 flex items-center">
-            <i class="fas fa-exclamation-triangle mr-2 text-red-600"></i>
-            Danger Zone
-          </h3>
+      <div class="danger-zone">
+        <div class="danger-zone-header">
+          <i class="fas fa-exclamation-triangle"></i>
+          <div>
+            <h4>Danger Zone</h4>
+            <p>Permanently delete this customer. This action cannot be undone.</p>
+          </div>
         </div>
-        <div class="px-6 py-6">
-          <p class="text-sm text-gray-600 mb-4">Permanently delete this customer. This action cannot be undone.</p>
+        <div class="danger-zone-body">
           {{ include('customer/_delete_form.html.twig') }}
         </div>
       </div>

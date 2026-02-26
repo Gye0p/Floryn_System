@@ -295,6 +295,67 @@ class ReportController extends AbstractController
         return $response;
     }
 
+    #[Route('/sold-flower-history', name: 'app_reports_sold_flower_history')]
+    public function soldFlowerHistory(
+        FlowerRepository $flowerRepo,
+        ReservationDetailRepository $detailRepo,
+        ReservationRepository $reservationRepo
+    ): Response {
+        // Get all sold-out / unavailable flowers
+        $soldFlowers = $flowerRepo->createQueryBuilder('f')
+            ->where('f.status = :soldOut OR f.status = :unavailable OR f.stockQuantity <= 0')
+            ->setParameter('soldOut', 'Sold Out')
+            ->setParameter('unavailable', 'Unavailable')
+            ->orderBy('f.soldAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+        // Per-flower sales summary from ReservationDetail
+        $salesData = $detailRepo->createQueryBuilder('rd')
+            ->select(
+                'IDENTITY(rd.flower) as flowerId',
+                'SUM(rd.quantity) as totalUnitsSold',
+                'SUM(rd.subtotal) as totalRevenue',
+                'COUNT(DISTINCT IDENTITY(rd.reservation)) as totalOrders'
+            )
+            ->groupBy('rd.flower')
+            ->getQuery()
+            ->getResult();
+
+        $salesMap = [];
+        foreach ($salesData as $row) {
+            $salesMap[$row['flowerId']] = $row;
+        }
+
+        // Recent individual sale line-items for the detail table
+        $recentSales = $detailRepo->createQueryBuilder('rd')
+            ->select('rd.id', 'rd.quantity', 'rd.subtotal',
+                     'f.name as flowerName', 'f.category as flowerCategory',
+                     'r.dateReserved', 'r.reservationStatus',
+                     'c.fullName as customerName')
+            ->join('rd.flower', 'f')
+            ->join('rd.reservation', 'r')
+            ->leftJoin('r.customer', 'c')
+            ->orderBy('r.dateReserved', 'DESC')
+            ->setMaxResults(50)
+            ->getQuery()
+            ->getResult();
+
+        // Summary stats
+        $totalSoldFlowers = count($soldFlowers);
+        $totalUnitsSold = array_sum(array_column($salesData, 'totalUnitsSold'));
+        $totalRevenue = array_sum(array_column($salesData, 'totalRevenue'));
+
+        return $this->render('reports/sold_flower_history.html.twig', [
+            'soldFlowers' => $soldFlowers,
+            'salesMap' => $salesMap,
+            'recentSales' => $recentSales,
+            'totalSoldFlowers' => $totalSoldFlowers,
+            'totalUnitsSold' => $totalUnitsSold,
+            'totalRevenue' => $totalRevenue,
+        ]);
+    }
+
     #[Route('/export/suppliers-csv', name: 'app_reports_export_suppliers_csv')]
     public function exportSuppliersCsv(
         SupplierRepository $supplierRepo,

@@ -16,6 +16,19 @@ class NotificationLogRepository extends ServiceEntityRepository
         parent::__construct($registry, NotificationLog::class);
     }
 
+    /**
+     * Count notifications that are still pending (not yet sent/delivered).
+     */
+    public function countPending(): int
+    {
+        return (int) $this->createQueryBuilder('n')
+            ->select('COUNT(n.id)')
+            ->where('n.status = :status')
+            ->setParameter('status', 'Pending')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
 //    /**
 //     * @return NotificationLog[] Returns an array of NotificationLog objects
 //     */

@@ -18,6 +18,7 @@ class FlowerRepository extends ServiceEntityRepository
 
     /**
      * Find flowers with stock below a given threshold
+     * Excludes flowers that are already Sold Out (0 stock) or Unavailable
      *
      * @return Flower[]
      */
@@ -25,7 +26,12 @@ class FlowerRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('f')
             ->where('f.stockQuantity < :threshold')
+            ->andWhere('f.stockQuantity > 0')
+            ->andWhere('f.status != :soldOut')
+            ->andWhere('f.status != :unavailable')
             ->setParameter('threshold', $threshold)
+            ->setParameter('soldOut', 'Sold Out')
+            ->setParameter('unavailable', 'Unavailable')
             ->orderBy('f.stockQuantity', 'ASC')
             ->getQuery()
             ->getResult();

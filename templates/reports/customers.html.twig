@@ -44,12 +44,38 @@
   </div>
 
   {# Customer Stats Table #}
-  <div class="bg-white rounded-xl shadow-md overflow-hidden">
-    <div class="p-6 border-b border-gray-200">
-      <h2 class="text-lg font-semibold text-gray-900"><i class="fas fa-chart-bar mr-2 text-[#5E548E]"></i>Customer Rankings (by Spending)</h2>
+  <div data-controller="floryn-table"
+       data-floryn-table-page-size-value="10"
+       data-floryn-table-sort-col-value="4"
+       data-floryn-table-sort-dir-value="desc"
+       data-floryn-table-no-sort-cols-value="[0]"
+       data-floryn-table-entity-name-value="customers">
+  <div class="table-card">
+    <div class="table-card-header">
+      <h3><i class="fas fa-chart-bar mr-2"></i>Customer Rankings (by Spending)</h3>
+    </div>
+    <div class="fg-toolbar">
+      <div class="fg-toolbar-left">
+        <select data-floryn-table-target="pageSize" data-action="floryn-table#onPageSizeChange" class="fg-page-size">
+          <option value="10">10</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+          <option value="-1">All</option>
+        </select>
+        <button type="button" class="fg-export-btn" data-action="floryn-table#exportCopy" title="Copy"><i class="fas fa-copy"></i></button>
+        <button type="button" class="fg-export-btn" data-action="floryn-table#exportCsv" title="CSV"><i class="fas fa-file-csv"></i></button>
+        <button type="button" class="fg-export-btn" data-action="floryn-table#exportExcel" title="Excel"><i class="fas fa-file-excel"></i></button>
+        <button type="button" class="fg-export-btn" data-action="floryn-table#exportPrint" title="Print"><i class="fas fa-print"></i></button>
+      </div>
+      <div class="fg-toolbar-right">
+        <div class="fg-search">
+          <i class="fas fa-search fg-search-icon"></i>
+          <input type="text" data-floryn-table-target="search" data-action="input->floryn-table#onSearch" placeholder="Search customers..." class="fg-search-input">
+        </div>
+      </div>
     </div>
     <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200" id="customerTable">
+      <table class="fg-table" data-floryn-table-target="table">
         <thead class="bg-gray-50">
           <tr>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rank</th>
@@ -88,6 +114,11 @@
         </tbody>
       </table>
     </div>
+    <div class="fg-bottom-bar">
+      <div class="fg-info" data-floryn-table-target="info"></div>
+      <div class="fg-pagination" data-floryn-table-target="pagination"></div>
+    </div>
+  </div>
   </div>
 </div>
 {% endblock %}

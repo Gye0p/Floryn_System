@@ -1,149 +1,57 @@
-{{ form_start(form, {'attr': {'class': 'space-y-6', 'novalidate': 'novalidate'}}) }}
-<div class="bg-white shadow-lg rounded-lg overflow-hidden">
-  <div class="px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-200">
-    <h3 class="text-lg font-medium text-blue-900 flex items-center">
-      <i class="fas fa-truck mr-2 text-blue-600"></i>
-      Supplier Information
-    </h3>
+{{ form_start(form, {'attr': {'class': 'space-y-0', 'novalidate': 'novalidate'}}) }}
+<div class="form-section">
+  <div class="form-section-header">
+    <div class="section-icon blue"><i class="fas fa-truck"></i></div>
+    <div>
+      <h3>Supplier Information</h3>
+      <p>Enter the supplier's company and contact details.</p>
+    </div>
   </div>
-  
-  <div class="px-6 py-6">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <!-- Supplier Name Field -->
-      <div class="md:col-span-2">
-        {{ form_label(form.supplierName, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-2'}}) }}
-        <div class="mt-1 relative rounded-md shadow-sm">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <i class="fas fa-building text-gray-400"></i>
-          </div>
-          {{ form_widget(form.supplierName, {
-            'attr': {
-              'class': 'block w-full pl-10 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm',
-              'placeholder': 'Enter supplier company name'
-            }
-          }) }}
-        </div>
+  <div class="form-section-body">
+    <div class="form-grid">
+      <div class="form-group full">
+        {{ form_label(form.supplierName, null, {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(form.supplierName, {'attr': {'placeholder': 'Enter supplier company name'}}) }}
         {{ form_errors(form.supplierName) }}
       </div>
-
-      <!-- Contact Person Field -->
-      <div>
-        {{ form_label(form.contactPerson, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-2'}}) }}
-        <div class="mt-1 relative rounded-md shadow-sm">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <i class="fas fa-user text-gray-400"></i>
-          </div>
-          {{ form_widget(form.contactPerson, {
-            'attr': {
-              'class': 'block w-full pl-10 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm',
-              'placeholder': 'Contact person name'
-            }
-          }) }}
-        </div>
+      <div class="form-group">
+        {{ form_label(form.contactPerson, null, {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(form.contactPerson, {'attr': {'placeholder': 'Contact person name'}}) }}
         {{ form_errors(form.contactPerson) }}
       </div>
-
-      <!-- Phone Field -->
-      <div>
-        {{ form_label(form.phone, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-2'}}) }}
-        <div class="mt-1 relative rounded-md shadow-sm">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <i class="fas fa-phone text-gray-400"></i>
-          </div>
-          {{ form_widget(form.phone, {
-            'attr': {
-              'class': 'block w-full pl-10 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm',
-              'placeholder': '+1 (555) 123-4567'
-            }
-          }) }}
-        </div>
+      <div class="form-group">
+        {{ form_label(form.phone, null, {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(form.phone, {'attr': {'placeholder': '+1 (555) 123-4567'}}) }}
         {{ form_errors(form.phone) }}
       </div>
-
-      <!-- Email Field -->
-      <div>
-        {{ form_label(form.email, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-2'}}) }}
-        <div class="mt-1 relative rounded-md shadow-sm">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <i class="fas fa-envelope text-gray-400"></i>
-          </div>
-          {{ form_widget(form.email, {
-            'attr': {
-              'class': 'block w-full pl-10 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm',
-              'placeholder': 'supplier@company.com'
-            }
-          }) }}
-        </div>
+      <div class="form-group full">
+        {{ form_label(form.email, null, {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(form.email, {'attr': {'placeholder': 'supplier@company.com'}}) }}
         {{ form_errors(form.email) }}
       </div>
-
-      <!-- Address Field -->
-      <div class="md:col-span-2">
-        {{ form_label(form.address, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-2'}}) }}
-        <div class="mt-1 relative rounded-md shadow-sm">
-          <div class="absolute top-3 left-0 pl-3 flex items-center pointer-events-none">
-            <i class="fas fa-map-marker-alt text-gray-400"></i>
-          </div>
-          {{ form_widget(form.address, {
-            'attr': {
-              'class': 'block w-full pl-10 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm',
-              'placeholder': 'Complete business address',
-              'rows': 3
-            }
-          }) }}
-        </div>
+      <div class="form-group full">
+        {{ form_label(form.address, null, {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(form.address, {'attr': {'placeholder': 'Complete business address', 'rows': 3}}) }}
         {{ form_errors(form.address) }}
       </div>
-
-      <!-- Delivery Schedule Field -->
-      <div>
-        {{ form_label(form.deliverySchedule, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-2'}}) }}
-        <div class="mt-1 relative rounded-md shadow-sm">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <i class="fas fa-calendar-alt text-gray-400"></i>
-          </div>
-          {{ form_widget(form.deliverySchedule, {
-            'attr': {
-              'class': 'block w-full pl-10 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm',
-              'placeholder': 'e.g., Daily, Weekly, Bi-weekly'
-            }
-          }) }}
-        </div>
+      <div class="form-group">
+        {{ form_label(form.deliverySchedule, null, {'label_attr': {'class': 'form-label'}}) }}
+        <p class="form-hint">e.g., Daily, Weekly, Bi-weekly</p>
+        {{ form_widget(form.deliverySchedule, {'attr': {'placeholder': 'e.g., Daily, Weekly'}}) }}
         {{ form_errors(form.deliverySchedule) }}
       </div>
-
-      <!-- Date Added Field -->
-      <div>
-        {{ form_label(form.dateAdded, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-2'}}) }}
-        <div class="mt-1 relative rounded-md shadow-sm">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <i class="fas fa-clock text-gray-400"></i>
-          </div>
-          {{ form_widget(form.dateAdded, {
-            'attr': {
-              'class': 'block w-full pl-10 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm'
-            }
-          }) }}
-        </div>
+      <div class="form-group">
+        {{ form_label(form.dateAdded, null, {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(form.dateAdded) }}
         {{ form_errors(form.dateAdded) }}
       </div>
     </div>
   </div>
+</div>
 
-  <!-- Form Actions -->
-  <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3">
-    <a href="{{ path('app_supplier_index') }}" 
-       class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
-      <i class="fas fa-times mr-2"></i>
-      Cancel
-    </a>
-    
-    <button type="submit" 
-            class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
-      <i class="fas fa-save mr-2"></i>
-      {{ button_label|default('Save Supplier') }}
-    </button>
-  </div>
+<div class="form-actions">
+  <a href="{{ path('app_supplier_index') }}" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Cancel</a>
+  <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> {{ button_label|default('Save Supplier') }}</button>
 </div>
 
 {{ form_rest(form) }}

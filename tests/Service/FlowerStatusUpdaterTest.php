@@ -32,7 +32,8 @@ class FlowerStatusUpdaterTest extends TestCase
     {
         $flower = new Flower();
         $flower->setPrice('100.00');
-        $flower->setExpiryDate(new \DateTime('-1 day'));
+        $flower->setStockQuantity(10);
+        $flower->setExpiryDate(new \DateTime('-2 days'));
 
         $this->repository->method('findAll')->willReturn([$flower]);
         $this->entityManager->expects($this->atLeastOnce())->method('flush');
@@ -49,6 +50,7 @@ class FlowerStatusUpdaterTest extends TestCase
     {
         $flower = new Flower();
         $flower->setPrice('100.00');
+        $flower->setStockQuantity(10);
         $flower->setExpiryDate(new \DateTime('+2 days'));
 
         $this->repository->method('findAll')->willReturn([$flower]);
@@ -67,6 +69,7 @@ class FlowerStatusUpdaterTest extends TestCase
     {
         $flower = new Flower();
         $flower->setPrice('100.00');
+        $flower->setStockQuantity(10);
         $flower->setExpiryDate(new \DateTime('+5 days'));
 
         $this->repository->method('findAll')->willReturn([$flower]);
@@ -84,6 +87,7 @@ class FlowerStatusUpdaterTest extends TestCase
     {
         $flower = new Flower();
         $flower->setPrice('100.00');
+        $flower->setStockQuantity(10);
         $flower->setExpiryDate(new \DateTime('+10 days'));
 
         $this->repository->method('findAll')->willReturn([$flower]);
@@ -119,14 +123,17 @@ class FlowerStatusUpdaterTest extends TestCase
     {
         $fresh = new Flower();
         $fresh->setPrice('50.00');
+        $fresh->setStockQuantity(10);
         $fresh->setExpiryDate(new \DateTime('+15 days'));
 
         $expired = new Flower();
         $expired->setPrice('30.00');
+        $expired->setStockQuantity(5);
         $expired->setExpiryDate(new \DateTime('-3 days'));
 
         $lastSale = new Flower();
         $lastSale->setPrice('200.00');
+        $lastSale->setStockQuantity(8);
         $lastSale->setExpiryDate(new \DateTime('+1 day'));
 
         $this->repository->method('findAll')->willReturn([$fresh, $expired, $lastSale]);
@@ -145,15 +152,23 @@ class FlowerStatusUpdaterTest extends TestCase
     {
         $fresh = new Flower();
         $fresh->setFreshnessStatus('Fresh');
+        $fresh->setStockQuantity(10);
+        $fresh->setStatus('Available');
 
         $good = new Flower();
         $good->setFreshnessStatus('Good');
+        $good->setStockQuantity(10);
+        $good->setStatus('Available');
 
         $lastSale = new Flower();
         $lastSale->setFreshnessStatus('Last Sale');
+        $lastSale->setStockQuantity(10);
+        $lastSale->setStatus('Available');
 
         $expired = new Flower();
         $expired->setFreshnessStatus('Expired');
+        $expired->setStockQuantity(10);
+        $expired->setStatus('Available');
 
         $this->repository->method('findAll')->willReturn([$fresh, $good, $lastSale, $expired]);
 
@@ -173,6 +188,8 @@ class FlowerStatusUpdaterTest extends TestCase
     {
         $flower = new Flower();
         $flower->setFreshnessStatus('Unknown');
+        $flower->setStockQuantity(10);
+        $flower->setStatus('Available');
 
         $this->repository->method('findAll')->willReturn([$flower]);
 

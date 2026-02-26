@@ -44,12 +44,32 @@
   </div>
 
   {# By Category #}
-  <div class="bg-white rounded-xl shadow-md overflow-hidden mb-8">
-    <div class="p-6 border-b border-gray-200">
-      <h2 class="text-lg font-semibold text-gray-900"><i class="fas fa-tags mr-2 text-[#5E548E]"></i>By Category</h2>
+  <div data-controller="floryn-table"
+       data-floryn-table-page-size-value="-1"
+       data-floryn-table-sort-col-value="2"
+       data-floryn-table-sort-dir-value="desc"
+       data-floryn-table-no-sort-cols-value="[]"
+       data-floryn-table-entity-name-value="categories">
+  <div class="table-card mb-8">
+    <div class="table-card-header">
+      <h3><i class="fas fa-tags mr-2"></i>By Category</h3>
+    </div>
+    <div class="fg-toolbar">
+      <div class="fg-toolbar-left">
+        <button type="button" class="fg-export-btn" data-action="floryn-table#exportCopy" title="Copy"><i class="fas fa-copy"></i></button>
+        <button type="button" class="fg-export-btn" data-action="floryn-table#exportCsv" title="CSV"><i class="fas fa-file-csv"></i></button>
+        <button type="button" class="fg-export-btn" data-action="floryn-table#exportExcel" title="Excel"><i class="fas fa-file-excel"></i></button>
+        <button type="button" class="fg-export-btn" data-action="floryn-table#exportPrint" title="Print"><i class="fas fa-print"></i></button>
+      </div>
+      <div class="fg-toolbar-right">
+        <div class="fg-search">
+          <i class="fas fa-search fg-search-icon"></i>
+          <input type="text" data-floryn-table-target="search" data-action="input->floryn-table#onSearch" placeholder="Search categories..." class="fg-search-input">
+        </div>
+      </div>
     </div>
     <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200">
+      <table class="fg-table" data-floryn-table-target="table">
         <thead class="bg-gray-50">
           <tr>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
@@ -70,16 +90,46 @@
         </tbody>
       </table>
     </div>
+    <div class="fg-bottom-bar">
+      <div class="fg-info" data-floryn-table-target="info"></div>
+      <div class="fg-pagination" data-floryn-table-target="pagination"></div>
+    </div>
+  </div>
   </div>
 
   {# Low Stock Alerts #}
   {% if low_stock|length > 0 %}
-  <div class="bg-white rounded-xl shadow-md overflow-hidden mb-8 border-l-4 border-yellow-400">
-    <div class="p-6 border-b border-gray-200 bg-yellow-50">
-      <h2 class="text-lg font-semibold text-yellow-800"><i class="fas fa-exclamation-triangle mr-2"></i>Low Stock Alerts (< 5 units)</h2>
+  <div data-controller="floryn-table"
+       data-floryn-table-page-size-value="10"
+       data-floryn-table-sort-col-value="2"
+       data-floryn-table-sort-dir-value="asc"
+       data-floryn-table-no-sort-cols-value="[]"
+       data-floryn-table-entity-name-value="items">
+  <div class="table-card mb-8" style="border-left:4px solid #eab308;">
+    <div class="table-card-header" style="background:#fefce8;">
+      <h3 style="color:#854d0e;"><i class="fas fa-exclamation-triangle mr-2"></i>Low Stock Alerts (< 5 units)</h3>
+    </div>
+    <div class="fg-toolbar">
+      <div class="fg-toolbar-left">
+        <select data-floryn-table-target="pageSize" data-action="floryn-table#onPageSizeChange" class="fg-page-size">
+          <option value="10">10</option>
+          <option value="25">25</option>
+          <option value="-1">All</option>
+        </select>
+        <button type="button" class="fg-export-btn" data-action="floryn-table#exportCopy" title="Copy"><i class="fas fa-copy"></i></button>
+        <button type="button" class="fg-export-btn" data-action="floryn-table#exportCsv" title="CSV"><i class="fas fa-file-csv"></i></button>
+        <button type="button" class="fg-export-btn" data-action="floryn-table#exportExcel" title="Excel"><i class="fas fa-file-excel"></i></button>
+        <button type="button" class="fg-export-btn" data-action="floryn-table#exportPrint" title="Print"><i class="fas fa-print"></i></button>
+      </div>
+      <div class="fg-toolbar-right">
+        <div class="fg-search">
+          <i class="fas fa-search fg-search-icon"></i>
+          <input type="text" data-floryn-table-target="search" data-action="input->floryn-table#onSearch" placeholder="Search low stock..." class="fg-search-input">
+        </div>
+      </div>
     </div>
     <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200">
+      <table class="fg-table" data-floryn-table-target="table">
         <thead class="bg-gray-50">
           <tr>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Flower</th>
@@ -104,16 +154,47 @@
         </tbody>
       </table>
     </div>
+    <div class="fg-bottom-bar">
+      <div class="fg-info" data-floryn-table-target="info"></div>
+      <div class="fg-pagination" data-floryn-table-target="pagination"></div>
+    </div>
+  </div>
   </div>
   {% endif %}
 
   {# Full Inventory Table #}
-  <div class="bg-white rounded-xl shadow-md overflow-hidden">
-    <div class="p-6 border-b border-gray-200">
-      <h2 class="text-lg font-semibold text-gray-900"><i class="fas fa-seedling mr-2 text-[#5E548E]"></i>All Flowers</h2>
+  <div data-controller="floryn-table"
+       data-floryn-table-page-size-value="10"
+       data-floryn-table-sort-col-value="0"
+       data-floryn-table-sort-dir-value="asc"
+       data-floryn-table-no-sort-cols-value="[]"
+       data-floryn-table-entity-name-value="flowers">
+  <div class="table-card">
+    <div class="table-card-header">
+      <h3><i class="fas fa-seedling mr-2"></i>All Flowers</h3>
+    </div>
+    <div class="fg-toolbar">
+      <div class="fg-toolbar-left">
+        <select data-floryn-table-target="pageSize" data-action="floryn-table#onPageSizeChange" class="fg-page-size">
+          <option value="10">10</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+          <option value="-1">All</option>
+        </select>
+        <button type="button" class="fg-export-btn" data-action="floryn-table#exportCopy" title="Copy"><i class="fas fa-copy"></i></button>
+        <button type="button" class="fg-export-btn" data-action="floryn-table#exportCsv" title="CSV"><i class="fas fa-file-csv"></i></button>
+        <button type="button" class="fg-export-btn" data-action="floryn-table#exportExcel" title="Excel"><i class="fas fa-file-excel"></i></button>
+        <button type="button" class="fg-export-btn" data-action="floryn-table#exportPrint" title="Print"><i class="fas fa-print"></i></button>
+      </div>
+      <div class="fg-toolbar-right">
+        <div class="fg-search">
+          <i class="fas fa-search fg-search-icon"></i>
+          <input type="text" data-floryn-table-target="search" data-action="input->floryn-table#onSearch" placeholder="Search flowers..." class="fg-search-input">
+        </div>
+      </div>
     </div>
     <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200" id="inventoryTable">
+      <table class="fg-table" data-floryn-table-target="table">
         <thead class="bg-gray-50">
           <tr>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
@@ -139,7 +220,7 @@
             </td>
             <td class="px-6 py-4 text-sm text-right font-medium">{{ flower.stockQuantity }}</td>
             <td class="px-6 py-4 text-center">
-              <span class="inline-flex px-2 py-1 text-xs rounded-full {% if flower.freshnessStatus == 'Fresh' %}bg-green-100 text-green-800{% elseif flower.freshnessStatus == 'Good' %}bg-blue-100 text-blue-800{% elseif flower.freshnessStatus == 'Last Sale' %}bg-yellow-100 text-yellow-800{% else %}bg-red-100 text-red-800{% endif %}">
+              <span class="inline-flex px-2 py-1 text-xs rounded-full {% if flower.freshnessStatus == 'Fresh' %}bg-green-100 text-green-800{% elseif flower.freshnessStatus == 'Good' %}bg-yellow-100 text-yellow-800{% elseif flower.freshnessStatus == 'Last Sale' %}bg-orange-100 text-orange-800{% else %}bg-red-100 text-red-800{% endif %}">
                 {{ flower.freshnessStatus }}
               </span>
             </td>
@@ -149,6 +230,11 @@
         </tbody>
       </table>
     </div>
+    <div class="fg-bottom-bar">
+      <div class="fg-info" data-floryn-table-target="info"></div>
+      <div class="fg-pagination" data-floryn-table-target="pagination"></div>
+    </div>
+  </div>
   </div>
 </div>
 {% endblock %}

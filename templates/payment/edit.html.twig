@@ -4,131 +4,74 @@
 {% block page_title %}Edit Payment{% endblock %}
 
 {% block body %}
-<div class="px-4 sm:px-6 lg:px-8">
-  <!-- Breadcrumb -->
-  <div class="mb-6">
-    <nav class="flex" aria-label="Breadcrumb">
-      <ol class="flex items-center space-x-4">
-        <li>
-          <a href="{{ path('admin_dashboard') }}" class="text-gray-400 hover:text-gray-500">
-            <i class="fas fa-home"></i>
-          </a>
-        </li>
-        <li>
-          <div class="flex items-center">
-            <i class="fas fa-chevron-right text-gray-400 mr-4"></i>
-            <a href="{{ path('app_payment_index') }}" class="text-sm font-medium text-gray-500 hover:text-gray-700">Payments</a>
-          </div>
-        </li>
-        <li>
-          <div class="flex items-center">
-            <i class="fas fa-chevron-right text-gray-400 mr-4"></i>
-            <a href="{{ path('app_payment_show', {'id': payment.id}) }}" class="text-sm font-medium text-gray-500 hover:text-gray-700">Payment #{{ payment.id }}</a>
-          </div>
-        </li>
-        <li>
-          <div class="flex items-center">
-            <i class="fas fa-chevron-right text-gray-400 mr-4"></i>
-            <span class="text-sm font-medium text-gray-500">Edit</span>
-          </div>
-        </li>
-      </ol>
-    </nav>
+<div class="page-wrapper px-4 sm:px-6 lg:px-8">
+  <nav class="breadcrumb">
+    <a href="{{ path('admin_dashboard') }}"><i class="fas fa-home"></i></a>
+    <span class="separator">/</span>
+    <a href="{{ path('app_payment_index') }}">Payments</a>
+    <span class="separator">/</span>
+    <a href="{{ path('app_payment_show', {'id': payment.id}) }}">Payment #{{ payment.id }}</a>
+    <span class="separator">/</span>
+    <span class="current">Edit</span>
+  </nav>
 
-    <div class="mt-4">
-      <h1 class="text-2xl font-bold text-gray-900 flex items-center">
-        <i class="fas fa-edit text-blue-600 mr-3"></i>
-        Edit Payment #{{ payment.id }}
-      </h1>
-      <p class="mt-2 text-sm text-gray-600">Update payment transaction details.</p>
+  <div class="page-header">
+    <div class="page-header-info">
+      <div class="avatar lg" style="background:linear-gradient(135deg,#22c55e,#16a34a);"><i class="fas fa-dollar-sign" style="font-size:20px;"></i></div>
+      <div>
+        <h1>Edit Payment #{{ payment.id }}</h1>
+        <p class="subtitle">Update payment transaction details. Amount: ₱{{ payment.amountPaid|number_format(2) }}</p>
+      </div>
+    </div>
+    <div class="page-header-actions">
+      <a href="{{ path('app_payment_show', {'id': payment.id}) }}" class="btn btn-outline"><i class="fas fa-eye"></i> View Details</a>
     </div>
   </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <!-- Form Container -->
     <div class="lg:col-span-2">
-      <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-        <div class="px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-200">
-          <h3 class="text-lg font-medium text-blue-900 flex items-center">
-            <i class="fas fa-credit-card mr-2 text-blue-600"></i>
-            Payment Information
-          </h3>
-          <p class="text-sm text-blue-700 mt-1">Update the payment transaction details</p>
-        </div>
-        <div class="p-6">
-          {{ include('payment/_form.html.twig', {'button_label': 'Update Payment'}) }}
-        </div>
-      </div>
+      {{ include('payment/_form.html.twig', {'button_label': 'Update Payment'}) }}
     </div>
 
-    <!-- Sidebar -->
-    <div class="space-y-6">
-      <!-- Current Payment Info -->
-      <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-        <div class="px-6 py-4 bg-gradient-to-r from-gray-50 to-slate-50 border-b border-gray-200">
-          <h3 class="text-lg font-medium text-gray-900 flex items-center">
-            <i class="fas fa-info-circle mr-2 text-gray-600"></i>Current Details
-          </h3>
+    <div>
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-icon blue"><i class="fas fa-info-circle"></i></div>
+          <h3>Current Details</h3>
         </div>
-        <div class="p-6 space-y-4">
-          <div>
-            <div class="text-sm text-gray-500">Payment ID</div>
-            <div class="font-medium text-gray-900">#{{ payment.id }}</div>
+        <div class="section-body">
+          <div class="detail-grid cols-1">
+            <div class="detail-item">
+              <div class="detail-label">Payment ID</div>
+              <div class="detail-value" style="font-weight:600;">#{{ payment.id }}</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Current Amount</div>
+              <div class="detail-value large" style="color:#22c55e;">₱{{ payment.amountPaid|number_format(2) }}</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Current Status</div>
+              <div class="detail-value">
+                <span class="pill {% if payment.status == 'Paid' or payment.status == 'Completed' %}green{% elseif payment.status == 'Pending' %}yellow{% else %}red{% endif %}">{{ payment.status }}</span>
+              </div>
+            </div>
+            {% if payment.reservation %}
+            <div class="detail-item">
+              <div class="detail-label">Related Reservation</div>
+              <div class="detail-value">#{{ payment.reservation.id }} &mdash; {{ payment.reservation.customer.fullName }}</div>
+            </div>
+            {% endif %}
           </div>
-          <div>
-            <div class="text-sm text-gray-500">Current Amount</div>
-            <div class="text-lg font-bold text-green-600">${{ payment.amountPaid|number_format(2) }}</div>
-          </div>
-          <div>
-            <div class="text-sm text-gray-500">Current Status</div>
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-              {% if payment.status == 'Completed' or payment.status == 'Paid' %}bg-green-100 text-green-800
-              {% elseif payment.status == 'Pending' %}bg-yellow-100 text-yellow-800
-              {% elseif payment.status == 'Processing' %}bg-blue-100 text-blue-800
-              {% else %}bg-red-100 text-red-800{% endif %}">
-              {{ payment.status }}
-            </span>
-          </div>
-          {% if payment.reservation %}
-          <div>
-            <div class="text-sm text-gray-500">Related Reservation</div>
-            <div class="font-medium text-gray-900">#{{ payment.reservation.id }}</div>
-            <div class="text-sm text-gray-600">{{ payment.reservation.customer.fullName }}</div>
-          </div>
-          {% endif %}
         </div>
       </div>
 
-      <!-- Quick Actions -->
-      <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-        <div class="px-6 py-4 bg-gradient-to-r from-gray-50 to-slate-50 border-b border-gray-200">
-          <h3 class="text-lg font-medium text-gray-900 flex items-center">
-            <i class="fas fa-bolt mr-2 text-gray-600"></i>Quick Actions
-          </h3>
+      <div class="danger-zone" style="margin-top:20px;">
+        <div class="danger-zone-header">
+          <i class="fas fa-exclamation-triangle"></i>
+          <h3>Danger Zone</h3>
         </div>
-        <div class="p-6 space-y-3">
-          <a href="{{ path('app_payment_show', {'id': payment.id}) }}" 
-             class="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
-            <i class="fas fa-eye mr-2"></i>View Details
-          </a>
-          {% if payment.reservation %}
-          <a href="{{ path('app_reservation_show', {'id': payment.reservation.id}) }}" 
-             class="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
-            <i class="fas fa-shopping-cart mr-2"></i>View Reservation
-          </a>
-          {% endif %}
-        </div>
-      </div>
-
-      <!-- Danger Zone -->
-      <div class="bg-white shadow-lg rounded-lg overflow-hidden border border-red-200">
-        <div class="px-6 py-4 border-b border-red-200 bg-red-50">
-          <h3 class="text-lg font-medium text-red-900 flex items-center">
-            <i class="fas fa-exclamation-triangle text-red-600 mr-2"></i>Danger Zone
-          </h3>
-        </div>
-        <div class="p-6">
-          <p class="text-sm text-red-700 mb-4">Delete this payment record permanently. This action cannot be undone.</p>
+        <div class="danger-zone-body">
+          <p>Permanently delete this payment record. This action cannot be undone.</p>
           {{ include('payment/_delete_form.html.twig') }}
         </div>
       </div>

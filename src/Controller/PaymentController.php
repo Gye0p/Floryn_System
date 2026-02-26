@@ -34,7 +34,31 @@ final class PaymentController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $reservation = $payment->getReservation();
+
+            // Enforce full payment: amount must equal the reservation total
+            if ($reservation && abs($payment->getAmountPaid() - $reservation->getTotalAmount()) > 0.01) {
+                $this->addFlash('danger', sprintf(
+                    'Full payment required. The reservation total is ₱%s but you entered ₱%s.',
+                    number_format($reservation->getTotalAmount(), 2),
+                    number_format($payment->getAmountPaid(), 2)
+                ));
+                return $this->render('payment/new.html.twig', [
+                    'payment' => $payment,
+                    'form' => $form,
+                ]);
+            }
+
+            // Auto-set payment status to Paid
+            $payment->setStatus('Paid');
+
             $entityManager->persist($payment);
+
+            // Sync reservation payment status
+            if ($reservation) {
+                $reservation->setPaymentStatus('Paid');
+            }
+
             $entityManager->flush();
 
             $activityLog->logCreate('Payment', $payment->getId(), 'Payment #' . $payment->getId());
@@ -42,7 +66,7 @@ final class PaymentController extends AbstractController
             // Send payment confirmation email
             $emailNotification->sendPaymentConfirmation($payment);
             
-            $this->addFlash('success', 'Payment recorded successfully!');
+            $this->addFlash('success', 'Payment recorded successfully! Reservation #' . $reservation->getId() . ' marked as Paid.');
 
             return $this->redirectToRoute('app_payment_index', [], Response::HTTP_SEE_OTHER);
         }
@@ -64,10 +88,20 @@ final class PaymentController extends AbstractController
     #[Route('/{id}/edit', name: 'app_payment_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Payment $payment, EntityManagerInterface $entityManager, ActivityLogService $activityLog): Response
     {
-        $form = $this->createForm(PaymentType::class, $payment);
+        $form = $this->createForm(PaymentType::class, $payment, ['is_edit' => true]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Sync reservation payment status based on payment status
+            $reservation = $payment->getReservation();
+            if ($reservation) {
+                if ($payment->getStatus() === 'Cancelled') {
+                    $reservation->setPaymentStatus('Unpaid');
+                } else {
+                    $reservation->setPaymentStatus('Paid');
+                }
+            }
+
             $entityManager->flush();
 
             $activityLog->logUpdate('Payment', $payment->getId(), 'Payment #' . $payment->getId());
@@ -88,11 +122,17 @@ final class PaymentController extends AbstractController
         if ($this->isCsrfTokenValid('delete'.$payment->getId(), $request->getPayload()->getString('_token'))) {
             $paymentId = $payment->getId();
             
+            // Revert reservation payment status to Unpaid
+            $reservation = $payment->getReservation();
+            if ($reservation) {
+                $reservation->setPaymentStatus('Unpaid');
+            }
+            
             $entityManager->remove($payment);
             $entityManager->flush();
             
             $activityLog->logDelete('Payment', $paymentId, 'Payment #' . $paymentId);
-            $this->addFlash('success', 'Payment deleted successfully!');
+            $this->addFlash('success', 'Payment deleted successfully! Reservation reverted to Unpaid.');
         }
 
         return $this->redirectToRoute('app_payment_index', [], Response::HTTP_SEE_OTHER);

@@ -4,219 +4,170 @@
 {% block page_title %}Payment Details{% endblock %}
 
 {% block body %}
-<div class="px-4 sm:px-6 lg:px-8">
-  <!-- Header -->
-  <div class="bg-white shadow-sm rounded-lg p-6 mb-6">
-    <div class="flex items-center justify-between">
-      <div class="flex items-center">
-        <div class="h-12 w-12 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center mr-4">
-          <i class="fas fa-dollar-sign text-white text-lg"></i>
-        </div>
-        <div>
-          <h1 class="text-2xl font-bold text-gray-900">Payment #{{ payment.id }}</h1>
-          <p class="text-gray-600">Transaction recorded on {{ payment.paymentDate ? payment.paymentDate|date('F j, Y g:i A') : 'Unknown date' }}</p>
-        </div>
+<div class="page-wrapper px-4 sm:px-6 lg:px-8">
+  <nav class="breadcrumb">
+    <a href="{{ path('admin_dashboard') }}"><i class="fas fa-home"></i></a>
+    <span class="separator">/</span>
+    <a href="{{ path('app_payment_index') }}">Payments</a>
+    <span class="separator">/</span>
+    <span class="current">Payment #{{ payment.id }}</span>
+  </nav>
+
+  <div class="page-header">
+    <div class="page-header-info">
+      <div class="avatar lg" style="background:linear-gradient(135deg,#22c55e,#16a34a);"><i class="fas fa-dollar-sign" style="font-size:20px;"></i></div>
+      <div>
+        <h1>Payment #{{ payment.id }}</h1>
+        <p class="subtitle">Transaction recorded on {{ payment.paymentDate ? payment.paymentDate|date('F j, Y \\a\\t g:i A') : 'Unknown date' }}</p>
       </div>
-      <div class="flex items-center space-x-3">
-        <a href="{{ path('app_payment_edit', {'id': payment.id}) }}" 
-           class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
-          <i class="fas fa-edit mr-2"></i>
-          Edit Payment
-        </a>
-        <a href="{{ path('app_payment_index') }}" 
-           class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200">
-          <i class="fas fa-arrow-left mr-2"></i>
-          Back to List
-        </a>
-      </div>
+    </div>
+    <div class="page-header-actions">
+      <a href="{{ path('app_payment_edit', {'id': payment.id}) }}" class="btn btn-primary"><i class="fas fa-edit"></i> Edit Payment</a>
+      <a href="{{ path('app_payment_index') }}" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Back to List</a>
     </div>
   </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <!-- Main Content -->
-    <div class="lg:col-span-2">
-      <!-- Payment Information -->
-      <div class="bg-white shadow-lg rounded-lg overflow-hidden mb-6">
-        <div class="px-6 py-4 border-b border-gray-200">
-          <h3 class="text-lg font-medium text-gray-900">Payment Information</h3>
+    <div class="lg:col-span-2 space-y-6">
+
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-icon green"><i class="fas fa-credit-card"></i></div>
+          <h3>Payment Information</h3>
         </div>
-        <div class="p-6">
-          <dl class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <dt class="text-sm font-medium text-gray-500">Payment ID</dt>
-              <dd class="mt-1 text-lg font-semibold text-gray-900">#{{ payment.id }}</dd>
+        <div class="section-body">
+          <div class="detail-grid cols-2">
+            <div class="detail-item">
+              <div class="detail-label">Payment ID</div>
+              <div class="detail-value" style="font-weight:700;">#{{ payment.id }}</div>
             </div>
-            <div>
-              <dt class="text-sm font-medium text-gray-500">Amount</dt>
-              <dd class="mt-1 text-2xl font-bold text-green-600">${{ payment.amountPaid|number_format(2) }}</dd>
+            <div class="detail-item">
+              <div class="detail-label">Amount Paid</div>
+              <div class="detail-value large" style="color:#22c55e;">₱{{ payment.amountPaid|number_format(2) }}</div>
             </div>
-            <div>
-              <dt class="text-sm font-medium text-gray-500">Payment Date</dt>
-              <dd class="mt-1 text-sm text-gray-900">
+            <div class="detail-item">
+              <div class="detail-label">Payment Date</div>
+              <div class="detail-value">
                 {% if payment.paymentDate %}
-                  <div class="flex items-center">
-                    <i class="fas fa-calendar mr-2 text-gray-400"></i>
-                    {{ payment.paymentDate|date('F j, Y') }}
-                  </div>
-                  <div class="flex items-center mt-1">
-                    <i class="fas fa-clock mr-2 text-gray-400"></i>
-                    {{ payment.paymentDate|date('g:i A') }}
-                  </div>
-                {% else %}
-                  <span class="text-gray-400 italic">No date specified</span>
-                {% endif %}
-              </dd>
+                  <div><i class="fas fa-calendar" style="color:var(--muted);margin-right:6px;"></i>{{ payment.paymentDate|date('F j, Y') }}</div>
+                  <div style="font-size:12px;color:var(--muted);margin-top:4px;"><i class="fas fa-clock" style="margin-right:6px;"></i>{{ payment.paymentDate|date('g:i A') }}</div>
+                {% else %}<span style="color:var(--muted);font-style:italic;">No date specified</span>{% endif %}
+              </div>
             </div>
-            <div>
-              <dt class="text-sm font-medium text-gray-500">Status</dt>
-              <dd class="mt-1">
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
-                  {% if payment.status == 'Completed' or payment.status == 'Paid' %}bg-green-100 text-green-800
-                  {% elseif payment.status == 'Pending' %}bg-yellow-100 text-yellow-800
-                  {% elseif payment.status == 'Processing' %}bg-blue-100 text-blue-800
-                  {% else %}bg-red-100 text-red-800{% endif %}">
-                  {% if payment.status == 'Completed' or payment.status == 'Paid' %}
-                    <i class="fas fa-check-circle mr-2"></i>
-                  {% elseif payment.status == 'Pending' %}
-                    <i class="fas fa-clock mr-2"></i>
-                  {% elseif payment.status == 'Processing' %}
-                    <i class="fas fa-sync mr-2"></i>
-                  {% else %}
-                    <i class="fas fa-times-circle mr-2"></i>
-                  {% endif %}
+            <div class="detail-item">
+              <div class="detail-label">Status</div>
+              <div class="detail-value">
+                <span class="pill {% if payment.status == 'Paid' or payment.status == 'Completed' %}green{% elseif payment.status == 'Pending' %}yellow{% elseif payment.status == 'Processing' %}blue{% else %}red{% endif %}">
+                  {% if payment.status == 'Paid' or payment.status == 'Completed' %}<i class="fas fa-check-circle" style="margin-right:4px;"></i>
+                  {% elseif payment.status == 'Pending' %}<i class="fas fa-clock" style="margin-right:4px;"></i>
+                  {% elseif payment.status == 'Processing' %}<i class="fas fa-spinner" style="margin-right:4px;"></i>
+                  {% else %}<i class="fas fa-times-circle" style="margin-right:4px;"></i>{% endif %}
                   {{ payment.status }}
                 </span>
-              </dd>
+              </div>
             </div>
-            <div>
-              <dt class="text-sm font-medium text-gray-500">Payment Method</dt>
-              <dd class="mt-1">
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
-                  {% if payment.paymentMethod == 'Credit Card' %}bg-blue-100 text-blue-800
-                  {% elseif payment.paymentMethod == 'Cash' %}bg-green-100 text-green-800
-                  {% elseif payment.paymentMethod == 'Bank Transfer' %}bg-purple-100 text-purple-800
-                  {% else %}bg-gray-100 text-gray-800{% endif %}">
-                  {% if payment.paymentMethod == 'Credit Card' %}
-                    <i class="fas fa-credit-card mr-2"></i>
-                  {% elseif payment.paymentMethod == 'Cash' %}
-                    <i class="fas fa-money-bill-wave mr-2"></i>
-                  {% elseif payment.paymentMethod == 'Bank Transfer' %}
-                    <i class="fas fa-university mr-2"></i>
-                  {% else %}
-                    <i class="fas fa-payment mr-2"></i>
-                  {% endif %}
+            <div class="detail-item">
+              <div class="detail-label">Payment Method</div>
+              <div class="detail-value">
+                <span class="pill {% if payment.paymentMethod == 'Credit Card' %}blue{% elseif payment.paymentMethod == 'Cash' %}green{% elseif payment.paymentMethod == 'Bank Transfer' %}navy{% else %}gray{% endif %}">
+                  {% if payment.paymentMethod == 'Credit Card' %}<i class="fas fa-credit-card" style="margin-right:4px;"></i>
+                  {% elseif payment.paymentMethod == 'Cash' %}<i class="fas fa-money-bill-wave" style="margin-right:4px;"></i>
+                  {% elseif payment.paymentMethod == 'Bank Transfer' %}<i class="fas fa-university" style="margin-right:4px;"></i>
+                  {% else %}<i class="fas fa-wallet" style="margin-right:4px;"></i>{% endif %}
                   {{ payment.paymentMethod }}
                 </span>
-              </dd>
+              </div>
             </div>
-            <div>
-              <dt class="text-sm font-medium text-gray-500">Reference Number</dt>
-              <dd class="mt-1 font-mono text-sm text-gray-900 bg-gray-50 px-3 py-1 rounded">{{ payment.referenceNo }}</dd>
+            <div class="detail-item">
+              <div class="detail-label">Reference Number</div>
+              <div class="detail-value mono">{{ payment.referenceNo }}</div>
             </div>
-          </dl>
+          </div>
         </div>
       </div>
 
       {% if payment.reservation %}
-      <!-- Related Reservation -->
-      <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200">
-          <h3 class="text-lg font-medium text-gray-900">Related Reservation</h3>
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-icon purple"><i class="fas fa-receipt"></i></div>
+          <h3>Related Reservation</h3>
         </div>
-        <div class="p-6">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center">
-              <div class="h-12 w-12 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center mr-4">
-                <i class="fas fa-shopping-cart text-white"></i>
-              </div>
-              <div>
-                <h4 class="text-lg font-medium text-gray-900">Reservation #{{ payment.reservation.id }}</h4>
-                <p class="text-gray-600">{{ payment.reservation.customer.fullName }}</p>
-                <p class="text-sm text-gray-500">
-                  Reserved on {{ payment.reservation.reservationDate ? payment.reservation.reservationDate|date('M j, Y') : 'Unknown' }}
-                </p>
-              </div>
+        <div class="section-body" style="padding:0;">
+          <div class="list-item" style="border:none;">
+            <div class="list-item-avatar" style="background:linear-gradient(135deg,#9b59b6,#8e44ad);"><i class="fas fa-receipt"></i></div>
+            <div class="list-item-content">
+              <div class="list-item-title">Reservation #{{ payment.reservation.id }}</div>
+              <div class="list-item-subtitle">{{ payment.reservation.customer.fullName }}</div>
             </div>
-            <div class="text-right">
-              <div class="text-lg font-semibold text-gray-900">${{ payment.reservation.totalAmount|number_format(2) }}</div>
-              <div class="text-sm text-gray-500">Total Amount</div>
-              <a href="{{ path('app_reservation_show', {'id': payment.reservation.id}) }}" 
-                 class="inline-flex items-center mt-2 text-sm text-purple-600 hover:text-purple-900">
-                View Reservation
-                <i class="fas fa-external-link-alt ml-1"></i>
-              </a>
+            <div class="list-item-actions" style="flex-direction:column;align-items:flex-end;gap:4px;">
+              <div style="font-size:18px;font-weight:700;color:var(--navy);">₱{{ payment.reservation.totalAmount|number_format(2) }}</div>
+              <a href="{{ path('app_reservation_show', {'id': payment.reservation.id}) }}" class="btn btn-ghost" style="padding:4px 10px;font-size:12px;"><i class="fas fa-external-link-alt"></i> View</a>
             </div>
           </div>
         </div>
       </div>
       {% endif %}
+
     </div>
 
-    <!-- Sidebar -->
     <div class="space-y-6">
-      <!-- Quick Actions -->
-      <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200">
-          <h3 class="text-lg font-medium text-gray-900">Quick Actions</h3>
-        </div>
-        <div class="p-6 space-y-4">
-          <a href="{{ path('app_payment_edit', {'id': payment.id}) }}" 
-             class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
-            <i class="fas fa-edit mr-2"></i>
-            Edit Payment
-          </a>
-          
-          {% if payment.reservation %}
-          <a href="{{ path('app_reservation_show', {'id': payment.reservation.id}) }}" 
-             class="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200">
-            <i class="fas fa-shopping-cart mr-2"></i>
-            View Reservation
-          </a>
-          {% endif %}
-        </div>
-      </div>
 
-      <!-- Payment Summary -->
-      <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200">
-          <h3 class="text-lg font-medium text-gray-900">Payment Summary</h3>
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-icon blue"><i class="fas fa-chart-bar"></i></div>
+          <h3>Payment Summary</h3>
         </div>
-        <div class="p-6">
-          <div class="space-y-4">
-            <div class="flex items-center justify-between">
-              <span class="text-sm text-gray-600">Transaction ID</span>
-              <span class="text-sm font-medium text-gray-900">#{{ payment.id }}</span>
+        <div class="section-body">
+          <div class="detail-grid cols-1">
+            <div class="detail-item">
+              <div class="detail-label">Transaction ID</div>
+              <div class="detail-value" style="font-weight:600;">#{{ payment.id }}</div>
             </div>
-            <div class="flex items-center justify-between">
-              <span class="text-sm text-gray-600">Amount Paid</span>
-              <span class="text-lg font-bold text-green-600">${{ payment.amountPaid|number_format(2) }}</span>
+            <div class="detail-item">
+              <div class="detail-label">Amount Paid</div>
+              <div class="detail-value large" style="color:#22c55e;">₱{{ payment.amountPaid|number_format(2) }}</div>
             </div>
             {% if payment.reservation %}
-            <div class="flex items-center justify-between">
-              <span class="text-sm text-gray-600">Order Total</span>
-              <span class="text-sm font-medium text-gray-900">${{ payment.reservation.totalAmount|number_format(2) }}</span>
+            <div class="detail-item">
+              <div class="detail-label">Order Total</div>
+              <div class="detail-value" style="font-weight:600;">₱{{ payment.reservation.totalAmount|number_format(2) }}</div>
             </div>
-            <div class="flex items-center justify-between">
-              <span class="text-sm text-gray-600">Balance</span>
-              <span class="text-sm font-medium {% if payment.reservation.totalAmount - payment.amountPaid == 0 %}text-green-600{% else %}text-red-600{% endif %}">
-                ${{ (payment.reservation.totalAmount - payment.amountPaid)|number_format(2) }}
-              </span>
+            <div class="detail-item">
+              <div class="detail-label">Remaining Balance</div>
+              <div class="detail-value" style="font-weight:600;color:{% if (payment.reservation.totalAmount - payment.amountPaid) == 0 %}#22c55e{% else %}#ef4444{% endif %};">
+                ₱{{ (payment.reservation.totalAmount - payment.amountPaid)|abs|number_format(2) }}
+                {% if (payment.reservation.totalAmount - payment.amountPaid) == 0 %}<i class="fas fa-check-circle" style="margin-left:6px;"></i>{% endif %}
+              </div>
             </div>
             {% endif %}
           </div>
         </div>
       </div>
 
-      <!-- Danger Zone -->
-      <div class="bg-white shadow-lg rounded-lg overflow-hidden border border-red-200">
-        <div class="px-6 py-4 border-b border-red-200 bg-red-50">
-          <h3 class="text-lg font-medium text-red-900">Danger Zone</h3>
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-icon" style="background:var(--navy);color:white;"><i class="fas fa-bolt"></i></div>
+          <h3>Quick Actions</h3>
         </div>
-        <div class="p-6">
-          <p class="text-sm text-gray-600 mb-4">Delete this payment record. This action cannot be undone.</p>
+        <div class="section-body" style="display:flex;flex-direction:column;gap:10px;">
+          <a href="{{ path('app_payment_edit', {'id': payment.id}) }}" class="btn btn-primary" style="width:100%;"><i class="fas fa-edit"></i> Edit Payment</a>
+          {% if payment.reservation %}
+          <a href="{{ path('app_reservation_show', {'id': payment.reservation.id}) }}" class="btn btn-outline" style="width:100%;"><i class="fas fa-receipt"></i> View Reservation</a>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="danger-zone">
+        <div class="danger-zone-header">
+          <i class="fas fa-exclamation-triangle"></i>
+          <h3>Danger Zone</h3>
+        </div>
+        <div class="danger-zone-body">
+          <p>Permanently delete this payment record. This action cannot be undone.</p>
           {{ include('payment/_delete_form.html.twig') }}
         </div>
       </div>
+
     </div>
   </div>
 </div>

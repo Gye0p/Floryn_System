@@ -40,10 +40,8 @@ class ReservationType extends AbstractType
             ])
             ->add('paymentStatus', ChoiceType::class, [
                 'choices' => [
-                    'Pending' => 'Pending',
-                    'Partial' => 'Partial',
+                    'Unpaid' => 'Unpaid',
                     'Paid' => 'Paid',
-                    'Refunded' => 'Refunded',
                 ],
                 'placeholder' => 'Select payment status',
                 'attr' => ['class' => 'form-select'],

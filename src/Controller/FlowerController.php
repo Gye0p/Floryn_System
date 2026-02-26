@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Flower;
+use App\Entity\FlowerBatch;
 use App\Form\FlowerType;
 use App\Repository\FlowerRepository;
 use App\Service\ActivityLogService;
@@ -21,8 +22,31 @@ final class FlowerController extends AbstractController
     #[Route(name: 'app_flower_index', methods: ['GET'])]
     public function index(FlowerRepository $flowerRepository): Response
     {
+        // Active flowers: in stock and not sold out / unavailable
+        $activeFlowers = $flowerRepository->createQueryBuilder('f')
+            ->where('f.stockQuantity > 0')
+            ->andWhere('f.status != :soldOut')
+            ->andWhere('f.status != :unavailable')
+            ->setParameter('soldOut', 'Sold Out')
+            ->setParameter('unavailable', 'Unavailable')
+            ->orderBy('f.name', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        // Sold out / unavailable flowers (0 stock OR marked sold/unavailable)
+        $soldFlowers = $flowerRepository->createQueryBuilder('f')
+            ->where('f.stockQuantity <= 0')
+            ->orWhere('f.status = :soldOut')
+            ->orWhere('f.status = :unavailable')
+            ->setParameter('soldOut', 'Sold Out')
+            ->setParameter('unavailable', 'Unavailable')
+            ->orderBy('f.name', 'ASC')
+            ->getQuery()
+            ->getResult();
+
         return $this->render('flower/index.html.twig', [
-            'flowers' => $flowerRepository->findAll(),
+            'flowers' => $activeFlowers,
+            'soldFlowers' => $soldFlowers,
         ]);
     }
 
@@ -31,14 +55,25 @@ final class FlowerController extends AbstractController
     {
         $flower = new Flower();
         
-        // Set default values
+        // Set default values — status is system-managed, always Available for new flowers
         $flower->setDateReceived(new \DateTime());
-        $flower->setFreshnessStatus('Fresh'); // Will be updated automatically
+        $flower->setStatus('Available');
+        $flower->setFreshnessStatus('Fresh'); // Will be recalculated by FlowerStatusUpdater
         
         $form = $this->createForm(FlowerType::class, $flower);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Create an initial batch for the new flower
+            $batch = new FlowerBatch();
+            $batch->setFlower($flower);
+            $batch->setQuantityReceived($flower->getStockQuantity());
+            $batch->setQuantityRemaining($flower->getStockQuantity());
+            $batch->setDateReceived($flower->getDateReceived() ?? new \DateTime());
+            $batch->setExpiryDate($flower->getExpiryDate());
+            $batch->setActive(true);
+            $flower->addBatch($batch);
+
             $entityManager->persist($flower);
             $entityManager->flush();
             
@@ -106,6 +141,66 @@ final class FlowerController extends AbstractController
             
             $this->addFlash('success', 'Flower deleted successfully!');
         }
+
+        return $this->redirectToRoute('app_flower_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/{id}/restock', name: 'app_flower_restock', methods: ['POST'])]
+    public function restock(Request $request, Flower $flower, EntityManagerInterface $entityManager, FlowerStatusUpdater $flowerStatusUpdater, ActivityLogService $activityLog): Response
+    {
+        if (!$this->isCsrfTokenValid('restock' . $flower->getId(), $request->request->get('_token'))) {
+            $this->addFlash('danger', 'Invalid security token. Please try again.');
+            return $this->redirectToRoute('app_flower_index');
+        }
+
+        $newStock = (int) $request->request->get('stock_quantity', 0);
+        $newExpiryDate = $request->request->get('expiry_date');
+
+        if ($newStock <= 0) {
+            $this->addFlash('danger', 'Stock quantity must be greater than zero.');
+            return $this->redirectToRoute('app_flower_show', ['id' => $flower->getId()]);
+        }
+
+        if (empty($newExpiryDate)) {
+            $this->addFlash('danger', 'Expiry date is required for restocking.');
+            return $this->redirectToRoute('app_flower_show', ['id' => $flower->getId()]);
+        }
+
+        try {
+            $expiryDate = new \DateTime($newExpiryDate);
+        } catch (\Exception $e) {
+            $this->addFlash('danger', 'Invalid expiry date format.');
+            return $this->redirectToRoute('app_flower_show', ['id' => $flower->getId()]);
+        }
+        $today = new \DateTime('today');
+        if ($expiryDate < $today) {
+            $this->addFlash('danger', 'Expiry date must be today or in the future.');
+            return $this->redirectToRoute('app_flower_show', ['id' => $flower->getId()]);
+        }
+
+        // Create a new batch for this restock delivery
+        $batch = new FlowerBatch();
+        $batch->setFlower($flower);
+        $batch->setQuantityReceived($newStock);
+        $batch->setQuantityRemaining($newStock);
+        $batch->setDateReceived(new \DateTime());
+        $batch->setExpiryDate($expiryDate);
+        $batch->setActive(true);
+        $flower->addBatch($batch);
+
+        // Sync flower summary fields from all active batches
+        $flower->syncFromBatches();
+        $flower->setStatus('Available');
+        $flower->setSoldAt(null);
+
+        $entityManager->persist($batch);
+        $entityManager->flush();
+
+        // Update freshness status
+        $flowerStatusUpdater->updateFlowerStatuses();
+
+        $activityLog->logUpdate('Flower', $flower->getId(), 'Restocked ' . $flower->getName() . ' with ' . $newStock . ' units');
+        $this->addFlash('success', sprintf('"%s" has been restocked with %d units!', $flower->getName(), $newStock));
 
         return $this->redirectToRoute('app_flower_index', [], Response::HTTP_SEE_OTHER);
     }

@@ -1,112 +1,56 @@
-{{ form_start(form, {'attr': {'class': 'space-y-6', 'novalidate': 'novalidate'}}) }}
-<div class="bg-white shadow-lg rounded-lg overflow-hidden">
-  <div class="px-6 py-4 bg-gradient-to-r from-emerald-50 to-teal-50 border-b border-emerald-200">
-    <h3 class="text-lg font-medium text-emerald-900 flex items-center">
-      <i class="fas fa-user mr-2 text-emerald-600"></i>
-      Customer Information
-    </h3>
+{{ form_start(form, {'attr': {'class': 'space-y-0', 'novalidate': 'novalidate'}}) }}
+<div class="form-section">
+  <div class="form-section-header">
+    <div class="section-icon blue"><i class="fas fa-user"></i></div>
+    <div>
+      <h3>Customer Information</h3>
+      <p>Enter the customer's personal and contact details.</p>
+    </div>
   </div>
-  
-  <div class="px-6 py-6">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <!-- Full Name Field -->
-      <div class="md:col-span-2">
-        {{ form_label(form.fullName, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-2'}}) }}
-        <p class="text-xs text-gray-500 mb-1">👤 Letters and spaces only (no numbers or symbols)</p>
-        {{ form_widget(form.fullName, {
-          'attr': {
-            'class': 'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm',
-            'placeholder': 'Enter full name'
-          }
-        }) }}
+  <div class="form-section-body">
+    <div class="form-grid">
+      <div class="form-group full">
+        {{ form_label(form.fullName, null, {'label_attr': {'class': 'form-label'}}) }}
+        <p class="form-hint">Letters and spaces only (no numbers or symbols)</p>
+        {{ form_widget(form.fullName, {'attr': {'placeholder': 'Enter full name'}}) }}
         {{ form_errors(form.fullName) }}
       </div>
-
-      <!-- Phone Field -->
-      <div>
-        {{ form_label(form.phone, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-2'}}) }}
-        <p class="text-xs text-gray-500 mb-1">📞 Format: +639XXXXXXXXX (Philippine mobile number)</p>
-        <div class="mt-1 relative rounded-md shadow-sm">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <i class="fas fa-phone text-gray-400"></i>
-          </div>
-          {{ form_widget(form.phone, {
-            'attr': {
-              'class': 'block w-full pl-10 rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm',
-              'placeholder': '+639123456789'
-            }
-          }) }}
-        </div>
+      <div class="form-group">
+        {{ form_label(form.phone, null, {'label_attr': {'class': 'form-label'}}) }}
+        <p class="form-hint">Format: +639XXXXXXXXX (Philippine mobile number)</p>
+        {{ form_widget(form.phone, {'attr': {'placeholder': '+639123456789'}}) }}
         {{ form_errors(form.phone) }}
       </div>
-
-      <!-- Email Field -->
-      <div>
-        {{ form_label(form.email, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-2'}}) }}
-        <div class="mt-1 relative rounded-md shadow-sm">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <i class="fas fa-envelope text-gray-400"></i>
-          </div>
-          {{ form_widget(form.email, {
-            'attr': {
-              'class': 'block w-full pl-10 rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm',
-              'placeholder': 'customer@example.com'
-            }
-          }) }}
-        </div>
+      <div class="form-group">
+        {{ form_label(form.email, null, {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(form.email, {'attr': {'placeholder': 'customer@example.com'}}) }}
         {{ form_errors(form.email) }}
       </div>
-
-      <!-- Address Field -->
-      <div class="md:col-span-2">
-        {{ form_label(form.address, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-2'}}) }}
-        <div class="mt-1 relative rounded-md shadow-sm">
-          <div class="absolute top-3 left-0 pl-3 flex items-center pointer-events-none">
-            <i class="fas fa-map-marker-alt text-gray-400"></i>
-          </div>
-          {{ form_widget(form.address, {
-            'attr': {
-              'class': 'block w-full pl-10 rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm',
-              'placeholder': 'Enter complete address',
-              'rows': 3
-            }
-          }) }}
-        </div>
+      <div class="form-group full">
+        {{ form_label(form.address, null, {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(form.address, {'attr': {'placeholder': 'Enter complete address', 'rows': 3}}) }}
         {{ form_errors(form.address) }}
       </div>
-
-      <!-- Date Registered Field -->
-      <div class="md:col-span-2">
-        {{ form_label(form.dateRegistered, null, {'label_attr': {'class': 'block text-sm font-medium text-gray-700 mb-2'}}) }}
-        <div class="mt-1 relative rounded-md shadow-sm">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <i class="fas fa-calendar text-gray-400"></i>
-          </div>
-          {{ form_widget(form.dateRegistered, {
-            'attr': {
-              'class': 'block w-full pl-10 rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm'
-            }
-          }) }}
-        </div>
+      <div class="form-group full">
+        {{ form_label(form.dateRegistered, null, {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(form.dateRegistered) }}
         {{ form_errors(form.dateRegistered) }}
       </div>
     </div>
   </div>
+</div>
 
-  <!-- Form Actions -->
-  <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3">
-    <a href="{{ path('app_customer_index') }}" 
-       class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors duration-200">
-      <i class="fas fa-times mr-2"></i>
-      Cancel
-    </a>
-    
-    <button type="submit" 
-            class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors duration-200">
-      <i class="fas fa-save mr-2"></i>
-      {{ button_label|default('Save Customer') }}
-    </button>
+<div class="form-info-banner">
+  <i class="fas fa-info-circle"></i>
+  <div>
+    <strong>Customer Data Policy</strong>
+    <p>All customer information is securely stored and used only for order management.</p>
   </div>
+</div>
+
+<div class="form-actions">
+  <a href="{{ path('app_customer_index') }}" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Cancel</a>
+  <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> {{ button_label|default('Save Customer') }}</button>
 </div>
 
 {{ form_rest(form) }}

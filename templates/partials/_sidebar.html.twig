@@ -1,74 +1,115 @@
 {% set currentRoute = app.request.attributes.get('_route') %}
 
-<aside class="flex flex-col h-full bg-gradient-to-b from-[#5E548E] to-[#4C4375] text-white shadow-2xl">
+<aside class="flex flex-col h-full w-full" style="background:#293855;">
   
-  {# ðŸŒ¸ Logo / System Name #}
-  <div class="flex items-center justify-center py-6 border-b border-white/20 shadow-sm">
-    <i class="fas fa-seedling text-white text-3xl mr-3 drop-shadow"></i>
-    <h1 class="text-xl font-semibold tracking-wide text-white">Floryn Garden</h1>
+  {# Logo #}
+  <div class="py-7 px-6" style="border-bottom:1px solid rgba(194,231,201,0.12);">
+    <div style="font-family:'Bricolage Grotesque',serif;font-size:26px;font-weight:700;color:#c2e7c9;letter-spacing:-0.5px;">
+      Floryn Garden
+    </div>
+    <div style="font-size:11px;color:rgba(194,231,201,0.5);letter-spacing:2px;text-transform:uppercase;margin-top:2px;">
+      Flower Management
+    </div>
   </div>
 
-  {# ðŸŒ¼ Navigation Links #}
-  <nav class="flex-1 overflow-y-auto mt-6 px-5 space-y-1">
-    {% set menu = [
-      {'route': 'admin_dashboard', 'icon': 'fa-chart-line', 'label': 'Dashboard'},
-      {'route': 'app_flower_index', 'icon': 'fa-leaf', 'label': 'Flowers'},
-      {'route': 'app_customer_index', 'icon': 'fa-users', 'label': 'Customers'},
-      {'route': 'app_supplier_index', 'icon': 'fa-truck', 'label': 'Suppliers'},
-      {'route': 'app_reservation_index', 'icon': 'fa-calendar-alt', 'label': 'Reservations'},
-      {'route': 'app_payment_index', 'icon': 'fa-credit-card', 'label': 'Payments'},
-      {'route': 'app_notification_log_index', 'icon': 'fa-bell', 'label': 'Notifications'},
-      {'route': 'app_reports_index', 'icon': 'fa-chart-bar', 'label': 'Reports'}
-    ] %}
+  {# Navigation #}
+  <nav class="flex-1 overflow-y-auto px-3 py-5">
+    <div class="mb-7">
+      <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(194,231,201,0.35);padding:0 12px;margin-bottom:8px;">Main</div>
+      
+      {% set menu = [
+        {'route': 'admin_dashboard', 'prefix': 'admin_dashboard', 'icon': 'fa-chart-line', 'label': 'Dashboard'},
+        {'route': 'app_flower_index', 'prefix': 'app_flower_', 'icon': 'fa-leaf', 'label': 'Inventory'},
+        {'route': 'app_reservation_index', 'prefix': 'app_reservation_', 'icon': 'fa-calendar-alt', 'label': 'Reservations'},
+        {'route': 'app_customer_index', 'prefix': 'app_customer_', 'icon': 'fa-users', 'label': 'Customers'},
+        {'route': 'app_supplier_index', 'prefix': 'app_supplier_', 'icon': 'fa-truck', 'label': 'Suppliers'}
+      ] %}
 
-    {% for item in menu %}
-      <a href="{{ path(item.route) }}"
-         class="flex items-center px-4 py-3 rounded-lg transition-all duration-200 text-sm font-medium border-l-4
-         {% if currentRoute == item.route %}
-            bg-white/10 text-[#FFF8F0] border-[#FFF8F0] shadow-inner
-         {% else %}
-            border-transparent text-white/80 hover:bg-white/10 hover:text-[#FFF8F0] hover:border-[#FFF8F0]/70
-         {% endif %}">
-        <i class="fas {{ item.icon }} text-lg mr-3 min-w-[20px] icon-glow"></i>
-        <span class="tracking-wide">{{ item.label }}</span>
+      {% for item in menu %}
+        {% set isActive = currentRoute starts with item.prefix %}
+        <a href="{{ path(item.route) }}"
+           class="sidebar-link flex items-center gap-2.5 px-3 py-2.5 rounded-lg mb-0.5 transition-all duration-200{% if isActive %} active{% endif %}"
+           style="font-size:14px;">
+          <span class="sidebar-icon"><i class="fas {{ item.icon }}"></i></span>
+          <span>{{ item.label }}</span>
+        </a>
+      {% endfor %}
+    </div>
+
+    <div class="mb-7">
+      <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(194,231,201,0.35);padding:0 12px;margin-bottom:8px;">Store</div>
+      
+      {% set storeMenu = [
+        {'route': 'app_pos', 'prefix': 'app_pos', 'icon': 'fa-cash-register', 'label': 'Point of Sale'},
+        {'route': 'app_payment_index', 'prefix': 'app_payment_', 'icon': 'fa-credit-card', 'label': 'Payments'},
+        {'route': 'app_notification_log_index', 'prefix': 'app_notification_log_', 'icon': 'fa-bell', 'label': 'Notifications'}
+      ] %}
+
+      {% for item in storeMenu %}
+        {% set isActive = currentRoute starts with item.prefix %}
+        <a href="{{ path(item.route) }}"
+           class="sidebar-link flex items-center gap-2.5 px-3 py-2.5 rounded-lg mb-0.5 transition-all duration-200{% if isActive %} active{% endif %}"
+           style="font-size:14px;">
+          <span class="sidebar-icon"><i class="fas {{ item.icon }}"></i></span>
+          <span>{{ item.label }}</span>
+        </a>
+      {% endfor %}
+    </div>
+
+    <div class="mb-7">
+      <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(194,231,201,0.35);padding:0 12px;margin-bottom:8px;">Reports</div>
+      
+      <a href="{{ path('app_reports_index') }}"
+         class="sidebar-link flex items-center gap-2.5 px-3 py-2.5 rounded-lg mb-0.5 transition-all duration-200{% if currentRoute starts with 'app_reports' %} active{% endif %}"
+         style="font-size:14px;">
+        <span class="sidebar-icon"><i class="fas fa-chart-bar"></i></span>
+        <span>Analytics</span>
       </a>
-    {% endfor %}
+    </div>
 
     {# Admin Only Links #}
     {% if is_granted('ROLE_ADMIN') %}
-      <div class="mt-6 mb-2 px-4 text-xs font-semibold text-white/50 uppercase tracking-wider">Administration</div>
-      
-      <a href="{{ path('app_user_index') }}"
-         class="flex items-center px-4 py-3 rounded-lg transition-all duration-200 text-sm font-medium border-l-4
-         {% if currentRoute == 'app_user_index' or currentRoute starts with 'app_user_' %}
-            bg-white/10 text-[#FFF8F0] border-[#FFF8F0] shadow-inner
-         {% else %}
-            border-transparent text-white/80 hover:bg-white/10 hover:text-[#FFF8F0] hover:border-[#FFF8F0]/70
-         {% endif %}">
-        <i class="fas fa-user-shield text-lg mr-3 min-w-[20px] icon-glow"></i>
-        <span class="tracking-wide">User Management</span>
-      </a>
+      <div class="mb-7">
+        <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(194,231,201,0.35);padding:0 12px;margin-bottom:8px;">Administration</div>
+        
+        <a href="{{ path('app_user_index') }}"
+           class="sidebar-link flex items-center gap-2.5 px-3 py-2.5 rounded-lg mb-0.5 transition-all duration-200{% if currentRoute starts with 'app_user_' %} active{% endif %}"
+           style="font-size:14px;">
+          <span class="sidebar-icon"><i class="fas fa-shield-alt"></i></span>
+          <span>User Management</span>
+        </a>
 
-      <a href="{{ path('app_activity_log_index') }}"
-         class="flex items-center px-4 py-3 rounded-lg transition-all duration-200 text-sm font-medium border-l-4
-         {% if currentRoute == 'app_activity_log_index' %}
-            bg-white/10 text-[#FFF8F0] border-[#FFF8F0] shadow-inner
-         {% else %}
-            border-transparent text-white/80 hover:bg-white/10 hover:text-[#FFF8F0] hover:border-[#FFF8F0]/70
-         {% endif %}">
-        <i class="fas fa-history text-lg mr-3 min-w-[20px] icon-glow"></i>
-        <span class="tracking-wide">Activity Logs</span>
-      </a>
+        <a href="{{ path('app_activity_log_index') }}"
+           class="sidebar-link flex items-center gap-2.5 px-3 py-2.5 rounded-lg mb-0.5 transition-all duration-200{% if currentRoute starts with 'app_activity_log' %} active{% endif %}"
+           style="font-size:14px;">
+          <span class="sidebar-icon"><i class="fas fa-history"></i></span>
+          <span>Activity Logs</span>
+        </a>
+      </div>
     {% endif %}
   </nav>
 
-  {# 🌺 Footer Section #}
-  <div class="mt-auto px-5 pb-6 border-t border-white/20 pt-4 space-y-2">
-    <a href="{{ path('app_profile') }}" class="flex items-center px-4 py-3 text-sm rounded-lg text-white/80 hover:bg-white/10 hover:text-[#FFF8F0] transition-all">
-      <i class="fas fa-user-circle text-lg mr-3 icon-glow"></i> Profile
+  {# Footer - User Card #}
+  <div class="px-3 pb-5 pt-4" style="border-top:1px solid rgba(194,231,201,0.1);">
+    <a href="{{ path('app_profile') }}"
+       class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg"
+       style="background:rgba(194,231,201,0.07);">
+      <div class="flex items-center justify-center rounded-full flex-shrink-0"
+           style="width:34px;height:34px;background:linear-gradient(135deg,#4265d6,#c2e7c9);font-size:13px;font-weight:600;color:white;">
+        {{ app.user.username|slice(0,2)|upper }}
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:500;color:#fff;">{{ app.user.username }}</div>
+        <div style="font-size:11px;color:rgba(194,231,201,0.45);">
+          {% if is_granted('ROLE_ADMIN') %}Administrator{% else %}Staff Member{% endif %}
+        </div>
+      </div>
     </a>
-    <a href="{{ path('app_logout') }}" class="flex items-center px-4 py-3 text-sm rounded-lg text-white/80 hover:bg-white/10 hover:text-[#FFF8F0] transition-all">
-      <i class="fas fa-sign-out-alt text-lg mr-3 icon-glow"></i> Logout
+    <a href="{{ path('app_logout') }}"
+       class="sidebar-link flex items-center gap-2.5 px-3 py-2 mt-1 rounded-lg transition-all duration-200"
+       style="font-size:13px;">
+      <span class="sidebar-icon"><i class="fas fa-sign-out-alt"></i></span>
+      <span>Logout</span>
     </a>
   </div>
 </aside>

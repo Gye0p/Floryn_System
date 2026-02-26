@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: FlowerRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Flower
 {
     #[ORM\Id]
@@ -72,9 +73,19 @@ class Flower
     #[ORM\Column(length: 50)]
     private ?string $status = null;
 
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTime $soldAt = null;
+
     #[ORM\ManyToOne(inversedBy: 'flowers')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Supplier $supplier = null;
+
+    /**
+     * @var Collection<int, FlowerBatch>
+     */
+    #[ORM\OneToMany(targetEntity: FlowerBatch::class, mappedBy: 'flower', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ORM\OrderBy(['expiryDate' => 'ASC'])]
+    private Collection $batches;
 
     /**
      * @var Collection<int, InventoryLog>
@@ -92,6 +103,7 @@ class Flower
     {
         $this->inventoryLogs = new ArrayCollection();
         $this->reservationDetails = new ArrayCollection();
+        $this->batches = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -164,7 +176,7 @@ class Flower
         return $this->freshnessStatus;
     }
 
-    public function setFreshnessStatus(string $freshnessStatus): static
+    public function setFreshnessStatus(?string $freshnessStatus): static
     {
         $this->freshnessStatus = $freshnessStatus;
 
@@ -205,6 +217,115 @@ class Flower
         $this->status = $status;
 
         return $this;
+    }
+
+    public function getSoldAt(): ?\DateTime
+    {
+        return $this->soldAt;
+    }
+
+    public function setSoldAt(?\DateTime $soldAt): static
+    {
+        $this->soldAt = $soldAt;
+
+        return $this;
+    }
+
+    /**
+     * Automatically update status and soldAt based on stock quantity.
+     * Call this after any stock modification.
+     */
+    public function syncStatusWithStock(): void
+    {
+        if ($this->stockQuantity <= 0) {
+            $this->status = 'Sold Out';
+            $this->discountPrice = null;
+            if ($this->soldAt === null) {
+                $this->soldAt = new \DateTime();
+            }
+        } elseif ($this->status === 'Sold Out') {
+            // Restocked — clear sold state
+            $this->status = 'Available';
+            $this->soldAt = null;
+        }
+    }
+
+    #[ORM\PreUpdate]
+    #[ORM\PrePersist]
+    public function onSave(): void
+    {
+        $this->syncStatusWithStock();
+    }
+
+    // ─── Batch helpers ───
+
+    /**
+     * @return Collection<int, FlowerBatch>
+     */
+    public function getBatches(): Collection
+    {
+        return $this->batches;
+    }
+
+    public function addBatch(FlowerBatch $batch): static
+    {
+        if (!$this->batches->contains($batch)) {
+            $this->batches->add($batch);
+            $batch->setFlower($this);
+        }
+        return $this;
+    }
+
+    public function removeBatch(FlowerBatch $batch): static
+    {
+        if ($this->batches->removeElement($batch)) {
+            if ($batch->getFlower() === $this) {
+                $batch->setFlower(null);
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * Get active batches (has stock, not expired), ordered soonest-expiring first.
+     *
+     * @return FlowerBatch[]
+     */
+    public function getActiveBatches(): array
+    {
+        return $this->batches->filter(
+            fn(FlowerBatch $b) => $b->isActive() && $b->getQuantityRemaining() > 0
+        )->toArray();
+    }
+
+    /**
+     * Recalculate stockQuantity, expiryDate, and freshnessStatus from active batches.
+     * Call this after batch modifications to keep the Flower summary in sync.
+     */
+    public function syncFromBatches(): void
+    {
+        $activeBatches = $this->getActiveBatches();
+
+        if (empty($activeBatches)) {
+            $this->stockQuantity = 0;
+            return;
+        }
+
+        // Total stock = sum of all active batch remaining quantities
+        $this->stockQuantity = array_sum(
+            array_map(fn(FlowerBatch $b) => $b->getQuantityRemaining(), $activeBatches)
+        );
+
+        // Expiry = earliest active batch expiry (drives freshness display)
+        $earliest = null;
+        foreach ($activeBatches as $batch) {
+            if ($earliest === null || $batch->getExpiryDate() < $earliest) {
+                $earliest = $batch->getExpiryDate();
+            }
+        }
+        if ($earliest) {
+            $this->expiryDate = $earliest;
+        }
     }
 
     public function getSupplier(): ?Supplier

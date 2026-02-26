@@ -46,7 +46,7 @@ class FlowerType extends AbstractType
             ])
             ->add('price', MoneyType::class, [
                 'label' => 'Price per Unit',
-                'currency' => 'USD',
+                'currency' => false,
                 'attr' => [
                     'class' => 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#39A8C9] focus:border-[#39A8C9]',
                     'placeholder' => '0.00'
@@ -76,18 +76,7 @@ class FlowerType extends AbstractType
                     'class' => 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#39A8C9] focus:border-[#39A8C9]'
                 ]
             ])
-            // Note: freshnessStatus is automatically calculated, not user-editable
-            ->add('status', ChoiceType::class, [
-                'label' => 'Status',
-                'choices' => [
-                    'Available' => 'Available',
-                    'Reserved' => 'Reserved',
-                    'Unavailable' => 'Unavailable'
-                ],
-                'attr' => [
-                    'class' => 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#39A8C9] focus:border-[#39A8C9]'
-                ]
-            ])
+            // Note: status & freshnessStatus are automatically managed by the system
             ->add('supplier', EntityType::class, [
                 'class' => Supplier::class,
                 'choice_label' => 'supplierName',

@@ -4,309 +4,237 @@
 {% block page_title %}Reservation #{{ reservation.id }}{% endblock %}
 
 {% block body %}
-<div class="px-4 sm:px-6 lg:px-8">
-  <!-- Breadcrumb -->
-  <div class="mb-6">
-    <nav class="flex" aria-label="Breadcrumb">
-      <ol class="flex items-center space-x-4">
-        <li>
-          <a href="{{ path('admin_dashboard') }}" class="text-gray-400 hover:text-gray-500">
-            <i class="fas fa-home"></i>
-          </a>
-        </li>
-        <li>
-          <div class="flex items-center">
-            <i class="fas fa-chevron-right text-gray-400 mr-4"></i>
-            <a href="{{ path('app_reservation_index') }}" class="text-sm font-medium text-gray-500 hover:text-gray-700">Reservations</a>
-          </div>
-        </li>
-        <li>
-          <div class="flex items-center">
-            <i class="fas fa-chevron-right text-gray-400 mr-4"></i>
-            <span class="text-sm font-medium text-gray-500">#{{ reservation.id }}</span>
-          </div>
-        </li>
-      </ol>
-    </nav>
+<div class="page-wrapper px-4 sm:px-6 lg:px-8">
+  <nav class="breadcrumb">
+    <a href="{{ path('admin_dashboard') }}"><i class="fas fa-home"></i></a>
+    <span class="separator">/</span>
+    <a href="{{ path('app_reservation_index') }}">Reservations</a>
+    <span class="separator">/</span>
+    <span class="current">#{{ reservation.id }}</span>
+  </nav>
 
-    <!-- Header -->
-    <div class="mt-4 flex justify-between items-start">
-      <div class="flex items-center">
-        <div class="h-12 w-12 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center mr-4">
-          <i class="fas fa-receipt text-white text-lg"></i>
-        </div>
-        <div>
-          <h1 class="text-2xl font-bold text-gray-900">Reservation #{{ reservation.id }}</h1>
-          <p class="mt-1 text-sm text-gray-600">
-            {% if reservation.customer %}Placed by {{ reservation.customer.fullName }}{% endif %}
-            {% if reservation.dateReserved %} on {{ reservation.dateReserved|date('F j, Y') }}{% endif %}
-          </p>
-        </div>
+  <div class="page-header">
+    <div class="page-header-info">
+      <div class="avatar lg" style="background:linear-gradient(135deg,#f6ad55,#ed8936);"><i class="fas fa-receipt" style="font-size:20px;"></i></div>
+      <div>
+        <h1>Reservation #{{ reservation.id }}</h1>
+        <p class="subtitle">
+          {% if reservation.customer %}Placed by {{ reservation.customer.fullName }}{% endif %}
+          {% if reservation.dateReserved %} on {{ reservation.dateReserved|date('F j, Y') }}{% endif %}
+        </p>
       </div>
-      <div class="flex space-x-3">
-        <a href="{{ path('app_reservation_edit', {'id': reservation.id}) }}"
-           class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200">
-          <i class="fas fa-edit mr-2"></i>Edit
-        </a>
-        <a href="{{ path('app_reservation_index') }}"
-           class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
-          <i class="fas fa-arrow-left mr-2"></i>Back to List
-        </a>
-      </div>
+    </div>
+    <div class="page-header-actions">
+      <a href="{{ path('app_reservation_edit', {'id': reservation.id}) }}" class="btn btn-primary"><i class="fas fa-edit"></i> Edit</a>
+      <a href="{{ path('app_reservation_index') }}" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Back to List</a>
     </div>
   </div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-    <!-- Main Content -->
-    <div class="lg:col-span-2">
-      <!-- Order Details -->
-      <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-        <div class="px-6 py-4 bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-200">
-          <h3 class="text-lg font-medium text-amber-900 flex items-center">
-            <i class="fas fa-shopping-basket mr-2 text-amber-600"></i>
-            Order Items
-          </h3>
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Order Items -->
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-icon amber"><i class="fas fa-shopping-basket"></i></div>
+          <h3>Order Items</h3>
         </div>
-        <div class="px-6 py-6">
+        <div class="section-body" style="padding:0;">
           {% if reservation.reservationDetails|length > 0 %}
             <div class="overflow-x-auto">
-              <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                  <tr>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Flower</th>
-                    <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Qty</th>
-                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Subtotal</th>
+              <table class="min-w-full" style="border-collapse:collapse;">
+                <thead>
+                  <tr style="background:var(--bg);">
+                    <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">Flower</th>
+                    <th style="padding:10px 16px;text-align:center;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">Qty</th>
+                    <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">Price</th>
+                    <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">Subtotal</th>
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200">
+                <tbody>
                   {% for detail in reservation.reservationDetails %}
-                    <tr class="hover:bg-gray-50">
-                      <td class="px-4 py-4">
-                        <div class="flex items-center">
-                          <div class="h-8 w-8 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 flex items-center justify-center mr-3">
-                            <i class="fas fa-leaf text-white text-xs"></i>
-                          </div>
+                    <tr style="border-top:1px solid var(--border);">
+                      <td style="padding:12px 16px;">
+                        <div class="flex items-center gap-3">
+                          <div class="avatar sm" style="background:linear-gradient(135deg,#e88da0,#d65d7a);"><i class="fas fa-leaf" style="font-size:11px;"></i></div>
                           <div>
-                            <p class="text-sm font-medium text-gray-900">{{ detail.flower.name }}</p>
-                            <p class="text-xs text-gray-500">{{ detail.flower.category }}</p>
+                            <div style="font-weight:600;font-size:13px;color:var(--navy);">{{ detail.flower.name }}</div>
+                            <div style="font-size:11px;color:var(--muted);">{{ detail.flower.category }}</div>
                           </div>
                         </div>
                       </td>
-                      <td class="px-4 py-4 text-center text-sm text-gray-900">{{ detail.quantity }}</td>
-                      <td class="px-4 py-4 text-right text-sm text-gray-900">${{ detail.flower.price|number_format(2) }}</td>
-                      <td class="px-4 py-4 text-right text-sm font-semibold text-gray-900">${{ detail.subtotal|number_format(2) }}</td>
+                      <td style="padding:12px 16px;text-align:center;font-size:13px;">{{ detail.quantity }}</td>
+                      <td style="padding:12px 16px;text-align:right;font-size:13px;">₱{{ detail.flower.price|number_format(2) }}</td>
+                      <td style="padding:12px 16px;text-align:right;font-weight:700;font-size:13px;color:var(--navy);">₱{{ detail.subtotal|number_format(2) }}</td>
                     </tr>
                   {% endfor %}
                 </tbody>
-                <tfoot class="bg-gray-50">
-                  <tr>
-                    <td colspan="3" class="px-4 py-4 text-right text-sm font-bold text-gray-900">Total</td>
-                    <td class="px-4 py-4 text-right text-lg font-bold text-emerald-600">${{ reservation.totalAmount|number_format(2) }}</td>
+                <tfoot>
+                  <tr style="border-top:2px solid var(--border);background:var(--bg);">
+                    <td colspan="3" style="padding:12px 16px;text-align:right;font-weight:700;font-size:14px;">Total</td>
+                    <td style="padding:12px 16px;text-align:right;font-weight:800;font-size:18px;color:var(--blue);">₱{{ reservation.totalAmount|number_format(2) }}</td>
                   </tr>
                 </tfoot>
               </table>
             </div>
           {% else %}
-            <div class="text-center py-8">
-              <i class="fas fa-box-open text-gray-300 text-4xl mb-3"></i>
-              <p class="text-gray-500">No items in this reservation</p>
+            <div class="empty-state" style="padding:32px 16px;">
+              <div class="empty-state-icon"><i class="fas fa-box-open"></i></div>
+              <h3>No items in this reservation</h3>
             </div>
           {% endif %}
         </div>
       </div>
 
       <!-- Customer Information -->
-      <div class="mt-6 bg-white shadow-lg rounded-lg overflow-hidden">
-        <div class="px-6 py-4 bg-gradient-to-r from-purple-50 to-indigo-50 border-b border-purple-200">
-          <h3 class="text-lg font-medium text-purple-900 flex items-center">
-            <i class="fas fa-user mr-2 text-purple-600"></i>
-            Customer Information
-          </h3>
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-icon purple"><i class="fas fa-user"></i></div>
+          <h3>Customer Information</h3>
         </div>
-        <div class="px-6 py-6">
+        <div class="section-body">
           {% if reservation.customer %}
-            <div class="flex items-center justify-between">
-              <div class="flex items-center">
-                <div class="h-12 w-12 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center mr-4">
-                  <span class="text-white font-bold">{{ reservation.customer.fullName|first|upper }}</span>
-                </div>
-                <div>
-                  <h4 class="text-lg font-medium text-gray-900">{{ reservation.customer.fullName }}</h4>
-                  {% if reservation.customer.email %}
-                    <p class="text-sm text-gray-500"><i class="fas fa-envelope mr-1"></i> {{ reservation.customer.email }}</p>
-                  {% endif %}
-                  {% if reservation.customer.phone %}
-                    <p class="text-sm text-gray-500"><i class="fas fa-phone mr-1"></i> {{ reservation.customer.phone }}</p>
-                  {% endif %}
+            <div class="list-item" style="border:none;padding:0;">
+              <div class="list-item-avatar" style="background:linear-gradient(135deg,#7c5cbf,#9b59b6);">{{ reservation.customer.fullName|first|upper }}</div>
+              <div class="list-item-content">
+                <div class="list-item-title">{{ reservation.customer.fullName }}</div>
+                <div class="list-item-subtitle">
+                  {% if reservation.customer.email %}<i class="fas fa-envelope" style="margin-right:4px;"></i>{{ reservation.customer.email }}{% endif %}
+                  {% if reservation.customer.phone %} &middot; <i class="fas fa-phone" style="margin-right:4px;"></i>{{ reservation.customer.phone }}{% endif %}
                 </div>
               </div>
-              <a href="{{ path('app_customer_show', {'id': reservation.customer.id}) }}"
-                 class="inline-flex items-center text-sm text-purple-600 hover:text-purple-900">
-                View Profile <i class="fas fa-external-link-alt ml-1"></i>
-              </a>
+              <div class="list-item-actions">
+                <a href="{{ path('app_customer_show', {'id': reservation.customer.id}) }}" class="btn btn-ghost" style="font-size:12px;">View Profile <i class="fas fa-external-link-alt" style="margin-left:4px;"></i></a>
+              </div>
             </div>
           {% else %}
-            <p class="text-gray-500 italic">No customer assigned</p>
+            <p style="color:var(--muted);font-style:italic;">No customer assigned</p>
           {% endif %}
         </div>
       </div>
 
       <!-- Payment Information -->
       {% if reservation.payment %}
-      <div class="mt-6 bg-white shadow-lg rounded-lg overflow-hidden">
-        <div class="px-6 py-4 bg-gradient-to-r from-green-50 to-emerald-50 border-b border-green-200">
-          <h3 class="text-lg font-medium text-green-900 flex items-center">
-            <i class="fas fa-credit-card mr-2 text-green-600"></i>
-            Payment Details
-          </h3>
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-icon green"><i class="fas fa-credit-card"></i></div>
+          <h3>Payment Details</h3>
         </div>
-        <div class="px-6 py-6">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <dt class="text-sm font-medium text-gray-500">Amount Paid</dt>
-              <dd class="mt-1 text-lg font-bold text-green-600">${{ reservation.payment.amountPaid|number_format(2) }}</dd>
+        <div class="section-body">
+          <div class="detail-grid cols-3">
+            <div class="detail-item">
+              <div class="detail-label">Amount Paid</div>
+              <div class="detail-value large" style="color:#27ae60;">₱{{ reservation.payment.amountPaid|number_format(2) }}</div>
             </div>
-            <div>
-              <dt class="text-sm font-medium text-gray-500">Payment Method</dt>
-              <dd class="mt-1">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                  {% if reservation.payment.paymentMethod == 'Credit Card' %}bg-blue-100 text-blue-800
-                  {% elseif reservation.payment.paymentMethod == 'Cash' %}bg-green-100 text-green-800
-                  {% else %}bg-gray-100 text-gray-800{% endif %}">
-                  {{ reservation.payment.paymentMethod }}
-                </span>
-              </dd>
+            <div class="detail-item">
+              <div class="detail-label">Payment Method</div>
+              <div class="detail-value"><span class="pill {% if reservation.payment.paymentMethod == 'Credit Card' %}blue{% elseif reservation.payment.paymentMethod == 'Cash' %}green{% else %}gray{% endif %}">{{ reservation.payment.paymentMethod }}</span></div>
             </div>
-            <div>
-              <dt class="text-sm font-medium text-gray-500">Reference Number</dt>
-              <dd class="mt-1 font-mono text-sm text-gray-900">{{ reservation.payment.referenceNo }}</dd>
+            <div class="detail-item">
+              <div class="detail-label">Reference Number</div>
+              <div class="detail-value mono">{{ reservation.payment.referenceNo }}</div>
             </div>
           </div>
-          <div class="mt-4 pt-4 border-t border-gray-200">
-            <a href="{{ path('app_payment_show', {'id': reservation.payment.id}) }}"
-               class="text-green-600 hover:text-green-800 text-sm font-medium">
-              View Full Payment Details <i class="fas fa-external-link-alt ml-1"></i>
-            </a>
+          <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+            <a href="{{ path('app_payment_show', {'id': reservation.payment.id}) }}" style="color:var(--blue);font-size:13px;font-weight:500;">View Full Payment Details <i class="fas fa-external-link-alt" style="margin-left:4px;"></i></a>
           </div>
         </div>
       </div>
       {% endif %}
     </div>
 
-    <!-- Sidebar -->
-    <div class="lg:col-span-1 space-y-6">
-      <!-- Status Card -->
-      <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-        <div class="px-6 py-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-b border-blue-200">
-          <h3 class="text-lg font-medium text-blue-900 flex items-center">
-            <i class="fas fa-info-circle mr-2 text-blue-600"></i>
-            Status
-          </h3>
+    <div class="space-y-6">
+      <!-- Status -->
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-icon blue"><i class="fas fa-info-circle"></i></div>
+          <h3>Status</h3>
         </div>
-        <div class="px-6 py-6 space-y-4">
-          <div>
-            <dt class="text-sm font-medium text-gray-500">Reservation Status</dt>
-            <dd class="mt-2">
-              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
-                {% if reservation.reservationStatus == 'Confirmed' %}bg-green-100 text-green-800
-                {% elseif reservation.reservationStatus == 'Pending' %}bg-yellow-100 text-yellow-800
-                {% elseif reservation.reservationStatus == 'Cancelled' %}bg-red-100 text-red-800
-                {% elseif reservation.reservationStatus == 'Completed' %}bg-blue-100 text-blue-800
-                {% else %}bg-gray-100 text-gray-800{% endif %}">
-                {% if reservation.reservationStatus == 'Confirmed' %}<i class="fas fa-check-circle mr-1"></i>
-                {% elseif reservation.reservationStatus == 'Pending' %}<i class="fas fa-clock mr-1"></i>
-                {% elseif reservation.reservationStatus == 'Cancelled' %}<i class="fas fa-times-circle mr-1"></i>
-                {% elseif reservation.reservationStatus == 'Completed' %}<i class="fas fa-flag-checkered mr-1"></i>
-                {% endif %}
-                {{ reservation.reservationStatus }}
-              </span>
-            </dd>
-          </div>
-          <div class="border-t border-gray-200 pt-4">
-            <dt class="text-sm font-medium text-gray-500">Payment Status</dt>
-            <dd class="mt-2">
-              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
-                {% if reservation.paymentStatus == 'Paid' %}bg-green-100 text-green-800
-                {% elseif reservation.paymentStatus == 'Pending' %}bg-yellow-100 text-yellow-800
-                {% elseif reservation.paymentStatus == 'Partial' %}bg-orange-100 text-orange-800
-                {% else %}bg-gray-100 text-gray-800{% endif %}">
-                {{ reservation.paymentStatus }}
-              </span>
-            </dd>
+        <div class="section-body">
+          <div class="detail-grid cols-1">
+            <div class="detail-item">
+              <div class="detail-label">Reservation Status</div>
+              <div class="detail-value">
+                <span class="pill {% if reservation.reservationStatus == 'Completed' %}green{% elseif reservation.reservationStatus == 'Confirmed' %}blue{% elseif reservation.reservationStatus == 'Pending' %}yellow{% else %}red{% endif %}">
+                  {% if reservation.reservationStatus == 'Completed' %}<i class="fas fa-check-circle" style="margin-right:4px;"></i>
+                  {% elseif reservation.reservationStatus == 'Confirmed' %}<i class="fas fa-thumbs-up" style="margin-right:4px;"></i>
+                  {% elseif reservation.reservationStatus == 'Pending' %}<i class="fas fa-clock" style="margin-right:4px;"></i>
+                  {% else %}<i class="fas fa-times-circle" style="margin-right:4px;"></i>{% endif %}
+                  {{ reservation.reservationStatus }}
+                </span>
+              </div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Payment Status</div>
+              <div class="detail-value">
+                <span class="pill {% if reservation.paymentStatus == 'Paid' %}green{% else %}red{% endif %}">
+                  {% if reservation.paymentStatus == 'Paid' %}<i class="fas fa-check-circle" style="margin-right:4px;"></i>{% else %}<i class="fas fa-times-circle" style="margin-right:4px;"></i>{% endif %}
+                  {{ reservation.paymentStatus }}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Important Dates -->
-      <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-        <div class="px-6 py-4 bg-gradient-to-r from-indigo-50 to-violet-50 border-b border-indigo-200">
-          <h3 class="text-lg font-medium text-indigo-900 flex items-center">
-            <i class="fas fa-calendar-alt mr-2 text-indigo-600"></i>
-            Dates
-          </h3>
+      <!-- Dates -->
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-icon purple"><i class="fas fa-calendar-alt"></i></div>
+          <h3>Dates</h3>
         </div>
-        <div class="px-6 py-6 space-y-4">
-          <div>
-            <dt class="text-sm font-medium text-gray-500">Date Reserved</dt>
-            <dd class="mt-1 text-sm text-gray-900">
-              {% if reservation.dateReserved %}
-                <div class="flex items-center">
-                  <i class="fas fa-calendar text-gray-400 mr-2"></i>
+        <div class="section-body">
+          <div class="detail-grid cols-1">
+            <div class="detail-item">
+              <div class="detail-label">Date Reserved</div>
+              <div class="detail-value">
+                {% if reservation.dateReserved %}
                   {{ reservation.dateReserved|date('F j, Y') }}
-                </div>
-                <div class="text-xs text-gray-500 ml-6">{{ reservation.dateReserved|date('g:i A') }}</div>
-              {% else %}
-                <span class="text-gray-400 italic">Not recorded</span>
-              {% endif %}
-            </dd>
-          </div>
-          <div class="border-t border-gray-200 pt-4">
-            <dt class="text-sm font-medium text-gray-500">Pickup Date</dt>
-            <dd class="mt-1 text-sm text-gray-900">
-              {% if reservation.pickupDate %}
-                <div class="flex items-center">
-                  <i class="fas fa-truck text-gray-400 mr-2"></i>
+                  <div style="font-size:12px;color:var(--muted);margin-top:2px;">{{ reservation.dateReserved|date('g:i A') }}</div>
+                {% else %}<span style="color:var(--muted);font-style:italic;">Not recorded</span>{% endif %}
+              </div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Pickup Date</div>
+              <div class="detail-value">
+                {% if reservation.pickupDate %}
                   {{ reservation.pickupDate|date('F j, Y') }}
-                </div>
-              {% else %}
-                <span class="text-gray-400 italic">Not scheduled</span>
-              {% endif %}
-            </dd>
+                {% else %}<span style="color:var(--muted);font-style:italic;">Not scheduled</span>{% endif %}
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Order Summary -->
-      <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-        <div class="px-6 py-4 bg-gradient-to-r from-emerald-50 to-teal-50 border-b border-emerald-200">
-          <h3 class="text-lg font-medium text-emerald-900 flex items-center">
-            <i class="fas fa-receipt mr-2 text-emerald-600"></i>
-            Summary
-          </h3>
+      <!-- Summary -->
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-icon green"><i class="fas fa-receipt"></i></div>
+          <h3>Summary</h3>
         </div>
-        <div class="px-6 py-6 space-y-4">
-          <div class="flex justify-between items-center">
-            <dt class="text-sm font-medium text-gray-500">Items</dt>
-            <dd class="text-sm font-medium text-gray-900">{{ reservation.reservationDetails|length }}</dd>
-          </div>
-          <div class="flex justify-between items-center border-t border-gray-200 pt-4">
-            <dt class="text-sm font-medium text-gray-500">Total Amount</dt>
-            <dd class="text-xl font-bold text-emerald-600">${{ reservation.totalAmount|number_format(2) }}</dd>
+        <div class="section-body">
+          <div class="detail-grid cols-1">
+            <div class="detail-item">
+              <div class="detail-label">Items</div>
+              <div class="detail-value">{{ reservation.reservationDetails|length }}</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Total Amount</div>
+              <div class="detail-value large" style="color:var(--blue);">₱{{ reservation.totalAmount|number_format(2) }}</div>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Danger Zone -->
-      <div class="bg-white shadow-lg rounded-lg overflow-hidden border border-red-200">
-        <div class="px-6 py-4 bg-red-50 border-b border-red-200">
-          <h3 class="text-lg font-medium text-red-900 flex items-center">
-            <i class="fas fa-exclamation-triangle mr-2 text-red-600"></i>
-            Danger Zone
-          </h3>
+      <div class="danger-zone">
+        <div class="danger-zone-header">
+          <i class="fas fa-exclamation-triangle"></i>
+          <div>
+            <h4>Danger Zone</h4>
+            <p>Permanently delete this reservation. This action cannot be undone.</p>
+          </div>
         </div>
-        <div class="px-6 py-6">
-          <p class="text-sm text-gray-600 mb-4">Permanently delete this reservation. This action cannot be undone.</p>
+        <div class="danger-zone-body">
           {{ include('reservation/_delete_form.html.twig') }}
         </div>
       </div>

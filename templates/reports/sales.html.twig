@@ -24,20 +24,30 @@
   </div>
 
   {# Date Filter #}
-  <div class="bg-white rounded-xl shadow-md p-6 mb-8">
-    <form method="get" class="flex flex-wrap items-end gap-4">
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-        <input type="date" name="start_date" value="{{ start_date }}" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#5E548E] focus:border-transparent">
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-        <input type="date" name="end_date" value="{{ end_date }}" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#5E548E] focus:border-transparent">
-      </div>
-      <button type="submit" class="px-4 py-2 bg-[#5E548E] text-white rounded-lg hover:bg-[#4C4375] transition text-sm font-medium">
-        <i class="fas fa-filter mr-1"></i> Filter
-      </button>
-    </form>
+  <div class="table-card mb-8">
+    <div class="px-5 py-4">
+      <h3 class="text-sm font-medium mb-4 flex items-center" style="color:var(--muted);font-family:'Inter',sans-serif;">
+        <i class="fas fa-filter mr-2" style="color:var(--muted);"></i>Filter Sales
+      </h3>
+      <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+          <label class="block text-sm font-medium mb-1" style="color:var(--navy);font-family:'Inter',sans-serif;">Start Date</label>
+          <input type="date" name="start_date" value="{{ start_date }}" class="filter-select" style="width:100%;">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1" style="color:var(--navy);font-family:'Inter',sans-serif;">End Date</label>
+          <input type="date" name="end_date" value="{{ end_date }}" class="filter-select" style="width:100%;">
+        </div>
+        <div class="flex items-end space-x-2">
+          <button type="submit" class="btn-primary" style="display:inline-flex;align-items:center;gap:6px;">
+            <i class="fas fa-search"></i>Filter
+          </button>
+          <a href="{{ path('app_reports_sales') }}" class="btn-outline" style="display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border:1px solid #e4e9f0;border-radius:8px;font-size:13px;font-weight:500;color:var(--navy);background:white;text-decoration:none;transition:all 0.2s;">
+            <i class="fas fa-redo"></i>Reset
+          </a>
+        </div>
+      </form>
+    </div>
   </div>
 
   {# Summary Cards #}
@@ -61,12 +71,38 @@
   </div>
 
   {# Reservations Table #}
-  <div class="bg-white rounded-xl shadow-md overflow-hidden mb-8">
-    <div class="p-6 border-b border-gray-200">
-      <h2 class="text-lg font-semibold text-gray-900"><i class="fas fa-list mr-2 text-[#5E548E]"></i>Reservations</h2>
+  <div data-controller="floryn-table"
+       data-floryn-table-page-size-value="10"
+       data-floryn-table-sort-col-value="2"
+       data-floryn-table-sort-dir-value="desc"
+       data-floryn-table-no-sort-cols-value="[]"
+       data-floryn-table-entity-name-value="reservations">
+  <div class="table-card mb-8">
+    <div class="table-card-header">
+      <h3><i class="fas fa-list mr-2"></i>Reservations</h3>
+    </div>
+    <div class="fg-toolbar">
+      <div class="fg-toolbar-left">
+        <select data-floryn-table-target="pageSize" data-action="floryn-table#onPageSizeChange" class="fg-page-size">
+          <option value="10">10</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+          <option value="-1">All</option>
+        </select>
+        <button type="button" class="fg-export-btn" data-action="floryn-table#exportCopy" title="Copy"><i class="fas fa-copy"></i></button>
+        <button type="button" class="fg-export-btn" data-action="floryn-table#exportCsv" title="CSV"><i class="fas fa-file-csv"></i></button>
+        <button type="button" class="fg-export-btn" data-action="floryn-table#exportExcel" title="Excel"><i class="fas fa-file-excel"></i></button>
+        <button type="button" class="fg-export-btn" data-action="floryn-table#exportPrint" title="Print"><i class="fas fa-print"></i></button>
+      </div>
+      <div class="fg-toolbar-right">
+        <div class="fg-search">
+          <i class="fas fa-search fg-search-icon"></i>
+          <input type="text" data-floryn-table-target="search" data-action="input->floryn-table#onSearch" placeholder="Search reservations..." class="fg-search-input">
+        </div>
+      </div>
     </div>
     <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200" id="salesTable">
+      <table class="fg-table" data-floryn-table-target="table">
         <thead class="bg-gray-50">
           <tr>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
@@ -87,12 +123,12 @@
             <td class="px-6 py-4 text-sm text-gray-500">{{ reservation.pickupDate ? reservation.pickupDate|date('M d, Y') : '—' }}</td>
             <td class="px-6 py-4 text-sm text-gray-900 text-right font-medium">₱{{ reservation.totalAmount|number_format(2) }}</td>
             <td class="px-6 py-4 text-center">
-              <span class="inline-flex px-2 py-1 text-xs rounded-full {% if reservation.paymentStatus == 'Paid' %}bg-green-100 text-green-800{% elseif reservation.paymentStatus == 'Partial' %}bg-yellow-100 text-yellow-800{% else %}bg-red-100 text-red-800{% endif %}">
+              <span class="inline-flex px-2 py-1 text-xs rounded-full {% if reservation.paymentStatus == 'Paid' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
                 {{ reservation.paymentStatus ?? 'Unpaid' }}
               </span>
             </td>
             <td class="px-6 py-4 text-center">
-              <span class="inline-flex px-2 py-1 text-xs rounded-full {% if reservation.reservationStatus == 'Completed' %}bg-green-100 text-green-800{% elseif reservation.reservationStatus == 'Pending' %}bg-yellow-100 text-yellow-800{% else %}bg-red-100 text-red-800{% endif %}">
+              <span class="inline-flex px-2 py-1 text-xs rounded-full {% if reservation.reservationStatus == 'Completed' %}bg-green-100 text-green-800{% elseif reservation.reservationStatus == 'Confirmed' %}bg-blue-100 text-blue-800{% elseif reservation.reservationStatus == 'Pending' %}bg-yellow-100 text-yellow-800{% else %}bg-red-100 text-red-800{% endif %}">
                 {{ reservation.reservationStatus ?? 'N/A' }}
               </span>
             </td>
@@ -105,15 +141,46 @@
         </tbody>
       </table>
     </div>
+    <div class="fg-bottom-bar">
+      <div class="fg-info" data-floryn-table-target="info"></div>
+      <div class="fg-pagination" data-floryn-table-target="pagination"></div>
+    </div>
+  </div>
   </div>
 
   {# Payments Table #}
-  <div class="bg-white rounded-xl shadow-md overflow-hidden">
-    <div class="p-6 border-b border-gray-200">
-      <h2 class="text-lg font-semibold text-gray-900"><i class="fas fa-credit-card mr-2 text-[#5E548E]"></i>Payments</h2>
+  <div data-controller="floryn-table"
+       data-floryn-table-page-size-value="10"
+       data-floryn-table-sort-col-value="1"
+       data-floryn-table-sort-dir-value="desc"
+       data-floryn-table-no-sort-cols-value="[]"
+       data-floryn-table-entity-name-value="payments">
+  <div class="table-card">
+    <div class="table-card-header">
+      <h3><i class="fas fa-credit-card mr-2"></i>Payments</h3>
+    </div>
+    <div class="fg-toolbar">
+      <div class="fg-toolbar-left">
+        <select data-floryn-table-target="pageSize" data-action="floryn-table#onPageSizeChange" class="fg-page-size">
+          <option value="10">10</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+          <option value="-1">All</option>
+        </select>
+        <button type="button" class="fg-export-btn" data-action="floryn-table#exportCopy" title="Copy"><i class="fas fa-copy"></i></button>
+        <button type="button" class="fg-export-btn" data-action="floryn-table#exportCsv" title="CSV"><i class="fas fa-file-csv"></i></button>
+        <button type="button" class="fg-export-btn" data-action="floryn-table#exportExcel" title="Excel"><i class="fas fa-file-excel"></i></button>
+        <button type="button" class="fg-export-btn" data-action="floryn-table#exportPrint" title="Print"><i class="fas fa-print"></i></button>
+      </div>
+      <div class="fg-toolbar-right">
+        <div class="fg-search">
+          <i class="fas fa-search fg-search-icon"></i>
+          <input type="text" data-floryn-table-target="search" data-action="input->floryn-table#onSearch" placeholder="Search payments..." class="fg-search-input">
+        </div>
+      </div>
     </div>
     <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200" id="paymentsTable">
+      <table class="fg-table" data-floryn-table-target="table">
         <thead class="bg-gray-50">
           <tr>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
@@ -133,7 +200,7 @@
             <td class="px-6 py-4 text-sm text-gray-700">{{ payment.paymentMethod }}</td>
             <td class="px-6 py-4 text-sm text-gray-500">{{ payment.referenceNo }}</td>
             <td class="px-6 py-4 text-center">
-              <span class="inline-flex px-2 py-1 text-xs rounded-full {% if payment.status == 'Completed' %}bg-green-100 text-green-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">
+              <span class="inline-flex px-2 py-1 text-xs rounded-full {% if payment.status == 'Paid' or payment.status == 'Completed' %}bg-green-100 text-green-800{% elseif payment.status == 'Pending' %}bg-yellow-100 text-yellow-800{% elseif payment.status == 'Processing' %}bg-blue-100 text-blue-800{% else %}bg-red-100 text-red-800{% endif %}">
                 {{ payment.status ?? 'Pending' }}
               </span>
             </td>
@@ -146,6 +213,11 @@
         </tbody>
       </table>
     </div>
+    <div class="fg-bottom-bar">
+      <div class="fg-info" data-floryn-table-target="info"></div>
+      <div class="fg-pagination" data-floryn-table-target="pagination"></div>
+    </div>
+  </div>
   </div>
 </div>
 {% endblock %}

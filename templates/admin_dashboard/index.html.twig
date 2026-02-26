@@ -1,455 +1,303 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Admin Dashboard | Floryn Garden{% endblock %}
-{% block page_title %}Admin Dashboard{% endblock %}
+{% block title %}Dashboard | Floryn Garden{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
 
 {% block body %}
-<div class="min-h-screen bg-[#FFF8F0] py-10 px-6 md:px-12">
+<div style="animation:fadeUp 0.4s ease both;">
 
-  <!-- Welcome Header -->
-  <div class="bg-gradient-to-r from-[#5E548E] to-[#39A8C9] rounded-2xl shadow-xl p-8 mb-10 text-white">
-    <div class="flex flex-col md:flex-row items-start md:items-center justify-between">
-      <div class="flex items-center mb-6 md:mb-0">
-        <div class="h-16 w-16 md:h-20 md:w-20 rounded-xl bg-white/20 flex items-center justify-center">
-          <i class="fas fa-seedling text-white text-3xl"></i>
-        </div>
-        <div class="ml-5">
-          <h1 class="text-3xl font-bold">Welcome, Administrator</h1>
-          <p class="text-[#E8F7FA] text-sm md:text-base mt-1">Manage and monitor your floral business effortlessly.</p>
-        </div>
+  {% if lowStockFlowers is not empty %}
+  <div class="flex items-center gap-3 rounded-xl mb-5" style="background:linear-gradient(135deg,#293855,#3a4f6e);padding:14px 20px;">
+    <div style="font-size:20px;">&#x26A0;&#xFE0F;</div>
+    <div class="flex-1">
+      <div style="font-size:13px;font-weight:600;color:#c2e7c9;">Low Stock Alert</div>
+      <div style="font-size:12px;color:rgba(194,231,201,0.6);margin-top:2px;">
+        {{ lowStockFlowers|length }} flower{{ lowStockFlowers|length > 1 ? ' varieties are' : ' variety is' }} running low on stock.
       </div>
-      <div class="flex space-x-3">
-        <button class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition-all duration-200 text-sm font-medium">
-          <i class="fas fa-download mr-2"></i>Export Data
-        </button>
-        <button class="bg-white text-[#5E548E] hover:bg-[#EDE7F6] px-4 py-2 rounded-lg transition-all duration-200 text-sm font-medium">
-          <i class="fas fa-cog mr-2"></i>Settings
-        </button>
-      </div>
+    </div>
+    <a href="{{ path('app_flower_index') }}" style="background:#c2e7c9;color:#293855;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;text-decoration:none;">
+      Restock Now
+    </a>
+  </div>
+  {% endif %}
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-7">
+    <div class="rounded-xl p-5 relative overflow-hidden" style="background:#293855;border:1px solid #293855;">
+      <div class="flex items-center justify-center rounded-lg mb-3.5" style="width:36px;height:36px;background:rgba(194,231,201,0.12);font-size:17px;">&#x1F4B0;</div>
+      <div style="font-size:12px;color:rgba(194,231,201,0.55);margin-bottom:6px;">Last Sale Savings</div>
+      <div style="font-family:'Bricolage Grotesque',serif;font-size:28px;font-weight:700;color:#c2e7c9;line-height:1;margin-bottom:8px;">₱{{ savingsData.totalSavings|number_format(2) }}</div>
+      <div style="font-size:12px;color:rgba(194,231,201,0.7);font-weight:500;">{{ savingsData.discountedItemsCount }} items discounted</div>
+    </div>
+    <div class="rounded-xl p-5 bg-white relative overflow-hidden" style="border:1px solid #e8edf2;">
+      <div class="flex items-center justify-center rounded-lg mb-3.5" style="width:36px;height:36px;background:#e8f7eb;font-size:17px;">&#x1F33A;</div>
+      <div style="font-size:12px;color:#6b7a8d;margin-bottom:6px;">Active Flowers</div>
+      <div style="font-family:'Bricolage Grotesque',serif;font-size:28px;font-weight:700;color:#293855;line-height:1;margin-bottom:8px;">{{ totalFlowers }}</div>
+      <a href="{{ path('app_flower_index') }}" style="font-size:12px;color:#4265d6;font-weight:500;text-decoration:none;">View inventory &#x2192;</a>
+    </div>
+    <div class="rounded-xl p-5 bg-white relative overflow-hidden" style="border:1px solid #e8edf2;">
+      <div class="flex items-center justify-center rounded-lg mb-3.5" style="width:36px;height:36px;background:#e8f7eb;font-size:17px;">&#x1F69A;</div>
+      <div style="font-size:12px;color:#6b7a8d;margin-bottom:6px;">Total Suppliers</div>
+      <div style="font-family:'Bricolage Grotesque',serif;font-size:28px;font-weight:700;color:#293855;line-height:1;margin-bottom:8px;">{{ totalSuppliers }}</div>
+      <a href="{{ path('app_supplier_index') }}" style="font-size:12px;color:#4265d6;font-weight:500;text-decoration:none;">View suppliers &#x2192;</a>
+    </div>
+    <div class="rounded-xl p-5 bg-white relative overflow-hidden" style="border:1px solid #e8edf2;">
+      <div class="flex items-center justify-center rounded-lg mb-3.5" style="width:36px;height:36px;background:#e8f7eb;font-size:17px;">&#x1F465;</div>
+      <div style="font-size:12px;color:#6b7a8d;margin-bottom:6px;">Active Customers</div>
+      <div style="font-family:'Bricolage Grotesque',serif;font-size:28px;font-weight:700;color:#293855;line-height:1;margin-bottom:8px;">{{ totalCustomers }}</div>
+      <a href="{{ path('app_customer_index') }}" style="font-size:12px;color:#4265d6;font-weight:500;text-decoration:none;">View customers &#x2192;</a>
     </div>
   </div>
 
-  <!-- Stats Section -->
-  <div class="mb-12">
-    <h2 class="text-2xl font-semibold text-[#2E2E2E] mb-6">Business Overview</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
-      
-      {% set stats = [
-        {'icon': 'fa-leaf', 'color': '#5E548E', 'label': 'Total Flowers', 'value': totalFlowers, 'path': 'app_flower_index'},
-        {'icon': 'fa-truck', 'color': '#39A8C9', 'label': 'Total Suppliers', 'value': totalSuppliers, 'path': 'app_supplier_index'},
-        {'icon': 'fa-users', 'color': '#5E548E', 'label': 'Total Customers', 'value': totalCustomers, 'path': 'app_customer_index'},
-        {'icon': 'fa-percentage', 'color': '#E8B931', 'label': 'Last Sale Savings', 'value': '$' ~ savingsData.totalSavings|number_format(2), 'path': 'app_flower_index', 'special': 'savings'}
-      ] %}
-
-      {% for stat in stats %}
-      <div class="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100">
-        <div class="flex justify-between items-center mb-3">
-          <div class="h-12 w-12 rounded-xl flex items-center justify-center" style="background-color: {{ stat.color }}15;">
-            <i class="fas {{ stat.icon }} text-xl" style="color: {{ stat.color }};"></i>
-          </div>
-          <div class="text-right">
-            <p class="text-sm text-gray-500">{{ stat.label }}</p>
-            <p class="text-2xl font-bold text-[#2E2E2E]">{{ stat.value }}</p>
-            {% if stat.special is defined and stat.special == 'savings' %}
-              <p class="text-xs text-orange-600 font-medium">{{ savingsData.discountedItemsCount }} items discounted</p>
-            {% endif %}
-          </div>
-        </div>
-        <a href="{{ path(stat.path) }}" class="text-sm text-[#39A8C9] font-medium hover:underline flex items-center justify-end">
-          {% if stat.special is defined and stat.special == 'savings' %}
-            View discounts <i class="fas fa-arrow-right ml-2 text-xs"></i>
-          {% else %}
-            View details <i class="fas fa-arrow-right ml-2 text-xs"></i>
-          {% endif %}
-        </a>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 mb-5">
+    {% set actions = [
+      {'icon': '&#x1F6D2;', 'label': 'Point of Sale', 'desc': 'Quick sale / walk-in', 'path': 'app_pos'},
+      {'icon': '&#x2795;', 'label': 'Add Flower', 'desc': 'New inventory', 'path': 'app_flower_new'},
+      {'icon': '&#x1F4CB;', 'label': 'New Reservation', 'desc': 'Walk-in or online', 'path': 'app_reservation_new'},
+      {'icon': '&#x1F464;', 'label': 'Add Customer', 'desc': 'Register client', 'path': 'app_customer_new'},
+      {'icon': '&#x1F69A;', 'label': 'Add Supplier', 'desc': 'Partner registration', 'path': 'app_supplier_new'}
+    ] %}
+    {% for a in actions %}
+    <a href="{{ path(a.path) }}" class="flex items-center gap-2.5 bg-white rounded-xl transition-all duration-200" style="border:1px solid #e8edf2;padding:14px 16px;text-decoration:none;">
+      <div class="flex items-center justify-center rounded-lg flex-shrink-0" style="width:32px;height:32px;background:#e8f7eb;font-size:15px;">{{ a.icon|raw }}</div>
+      <div>
+        <div style="font-size:13px;font-weight:500;color:#293855;">{{ a.label }}</div>
+        <div style="font-size:11px;color:#6b7a8d;">{{ a.desc }}</div>
       </div>
-      {% endfor %}
-    </div>
+    </a>
+    {% endfor %}
   </div>
 
-  <!-- Quick Actions -->
-  <div class="mb-12">
-    <h2 class="text-2xl font-semibold text-[#2E2E2E] mb-6">Quick Actions</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {% set actions = [
-        {'icon': 'fa-plus-circle', 'color': '#5E548E', 'label': 'Add New Flower', 'desc': 'Create flower listing', 'path': 'app_flower_new'},
-        {'icon': 'fa-user-plus', 'color': '#39A8C9', 'label': 'Add Customer', 'desc': 'Register new client', 'path': 'app_customer_new'},
-        {'icon': 'fa-calendar-plus', 'color': '#5E548E', 'label': 'New Reservation', 'desc': 'Book appointment', 'path': 'app_reservation_new'},
-        {'icon': 'fa-truck', 'color': '#39A8C9', 'label': 'Add Supplier', 'desc': 'Partner registration', 'path': 'app_supplier_new'}
-      ] %}
-
-      {% for a in actions %}
-      <a href="{{ path(a.path) }}" class="bg-white rounded-xl p-6 text-center border border-gray-100 shadow-md hover:shadow-lg hover:border-[#5E548E] transition-all duration-300">
-        <div class="h-12 w-12 rounded-lg flex items-center justify-center mx-auto mb-3" style="background-color: {{ a.color }}15;">
-          <i class="fas {{ a.icon }} text-xl" style="color: {{ a.color }};"></i>
-        </div>
-        <span class="text-sm font-semibold text-[#2E2E2E]">{{ a.label }}</span>
-        <p class="text-xs text-gray-500 mt-1">{{ a.desc }}</p>
-      </a>
-      {% endfor %}
-    </div>
-  </div>
-
-  <!-- Freshness Analytics -->
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-    <!-- Freshness Distribution Chart -->
-    <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
-      <h3 class="text-lg font-semibold text-[#2E2E2E] mb-4">Flower Freshness Status</h3>
-      
-      <div class="space-y-4">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5">
+    <div class="lg:col-span-2 bg-white rounded-xl overflow-hidden" style="border:1px solid #e8edf2;">
+      <div class="flex items-center justify-between px-5 pt-5 mb-4">
+        <div style="font-family:'Bricolage Grotesque',serif;font-size:16px;font-weight:600;color:#293855;">Flower Freshness Status</div>
+        <a href="{{ path('app_flower_index') }}" style="font-size:12px;color:#4265d6;font-weight:500;text-decoration:none;">View all &#x2192;</a>
+      </div>
+      <div class="px-5 pb-5">
         {% set total = freshnessDistribution['Fresh'] + freshnessDistribution['Good'] + freshnessDistribution['Last Sale'] + freshnessDistribution['Expired'] %}
-        
         {% if total > 0 %}
-          <div class="space-y-3">
-            <div class="flex justify-between items-center">
-              <div class="flex items-center">
-                <i class="fas fa-leaf text-green-600 mr-2"></i>
-                <span class="text-sm font-medium text-gray-700">Fresh</span>
-              </div>
-              <span class="text-sm font-semibold text-gray-900">{{ freshnessDistribution['Fresh'] }}</span>
+          <div class="flex items-end gap-2 mb-4" style="height:120px;padding-bottom:8px;border-bottom:1px solid #f0f3f7;">
+            {% set categories = [
+              {'label': 'Fresh', 'value': freshnessDistribution['Fresh'], 'color': '#22c55e'},
+              {'label': 'Good', 'value': freshnessDistribution['Good'], 'color': '#eab308'},
+              {'label': 'Last Sale', 'value': freshnessDistribution['Last Sale'], 'color': '#f97316'},
+              {'label': 'Expired', 'value': freshnessDistribution['Expired'], 'color': '#ef4444'}
+            ] %}
+            {% for cat in categories %}
+            <div class="flex-1 flex flex-col items-center gap-1 h-full justify-end">
+              <div style="width:100%;border-radius:4px 4px 0 0;background:{{ cat.color }};height:{{ total > 0 ? ((cat.value / total) * 100)|round : 0 }}%;min-height:4px;"></div>
+              <div style="font-size:10px;color:#6b7a8d;text-align:center;margin-top:4px;">{{ cat.label }}</div>
             </div>
-            <div class="w-full bg-gray-200 rounded-full h-2">
-              <div class="bg-green-500 h-2 rounded-full" style="width: {{ (freshnessDistribution['Fresh'] / total * 100)|round }}%"></div>
-            </div>
+            {% endfor %}
           </div>
-          
-          <div class="space-y-3">
-            <div class="flex justify-between items-center">
-              <div class="flex items-center">
-                <i class="fas fa-clock text-yellow-600 mr-2"></i>
-                <span class="text-sm font-medium text-gray-700">Good</span>
-              </div>
-              <span class="text-sm font-semibold text-gray-900">{{ freshnessDistribution['Good'] }}</span>
+          <div class="flex gap-4 mt-2">
+            {% for cat in categories %}
+            <div class="flex items-center gap-1.5" style="font-size:11px;color:#6b7a8d;">
+              <div style="width:8px;height:8px;border-radius:2px;background:{{ cat.color }};"></div>
+              {{ cat.label }} ({{ cat.value }})
             </div>
-            <div class="w-full bg-gray-200 rounded-full h-2">
-              <div class="bg-yellow-500 h-2 rounded-full" style="width: {{ (freshnessDistribution['Good'] / total * 100)|round }}%"></div>
-            </div>
-          </div>
-          
-          <div class="space-y-3">
-            <div class="flex justify-between items-center">
-              <div class="flex items-center">
-                <i class="fas fa-fire text-red-600 mr-2"></i>
-                <span class="text-sm font-medium text-gray-700">Last Sale</span>
-                <span class="ml-2 px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded-full font-medium">20% OFF</span>
-              </div>
-              <span class="text-sm font-semibold text-gray-900">{{ freshnessDistribution['Last Sale'] }}</span>
-            </div>
-            <div class="w-full bg-gray-200 rounded-full h-2">
-              <div class="bg-red-500 h-2 rounded-full" style="width: {{ (freshnessDistribution['Last Sale'] / total * 100)|round }}%"></div>
-            </div>
-            {% if freshnessDistribution['Last Sale'] > 0 %}
-              <p class="text-xs text-red-600 font-medium">💸 Discounted flowers available for quick sale</p>
-            {% endif %}
-          </div>
-          
-          <div class="space-y-3">
-            <div class="flex justify-between items-center">
-              <div class="flex items-center">
-                <i class="fas fa-ban text-gray-600 mr-2"></i>
-                <span class="text-sm font-medium text-gray-700">Expired</span>
-              </div>
-              <span class="text-sm font-semibold text-gray-900">{{ freshnessDistribution['Expired'] }}</span>
-            </div>
-            <div class="w-full bg-gray-200 rounded-full h-2">
-              <div class="bg-gray-500 h-2 rounded-full" style="width: {{ (freshnessDistribution['Expired'] / total * 100)|round }}%"></div>
-            </div>
+            {% endfor %}
           </div>
         {% else %}
-          <p class="text-gray-500 text-center py-8">No flowers in inventory</p>
+          <div class="text-center py-8" style="color:#6b7a8d;">No flowers in inventory</div>
         {% endif %}
       </div>
     </div>
 
-    <!-- Expiring Soon Section -->
-    <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-semibold text-[#2E2E2E]">Expiring Soon</h3>
-        <div class="flex space-x-2">
-          <span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-medium">
-            {{ expiringSoonFlowers|length }} items
-          </span>
-          {% if expiringSoonFlowers|length > 0 %}
-            <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs font-medium">
-              🏷️ 20% OFF
-            </span>
+    <div class="bg-white rounded-xl overflow-hidden" style="border:1px solid #e8edf2;">
+      <div class="flex items-center justify-between px-5 pt-5 mb-4">
+        <div style="font-family:'Bricolage Grotesque',serif;font-size:16px;font-weight:600;color:#293855;">Expiring Soon</div>
+        <span style="background:#fdecea;color:#c0392b;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500;">{{ expiringSoonFlowers|length }} items</span>
+      </div>
+      <div class="px-5 pb-5">
+        {% if expiringSoonFlowers is not empty %}
+          {% for flower in expiringSoonFlowers[:5] %}
+          <div class="flex items-center gap-3 py-2.5" style="border-bottom:1px solid #f3f5f8;">
+            <div class="flex items-center justify-center rounded-lg flex-shrink-0" style="width:38px;height:38px;background:#fdecea;font-size:18px;">&#x1F339;</div>
+            <div class="flex-1 min-w-0">
+              <div style="font-size:13px;font-weight:500;color:#293855;">{{ flower.name }}</div>
+              <div style="font-size:11px;color:#6b7a8d;">{{ flower.stockQuantity }} units</div>
+            </div>
+            <div class="text-right">
+              <div style="font-size:12px;font-weight:600;color:#c0392b;">{{ flower.expiryDate|date('M d') }}</div>
+              {% if flower.discountPrice %}
+              <div style="font-size:11px;color:#2d8a4e;font-weight:600;">₱{{ flower.discountPrice|number_format(2) }}</div>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="text-center py-8">
+            <div style="font-size:24px;margin-bottom:8px;">&#x2705;</div>
+            <div style="font-size:13px;color:#6b7a8d;">No flowers expiring soon</div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl overflow-hidden mb-5" style="border:1px solid #e8edf2;">
+    <div class="px-5 py-4" style="background:#293855;">
+      <div style="font-family:'Bricolage Grotesque',serif;font-size:16px;font-weight:600;color:#c2e7c9;">Freshness Overview by Category</div>
+      <div style="font-size:12px;color:rgba(194,231,201,0.6);margin-top:2px;">Real-time freshness distribution across flower categories</div>
+    </div>
+    <div class="overflow-x-auto">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr style="border-bottom:1px solid #f0f3f7;">
+            <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:500;color:#6b7a8d;text-transform:uppercase;">Category</th>
+            <th style="padding:10px 16px;text-align:center;font-size:11px;font-weight:500;color:#16a34a;text-transform:uppercase;">Fresh</th>
+            <th style="padding:10px 16px;text-align:center;font-size:11px;font-weight:500;color:#ca8a04;text-transform:uppercase;">Good</th>
+            <th style="padding:10px 16px;text-align:center;font-size:11px;font-weight:500;color:#ea580c;text-transform:uppercase;">Last Sale</th>
+            <th style="padding:10px 16px;text-align:center;font-size:11px;font-weight:500;color:#dc2626;text-transform:uppercase;">Expired</th>
+            <th style="padding:10px 16px;text-align:center;font-size:11px;font-weight:500;color:#293855;text-transform:uppercase;">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if freshnessByCategory is not empty %}
+            {% for category, data in freshnessByCategory %}
+            <tr style="border-bottom:1px solid #f7f9fb;">
+              <td style="padding:12px 16px;"><span style="margin-right:8px;">&#x1F33F;</span><span style="font-weight:500;color:#293855;">{{ category }}</span></td>
+              <td style="padding:12px 16px;text-align:center;"><span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;background:#dcfce7;color:#16a34a;font-size:13px;font-weight:600;border-radius:50%;">{{ data.Fresh }}</span></td>
+              <td style="padding:12px 16px;text-align:center;"><span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;background:#fef9c3;color:#ca8a04;font-size:13px;font-weight:600;border-radius:50%;">{{ data.Good }}</span></td>
+              <td style="padding:12px 16px;text-align:center;"><span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;background:#ffedd5;color:#ea580c;font-size:13px;font-weight:600;border-radius:50%;">{{ data['Last Sale'] }}</span>{% if data['Last Sale'] > 0 %}<div style="font-size:10px;color:#ea580c;font-weight:500;margin-top:2px;">20% OFF</div>{% endif %}</td>
+              <td style="padding:12px 16px;text-align:center;"><span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;background:#fee2e2;color:#dc2626;font-size:13px;font-weight:600;border-radius:50%;">{{ data.Expired }}</span></td>
+              <td style="padding:12px 16px;text-align:center;font-weight:700;color:#293855;">{{ data.total }}</td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr><td colspan="6" style="padding:32px;text-align:center;color:#6b7a8d;">No flowers in inventory</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl overflow-hidden mb-5" style="border:1px solid #e8edf2;">
+    <div class="flex items-center justify-between px-5 py-4" style="border-bottom:1px solid #e8edf2;">
+      <div>
+        <div style="font-family:'Bricolage Grotesque',serif;font-size:16px;font-weight:600;color:#293855;">Detailed Freshness by Flower</div>
+        <div style="font-size:12px;color:#6b7a8d;margin-top:2px;">Individual flower inventory status</div>
+      </div>
+      <div class="flex gap-2" style="font-size:11px;">
+        <span style="padding:2px 8px;background:#dcfce7;color:#166534;border-radius:4px;">Fresh</span>
+        <span style="padding:2px 8px;background:#fef9c3;color:#854d0e;border-radius:4px;">Good</span>
+        <span style="padding:2px 8px;background:#ffedd5;color:#9a3412;border-radius:4px;">Last Sale</span>
+        <span style="padding:2px 8px;background:#fee2e2;color:#991b1b;border-radius:4px;">Expired</span>
+      </div>
+    </div>
+    <div style="max-height:384px;overflow-y:auto;">
+      {% if freshnessByFlowerName is not empty %}
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 p-5">
+        {% for flowerName, data in freshnessByFlowerName %}
+        <div class="rounded-lg p-4" style="background:#f9fafb;border:1px solid #e8edf2;">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <div style="font-weight:600;color:#293855;">{{ flowerName }}</div>
+              <div style="font-size:11px;color:#6b7a8d;">{{ data.category }}</div>
+            </div>
+            <span style="font-size:13px;font-weight:700;color:#293855;">{{ data.stockQuantity }} in stock</span>
+          </div>
+          {% set total = data.total %}
+          {% if total > 0 %}
+          {% if data.stockQuantity < 5 and data.stockQuantity > 0 %}
+          <div style="font-size:11px;color:#c0392b;font-weight:500;margin-bottom:6px;">&#x26A0;&#xFE0F; Low stock</div>
+          {% endif %}
+          <div class="flex h-2 rounded-full overflow-hidden" style="background:#eef0f4;">
+            {% if data.Fresh > 0 %}<div style="background:#22c55e;width:{{ (data.Fresh / total * 100)|round }}%;min-height:2px;"></div>{% endif %}
+            {% if data.Good > 0 %}<div style="background:#eab308;width:{{ (data.Good / total * 100)|round }}%;min-height:2px;"></div>{% endif %}
+            {% if data['Last Sale'] > 0 %}<div style="background:#f97316;width:{{ (data['Last Sale'] / total * 100)|round }}%;min-height:2px;"></div>{% endif %}
+            {% if data.Expired > 0 %}<div style="background:#ef4444;width:{{ (data.Expired / total * 100)|round }}%;min-height:2px;"></div>{% endif %}
+          </div>
+          <div class="flex justify-between mt-2" style="font-size:11px;">
+            <span style="color:#16a34a;">{{ data.Fresh }} Fresh</span>
+            <span style="color:#ca8a04;">{{ data.Good }} Good</span>
+            <span style="color:#ea580c;">{{ data['Last Sale'] }} Sale</span>
+            <span style="color:#dc2626;">{{ data.Expired }} Exp</span>
+          </div>
           {% endif %}
         </div>
+        {% endfor %}
       </div>
-      
-      {% if expiringSoonFlowers is not empty %}
-        <div class="space-y-3 max-h-64 overflow-y-auto">
-          {% for flower in expiringSoonFlowers %}
-            <div class="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-100">
-              <div class="flex items-center">
-                <i class="fas fa-leaf text-red-600 mr-3"></i>
-                <div>
-                  <p class="font-medium text-red-900">{{ flower.name }}</p>
-                  <p class="text-sm text-red-700">{{ flower.stockQuantity }} units • {{ flower.category }}</p>
-                </div>
-              </div>
-              <div class="text-right">
-                <p class="text-sm font-semibold text-red-600">
-                  {{ flower.expiryDate|date('M d') }}
-                </p>
-                {% if flower.discountPrice %}
-                  <div class="text-xs">
-                    <span class="font-semibold text-green-600">${{ flower.discountPrice|number_format(2) }}</span>
-                    <span class="line-through text-gray-400 ml-1">${{ flower.price|number_format(2) }}</span>
-                  </div>
-                  <p class="text-xs text-red-500 font-medium">Save ${{ (flower.price - flower.discountPrice)|number_format(2) }}</p>
-                {% endif %}
-              </div>
-            </div>
-          {% endfor %}
-        </div>
-        <div class="mt-4 pt-4 border-t border-gray-100">
-          <a href="{{ path('app_flower_index') }}" class="text-[#39A8C9] hover:text-[#5E548E] text-sm font-medium">
-            View all flowers →
-          </a>
-        </div>
       {% else %}
-        <div class="text-center py-8">
-          <i class="fas fa-check-circle text-green-500 text-3xl mb-3"></i>
-          <p class="text-gray-600 font-medium">No flowers expiring soon</p>
-          <p class="text-gray-500 text-sm">All inventory is fresh!</p>
-        </div>
+      <div class="text-center py-8" style="color:#6b7a8d;">No individual flowers tracked</div>
       {% endif %}
     </div>
   </div>
 
-  <!-- Freshness by Category Matrix -->
-  <div class="mb-12">
-    <div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
-      <div class="px-6 py-5 bg-gradient-to-r from-[#5E548E] to-[#39A8C9] text-white">
-        <h3 class="text-lg font-semibold">Freshness Overview by Category</h3>
-        <p class="text-sm text-white/80 mt-1">Real-time freshness distribution across flower categories</p>
+  <div class="bg-white rounded-xl overflow-hidden mb-5" style="border:1px solid #e8edf2;">
+    <div class="flex items-center gap-3 px-5 py-4" style="background:#fdecea;border-bottom:1px solid #f5c6c2;">
+      <span style="font-size:18px;">&#x26A0;&#xFE0F;</span>
+      <div>
+        <div style="font-family:'Bricolage Grotesque',serif;font-size:16px;font-weight:600;color:#c0392b;">Low Stock Alert</div>
+        <div style="font-size:12px;color:#6b7a8d;">Flowers with fewer than 5 units in stock</div>
       </div>
-      
-      <div class="overflow-x-auto">
-        <table class="min-w-full">
-          <thead class="bg-gray-50">
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-              <th class="px-4 py-3 text-center text-xs font-medium text-green-600 uppercase tracking-wider">Fresh</th>
-              <th class="px-4 py-3 text-center text-xs font-medium text-yellow-600 uppercase tracking-wider">Good</th>
-              <th class="px-4 py-3 text-center text-xs font-medium text-red-600 uppercase tracking-wider">Last Sale</th>
-              <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Expired</th>
-              <th class="px-4 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider">Total</th>
-            </tr>
-          </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            {% if freshnessByCategory is not empty %}
-              {% for category, data in freshnessByCategory %}
-                <tr class="hover:bg-gray-50 transition-colors duration-200">
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="flex items-center">
-                      <i class="fas fa-leaf text-[#5E548E] mr-3"></i>
-                      <span class="text-sm font-semibold text-gray-900">{{ category }}</span>
-                    </div>
-                  </td>
-                  <td class="px-4 py-4 text-center">
-                    <span class="inline-flex items-center justify-center w-8 h-8 bg-green-100 text-green-800 text-sm font-semibold rounded-full">
-                      {{ data.Fresh }}
-                    </span>
-                  </td>
-                  <td class="px-4 py-4 text-center">
-                    <span class="inline-flex items-center justify-center w-8 h-8 bg-yellow-100 text-yellow-800 text-sm font-semibold rounded-full">
-                      {{ data.Good }}
-                    </span>
-                  </td>
-                  <td class="px-4 py-4 text-center">
-                    <span class="inline-flex items-center justify-center w-8 h-8 bg-red-100 text-red-800 text-sm font-semibold rounded-full">
-                      {{ data['Last Sale'] }}
-                    </span>
-                    {% if data['Last Sale'] > 0 %}
-                      <div class="text-xs text-red-600 font-medium mt-1">20% OFF</div>
-                    {% endif %}
-                  </td>
-                  <td class="px-4 py-4 text-center">
-                    <span class="inline-flex items-center justify-center w-8 h-8 bg-gray-100 text-gray-600 text-sm font-semibold rounded-full">
-                      {{ data.Expired }}
-                    </span>
-                  </td>
-                  <td class="px-4 py-4 text-center">
-                    <span class="text-sm font-bold text-gray-900">{{ data.total }}</span>
-                  </td>
-                </tr>
-              {% endfor %}
-            {% else %}
-              <tr>
-                <td colspan="6" class="px-6 py-8 text-center text-gray-500">
-                  <i class="fas fa-seedling text-4xl mb-3 text-gray-300"></i>
-                  <p class="text-lg font-medium">No flowers in inventory</p>
-                  <p class="text-sm">Add some flowers to see freshness tracking</p>
-                </td>
-              </tr>
-            {% endif %}
-          </tbody>
-        </table>
+    </div>
+    <div class="overflow-x-auto">
+      {% if lowStockFlowers is not empty %}
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr style="border-bottom:1px solid #f0f3f7;">
+            <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:500;color:#6b7a8d;text-transform:uppercase;">Flower</th>
+            <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:500;color:#6b7a8d;text-transform:uppercase;">Category</th>
+            <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:500;color:#6b7a8d;text-transform:uppercase;">Stock</th>
+            <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:500;color:#6b7a8d;text-transform:uppercase;">Status</th>
+            <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:500;color:#6b7a8d;text-transform:uppercase;">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for flower in lowStockFlowers %}
+          <tr style="border-bottom:1px solid #f7f9fb;">
+            <td style="padding:12px 16px;font-weight:500;color:#293855;">{{ flower.name }}</td>
+            <td style="padding:12px 16px;color:#6b7a8d;">{{ flower.category }}</td>
+            <td style="padding:12px 16px;color:#c0392b;font-weight:600;">{{ flower.stockQuantity }} units</td>
+            <td style="padding:12px 16px;">
+              <span style="display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500;{{ flower.status == 'Available' ? 'background:#e8f7eb;color:#2d8a4e;' : 'background:#fdecea;color:#c0392b;' }}">{{ flower.status }}</span>
+            </td>
+            <td style="padding:12px 16px;text-align:right;">
+              <a href="{{ path('app_flower_edit', {'id': flower.id}) }}" style="color:#4265d6;font-weight:500;font-size:13px;text-decoration:none;"><i class="fas fa-edit" style="margin-right:4px;"></i>Update</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="text-center py-10">
+        <div style="font-size:32px;margin-bottom:8px;">&#x2705;</div>
+        <div style="font-size:14px;font-weight:500;color:#293855;">All stocks are healthy</div>
+        <div style="font-size:12px;color:#6b7a8d;">No low-stock alerts at the moment.</div>
       </div>
+      {% endif %}
     </div>
   </div>
 
-  <!-- Detailed Freshness by Flower Name -->
-  <div class="mb-12">
-    <div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
-      <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
-        <div>
-          <h3 class="text-lg font-semibold text-[#2E2E2E]">Detailed Freshness by Flower</h3>
-          <p class="text-sm text-gray-600 mt-1">Individual flower inventory status</p>
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+    <div class="lg:col-span-2 bg-white rounded-xl overflow-hidden" style="border:1px solid #e8edf2;">
+      <div class="flex items-center justify-between px-5 py-4" style="border-bottom:1px solid #e8edf2;">
+        <div style="font-family:'Bricolage Grotesque',serif;font-size:16px;font-weight:600;color:#293855;">Recent Activity</div>
+        <a href="{{ path('app_activity_log_index') }}" style="font-size:12px;color:#4265d6;font-weight:500;text-decoration:none;">View all &#x2192;</a>
+      </div>
+      <div class="px-5 py-4 space-y-3">
+        <div class="p-4 rounded-lg" style="background:#eaeefc;">
+          <div style="font-size:13px;font-weight:500;color:#293855;">New reservation created</div>
+          <div style="font-size:12px;color:#6b7a8d;margin-top:4px;">A customer placed a new flower reservation.</div>
         </div>
-        <div class="flex space-x-2 text-xs">
-          <span class="px-2 py-1 bg-green-100 text-green-700 rounded">Fresh</span>
-          <span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded">Good</span>
-          <span class="px-2 py-1 bg-red-100 text-red-700 rounded">Last Sale</span>
-          <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded">Expired</span>
-        </div>
-      </div>
-      
-      <div class="max-h-96 overflow-y-auto">
-        {% if freshnessByFlowerName is not empty %}
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 p-6">
-            {% for flowerName, data in freshnessByFlowerName %}
-              <div class="bg-gray-50 rounded-lg p-4 border border-gray-100">
-                <div class="flex items-center justify-between mb-3">
-                  <div>
-                    <h4 class="font-semibold text-gray-900">{{ flowerName }}</h4>
-                    <p class="text-xs text-gray-500">{{ data.category }}</p>
-                  </div>
-                  <span class="text-sm font-bold text-gray-700">{{ data.total }} units</span>
-                </div>
-                
-                <!-- Mini Progress Bar Visualization -->
-                <div class="space-y-2">
-                  {% set total = data.total %}
-                  {% if total > 0 %}
-                    <div class="flex h-2 bg-gray-200 rounded-full overflow-hidden">
-                      {% if data.Fresh > 0 %}
-                        <div class="bg-green-500" style="width: {{ (data.Fresh / total * 100)|round }}%"></div>
-                      {% endif %}
-                      {% if data.Good > 0 %}
-                        <div class="bg-yellow-500" style="width: {{ (data.Good / total * 100)|round }}%"></div>
-                      {% endif %}
-                      {% if data['Last Sale'] > 0 %}
-                        <div class="bg-red-500" style="width: {{ (data['Last Sale'] / total * 100)|round }}%"></div>
-                      {% endif %}
-                      {% if data.Expired > 0 %}
-                        <div class="bg-gray-400" style="width: {{ (data.Expired / total * 100)|round }}%"></div>
-                      {% endif %}
-                    </div>
-                    
-                    <div class="flex justify-between text-xs">
-                      <span class="text-green-600">{{ data.Fresh }} Fresh</span>
-                      <span class="text-yellow-600">{{ data.Good }} Good</span>
-                      <span class="text-red-600">{{ data['Last Sale'] }} Sale</span>
-                      <span class="text-gray-500">{{ data.Expired }} Exp</span>
-                    </div>
-                  {% endif %}
-                </div>
-              </div>
-            {% endfor %}
-          </div>
-        {% else %}
-          <div class="p-8 text-center text-gray-500">
-            <i class="fas fa-flower text-4xl mb-3 text-gray-300"></i>
-            <p class="text-lg font-medium">No individual flowers tracked</p>
-          </div>
-        {% endif %}
-      </div>
-    </div>
-  </div>
-
-  <!-- Low Stock Alert -->
-  <div class="mb-12">
-    <div class="bg-white shadow-md rounded-2xl overflow-hidden border border-gray-200">
-      <div class="px-6 py-4 bg-[#FFF0F0] border-b border-[#FFD1D1] flex items-center">
-        <i class="fas fa-exclamation-triangle text-[#C94C4C] text-xl mr-3"></i>
-        <div>
-          <h3 class="text-lg font-semibold text-[#C94C4C]">Low Stock Alert</h3>
-          <p class="text-sm text-gray-600">Flowers with fewer than 5 units in stock</p>
-        </div>
-      </div>
-
-      <div class="px-6 py-5">
-        {% if lowStockFlowers is not empty %}
-          <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 text-sm">
-              <thead class="bg-gray-50">
-                <tr class="text-left text-gray-500 uppercase text-xs tracking-wider">
-                  <th class="px-6 py-3">Flower</th>
-                  <th class="px-6 py-3">Category</th>
-                  <th class="px-6 py-3">Stock</th>
-                  <th class="px-6 py-3">Status</th>
-                  <th class="px-6 py-3 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-200">
-                {% for flower in lowStockFlowers %}
-                <tr class="hover:bg-gray-50">
-                  <td class="px-6 py-4 font-medium text-gray-900">{{ flower.name }}</td>
-                  <td class="px-6 py-4 text-gray-700">{{ flower.category }}</td>
-                  <td class="px-6 py-4 text-[#C94C4C] font-semibold">{{ flower.stockQuantity }} units</td>
-                  <td class="px-6 py-4">
-                    <span class="px-2.5 py-0.5 rounded-full text-xs font-medium {{ flower.status == 'Available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                      {{ flower.status }}
-                    </span>
-                  </td>
-                  <td class="px-6 py-4 text-right">
-                    <a href="{{ path('app_flower_edit', {'id': flower.id}) }}" class="text-[#39A8C9] hover:text-[#5E548E] font-medium">
-                      <i class="fas fa-edit mr-1"></i>Update
-                    </a>
-                  </td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        {% else %}
-          <div class="text-center py-10">
-            <i class="fas fa-check-circle text-green-500 text-4xl mb-3"></i>
-            <h3 class="text-lg font-medium text-gray-900">All stocks are healthy</h3>
-            <p class="text-gray-500">No low-stock alerts at the moment.</p>
-          </div>
-        {% endif %}
-      </div>
-    </div>
-  </div>
-
-  <!-- Recent Activity & Summary -->
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-    <div class="lg:col-span-2 bg-white rounded-2xl shadow-md border border-gray-100">
-      <div class="px-6 py-5 border-b border-gray-100">
-        <h3 class="text-lg font-semibold text-[#2E2E2E]">Recent Activity</h3>
-      </div>
-      <div class="px-6 py-4 space-y-5">
-        <div class="p-4 rounded-lg bg-[#39A8C910] hover:bg-[#39A8C920] transition">
-          <h4 class="font-medium text-[#2E2E2E]">New reservation created</h4>
-          <p class="text-sm text-gray-600 mt-1">A customer placed a new flower reservation in the system.</p>
-        </div>
-        <div class="p-4 rounded-lg bg-[#5E548E10] hover:bg-[#5E548E20] transition">
-          <h4 class="font-medium text-[#2E2E2E]">Stock updated</h4>
-          <p class="text-sm text-gray-600 mt-1">Supplier delivered new rose stocks to inventory.</p>
+        <div class="p-4 rounded-lg" style="background:#e8f7eb;">
+          <div style="font-size:13px;font-weight:500;color:#293855;">Stock updated</div>
+          <div style="font-size:12px;color:#6b7a8d;margin-top:4px;">Supplier delivered new stocks to inventory.</div>
         </div>
       </div>
     </div>
-
-    <div class="bg-white rounded-2xl shadow-md border border-gray-100">
-      <div class="px-6 py-5 border-b border-gray-100">
-        <h3 class="text-lg font-semibold text-[#2E2E2E]">Monthly Summary</h3>
+    <div class="bg-white rounded-xl overflow-hidden" style="border:1px solid #e8edf2;">
+      <div class="px-5 py-4" style="border-bottom:1px solid #e8edf2;">
+        <div style="font-family:'Bricolage Grotesque',serif;font-size:16px;font-weight:600;color:#293855;">Monthly Summary</div>
       </div>
-      <div class="px-6 py-4 space-y-4">
-        <div class="flex justify-between">
-          <span class="text-sm text-gray-600">Total Revenue</span>
-          <span class="font-medium text-[#5E548E]">$0.00</span>
-        </div>
-        <div class="flex justify-between">
-          <span class="text-sm text-gray-600">Orders This Month</span>
-          <span class="font-medium text-[#39A8C9]">{{ totalReservations }}</span>
-        </div>
-        <div class="flex justify-between">
-          <span class="text-sm text-gray-600">New Customers</span>
-          <span class="font-medium text-[#5E548E]">{{ totalCustomers }}</span>
+      <div class="px-5 py-4 space-y-4">
+        <div class="flex justify-between"><span style="font-size:13px;color:#6b7a8d;">Total Revenue</span><span style="font-size:13px;font-weight:600;color:#293855;">₱0.00</span></div>
+        <div class="flex justify-between"><span style="font-size:13px;color:#6b7a8d;">Orders This Month</span><span style="font-size:13px;font-weight:600;color:#4265d6;">{{ totalReservations }}</span></div>
+        <div class="flex justify-between"><span style="font-size:13px;color:#6b7a8d;">New Customers</span><span style="font-size:13px;font-weight:600;color:#293855;">{{ totalCustomers }}</span></div>
+        <div style="border-top:1px solid #e8edf2;padding-top:16px;margin-top:8px;">
+          <a href="{{ path('app_reports_index') }}" style="font-size:12px;color:#4265d6;font-weight:500;text-decoration:none;">View full report &#x2192;</a>
         </div>
       </div>
     </div>

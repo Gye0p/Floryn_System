@@ -1,0 +1,295 @@
+{% extends 'base.html.twig' %}
+
+{% block page_title %}Search Results{% endblock %}
+{% block title %}Search — Floryn Garden{% endblock %}
+
+{% block body %}
+<div class="px-4 sm:px-6 lg:px-8">
+
+  {# Breadcrumb #}
+  <div class="mb-6">
+    <nav class="flex" aria-label="Breadcrumb">
+      <ol class="flex items-center space-x-4">
+        <li>
+          <a href="{{ path('admin_dashboard') }}" class="text-[#6b7a8d] hover:text-[#293855] transition-colors">
+            <i class="fas fa-home"></i>
+          </a>
+        </li>
+        <li>
+          <div class="flex items-center">
+            <i class="fas fa-chevron-right mr-4" style="color:#6b7a8d;"></i>
+            <span style="font-size:13px;font-weight:500;color:#6b7a8d;">Search Results</span>
+          </div>
+        </li>
+      </ol>
+    </nav>
+  </div>
+
+  {# Header #}
+  <div class="mb-8">
+    <h1 class="flex items-center gap-3" style="font-family:'Bricolage Grotesque',serif;font-size:22px;font-weight:600;color:#293855;">
+      <i class="fas fa-search"></i>
+      Search Results
+    </h1>
+    {% if q %}
+      <p style="margin-top:8px;font-size:14px;color:#6b7a8d;">
+        Found <strong style="color:#293855;">{{ totalCount }}</strong> result{{ totalCount != 1 ? 's' : '' }} for "<strong style="color:#293855;">{{ q }}</strong>"
+      </p>
+    {% endif %}
+  </div>
+
+  {# Search form #}
+  <form action="{{ path('app_search') }}" method="GET" class="mb-8">
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 rounded-xl px-4 py-3 flex-1" style="background:white;border:1px solid #dde3ec;max-width:500px;">
+        <span style="font-size:16px;color:#6b7a8d;">🔍</span>
+        <input type="text"
+               name="q"
+               value="{{ q }}"
+               placeholder="Search flowers, customers, suppliers, reservations, payments..."
+               class="bg-transparent border-none outline-none flex-1"
+               style="font-size:14px;color:#293855;font-family:'Inter',sans-serif;">
+      </div>
+      <button type="submit"
+              class="px-5 py-3 rounded-xl text-white font-medium transition-all duration-200 bg-[#4265d6] hover:bg-[#3554b8]"
+              style="font-size:14px;">
+        Search
+      </button>
+    </div>
+  </form>
+
+  {% if q and q|length >= 2 %}
+
+    {% if totalCount == 0 %}
+      <div class="rounded-xl py-16 text-center" style="background:white;border:1px solid #e8edf2;">
+        <div style="font-size:48px;margin-bottom:12px;">🔍</div>
+        <p style="font-size:16px;font-weight:500;color:#293855;">No results found</p>
+        <p style="font-size:13px;color:#6b7a8d;margin-top:4px;">Try a different keyword or check your spelling</p>
+      </div>
+    {% endif %}
+
+    {# Flowers #}
+    {% if flowers|length > 0 %}
+      <div class="mb-8">
+        <h2 class="flex items-center gap-2 mb-4" style="font-size:16px;font-weight:600;color:#293855;">
+          <span>🌺</span> Flowers <span class="ml-1 px-2 py-0.5 rounded-full text-xs" style="background:#e8f5e9;color:#2e7d32;">{{ flowers|length }}</span>
+        </h2>
+        <div class="rounded-xl overflow-hidden" style="background:white;border:1px solid #e8edf2;">
+          <table class="w-full">
+            <thead>
+              <tr style="background:#f9fafb;border-bottom:1px solid #e8edf2;">
+                <th class="text-left px-5 py-3" style="font-size:12px;font-weight:500;color:#6b7a8d;text-transform:uppercase;letter-spacing:0.5px;">Name</th>
+                <th class="text-left px-5 py-3" style="font-size:12px;font-weight:500;color:#6b7a8d;text-transform:uppercase;letter-spacing:0.5px;">Category</th>
+                <th class="text-left px-5 py-3" style="font-size:12px;font-weight:500;color:#6b7a8d;text-transform:uppercase;letter-spacing:0.5px;">Price</th>
+                <th class="text-left px-5 py-3" style="font-size:12px;font-weight:500;color:#6b7a8d;text-transform:uppercase;letter-spacing:0.5px;">Stock</th>
+                <th class="text-left px-5 py-3" style="font-size:12px;font-weight:500;color:#6b7a8d;text-transform:uppercase;letter-spacing:0.5px;">Status</th>
+                <th class="text-right px-5 py-3"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for flower in flowers %}
+                <tr class="border-b border-[#f0f3f7] bg-white hover:bg-[#f9fafb] transition-colors">
+                  <td class="px-5 py-3" style="font-size:14px;font-weight:500;color:#293855;">{{ flower.name }}</td>
+                  <td class="px-5 py-3" style="font-size:13px;color:#6b7a8d;">{{ flower.category }}</td>
+                  <td class="px-5 py-3" style="font-size:13px;color:#293855;">₱{{ flower.price|number_format(2) }}</td>
+                  <td class="px-5 py-3" style="font-size:13px;color:#6b7a8d;">{{ flower.stockQuantity }}</td>
+                  <td class="px-5 py-3">
+                    <span class="px-2 py-1 rounded-full text-xs font-medium"
+                          style="{% if flower.status == 'Available' %}background:#dcfce7;color:#166534;{% elseif flower.status == 'Low Stock' %}background:#fef9c3;color:#854d0e;{% else %}background:#fee2e2;color:#991b1b;{% endif %}">
+                      {{ flower.status }}
+                    </span>
+                  </td>
+                  <td class="px-5 py-3 text-right">
+                    <a href="{{ path('app_flower_show', {id: flower.id}) }}"
+                       class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 text-[#4265d6] bg-[#eef2ff] hover:bg-[#dde5ff]">
+                      View <i class="fas fa-arrow-right" style="font-size:10px;"></i>
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% endif %}
+
+    {# Customers #}
+    {% if customers|length > 0 %}
+      <div class="mb-8">
+        <h2 class="flex items-center gap-2 mb-4" style="font-size:16px;font-weight:600;color:#293855;">
+          <span>👥</span> Customers <span class="ml-1 px-2 py-0.5 rounded-full text-xs" style="background:#e3f2fd;color:#1565c0;">{{ customers|length }}</span>
+        </h2>
+        <div class="table-card" data-controller="floryn-table" data-floryn-table-page-size-value="10" data-floryn-table-sort-col-value="0" data-floryn-table-sort-dir-value="asc" data-floryn-table-no-sort-cols-value="[3]" data-floryn-table-entity-name-value="customers">
+          <table class="fg-table" data-floryn-table-target="table">
+                <th class="text-right px-5 py-3"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for customer in customers %}
+                <tr class="border-b border-[#f0f3f7] bg-white hover:bg-[#f9fafb] transition-colors">
+                  <td class="px-5 py-3" style="font-size:14px;font-weight:500;color:#293855;">{{ customer.fullName }}</td>
+                  <td class="px-5 py-3" style="font-size:13px;color:#6b7a8d;">{{ customer.email }}</td>
+                  <td class="px-5 py-3" style="font-size:13px;color:#6b7a8d;">{{ customer.phone }}</td>
+                  <td class="px-5 py-3 text-right">
+                    <a href="{{ path('app_customer_show', {id: customer.id}) }}"
+                       class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 text-[#4265d6] bg-[#eef2ff] hover:bg-[#dde5ff]">
+                      View <i class="fas fa-arrow-right" style="font-size:10px;"></i>
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          <div class="fg-bottom-bar">
+            <div class="fg-info" data-floryn-table-target="info"></div>
+            <div class="fg-pagination" data-floryn-table-target="pagination"></div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
+    {# Suppliers #}
+    {% if suppliers|length > 0 %}
+      <div class="mb-8">
+        <h2 class="flex items-center gap-2 mb-4" style="font-size:16px;font-weight:600;color:#293855;">
+          <span>🚚</span> Suppliers <span class="ml-1 px-2 py-0.5 rounded-full text-xs" style="background:#fff3e0;color:#e65100;">{{ suppliers|length }}</span>
+        </h2>
+        <div class="table-card" data-controller="floryn-table" data-floryn-table-page-size-value="10" data-floryn-table-sort-col-value="0" data-floryn-table-sort-dir-value="asc" data-floryn-table-no-sort-cols-value="[3]" data-floryn-table-entity-name-value="suppliers">
+          <table class="fg-table" data-floryn-table-target="table">
+                <th class="text-right px-5 py-3"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for supplier in suppliers %}
+                <tr class="border-b border-[#f0f3f7] bg-white hover:bg-[#f9fafb] transition-colors">
+                  <td class="px-5 py-3" style="font-size:14px;font-weight:500;color:#293855;">{{ supplier.supplierName }}</td>
+                  <td class="px-5 py-3" style="font-size:13px;color:#6b7a8d;">{{ supplier.contactPerson }}</td>
+                  <td class="px-5 py-3" style="font-size:13px;color:#6b7a8d;">{{ supplier.email }}</td>
+                  <td class="px-5 py-3 text-right">
+                    <a href="{{ path('app_supplier_show', {id: supplier.id}) }}"
+                       class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 text-[#4265d6] bg-[#eef2ff] hover:bg-[#dde5ff]">
+                      View <i class="fas fa-arrow-right" style="font-size:10px;"></i>
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          <div class="fg-bottom-bar">
+            <div class="fg-info" data-floryn-table-target="info"></div>
+            <div class="fg-pagination" data-floryn-table-target="pagination"></div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
+    {# Reservations #}
+    {% if reservations|length > 0 %}
+      <div class="mb-8">
+        <h2 class="flex items-center gap-2 mb-4" style="font-size:16px;font-weight:600;color:#293855;">
+          <span>📦</span> Reservations <span class="ml-1 px-2 py-0.5 rounded-full text-xs" style="background:#f3e5f5;color:#7b1fa2;">{{ reservations|length }}</span>
+        </h2>
+        <div class="table-card" data-controller="floryn-table" data-floryn-table-page-size-value="10" data-floryn-table-sort-col-value="0" data-floryn-table-sort-dir-value="desc" data-floryn-table-no-sort-cols-value="[4]" data-floryn-table-entity-name-value="reservations">
+          <table class="fg-table" data-floryn-table-target="table">
+            <thead>
+              <tr style="background:#f9fafb;border-bottom:1px solid #e8edf2;">
+                <th class="text-left px-5 py-3" style="font-size:12px;font-weight:500;color:#6b7a8d;text-transform:uppercase;letter-spacing:0.5px;">ID</th>
+                <th class="text-left px-5 py-3" style="font-size:12px;font-weight:500;color:#6b7a8d;text-transform:uppercase;letter-spacing:0.5px;">Customer</th>
+                <th class="text-left px-5 py-3" style="font-size:12px;font-weight:500;color:#6b7a8d;text-transform:uppercase;letter-spacing:0.5px;">Status</th>
+                <th class="text-left px-5 py-3" style="font-size:12px;font-weight:500;color:#6b7a8d;text-transform:uppercase;letter-spacing:0.5px;">Amount</th>
+                <th class="text-right px-5 py-3"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for reservation in reservations %}
+                <tr class="border-b border-[#f0f3f7] bg-white hover:bg-[#f9fafb] transition-colors">
+                  <td class="px-5 py-3" style="font-size:14px;font-weight:500;color:#293855;">#{{ reservation.id }}</td>
+                  <td class="px-5 py-3" style="font-size:13px;color:#6b7a8d;">{{ reservation.customer ? reservation.customer.fullName : '—' }}</td>
+                  <td class="px-5 py-3">
+                    <span class="px-2 py-1 rounded-full text-xs font-medium"
+                          style="{% if reservation.reservationStatus == 'Completed' %}background:#dcfce7;color:#166534;{% elseif reservation.reservationStatus == 'Confirmed' %}background:#dbeafe;color:#1e40af;{% elseif reservation.reservationStatus == 'Pending' %}background:#fef9c3;color:#854d0e;{% else %}background:#fee2e2;color:#991b1b;{% endif %}">
+                      {{ reservation.reservationStatus }}
+                    </span>
+                  </td>
+                  <td class="px-5 py-3" style="font-size:13px;color:#293855;">₱{{ reservation.totalAmount|number_format(2) }}</td>
+                  <td class="px-5 py-3 text-right">
+                    <a href="{{ path('app_reservation_show', {id: reservation.id}) }}"
+                       class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 text-[#4265d6] bg-[#eef2ff] hover:bg-[#dde5ff]">
+                      View <i class="fas fa-arrow-right" style="font-size:10px;"></i>
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          <div class="fg-bottom-bar">
+            <div class="fg-info" data-floryn-table-target="info"></div>
+            <div class="fg-pagination" data-floryn-table-target="pagination"></div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
+    {# Payments #}
+    {% if payments|length > 0 %}
+      <div class="mb-8">
+        <h2 class="flex items-center gap-2 mb-4" style="font-size:16px;font-weight:600;color:#293855;">
+          <span>💰</span> Payments <span class="ml-1 px-2 py-0.5 rounded-full text-xs" style="background:#fce4ec;color:#c62828;">{{ payments|length }}</span>
+        </h2>
+        <div class="table-card" data-controller="floryn-table" data-floryn-table-page-size-value="10" data-floryn-table-sort-col-value="0" data-floryn-table-sort-dir-value="asc" data-floryn-table-no-sort-cols-value="[4]" data-floryn-table-entity-name-value="payments">
+          <table class="fg-table" data-floryn-table-target="table">
+            <thead>
+              <tr style="background:#f9fafb;border-bottom:1px solid #e8edf2;">
+                <th class="text-left px-5 py-3" style="font-size:12px;font-weight:500;color:#6b7a8d;text-transform:uppercase;letter-spacing:0.5px;">Reference</th>
+                <th class="text-left px-5 py-3" style="font-size:12px;font-weight:500;color:#6b7a8d;text-transform:uppercase;letter-spacing:0.5px;">Method</th>
+                <th class="text-left px-5 py-3" style="font-size:12px;font-weight:500;color:#6b7a8d;text-transform:uppercase;letter-spacing:0.5px;">Amount</th>
+                <th class="text-left px-5 py-3" style="font-size:12px;font-weight:500;color:#6b7a8d;text-transform:uppercase;letter-spacing:0.5px;">Status</th>
+                <th class="text-right px-5 py-3"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for payment in payments %}
+                <tr class="border-b border-[#f0f3f7] bg-white hover:bg-[#f9fafb] transition-colors">
+                  <td class="px-5 py-3" style="font-size:14px;font-weight:500;color:#293855;">{{ payment.referenceNo }}</td>
+                  <td class="px-5 py-3" style="font-size:13px;color:#6b7a8d;">{{ payment.paymentMethod }}</td>
+                  <td class="px-5 py-3" style="font-size:13px;color:#293855;">₱{{ payment.amountPaid|number_format(2) }}</td>
+                  <td class="px-5 py-3">
+                    <span class="px-2 py-1 rounded-full text-xs font-medium"
+                          style="{% if payment.status == 'Paid' or payment.status == 'Completed' %}background:#dcfce7;color:#166534;{% elseif payment.status == 'Pending' %}background:#fef9c3;color:#854d0e;{% elseif payment.status == 'Processing' %}background:#dbeafe;color:#1e40af;{% else %}background:#fee2e2;color:#991b1b;{% endif %}">
+                      {{ payment.status }}
+                    </span>
+                  </td>
+                  <td class="px-5 py-3 text-right">
+                    <a href="{{ path('app_payment_show', {id: payment.id}) }}"
+                       class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 text-[#4265d6] bg-[#eef2ff] hover:bg-[#dde5ff]">
+                      View <i class="fas fa-arrow-right" style="font-size:10px;"></i>
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          <div class="fg-bottom-bar">
+            <div class="fg-info" data-floryn-table-target="info"></div>
+            <div class="fg-pagination" data-floryn-table-target="pagination"></div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
+  {% elseif q and q|length < 2 %}
+    <div class="rounded-xl py-16 text-center" style="background:white;border:1px solid #e8edf2;">
+      <div style="font-size:48px;margin-bottom:12px;">✏️</div>
+      <p style="font-size:16px;font-weight:500;color:#293855;">Enter at least 2 characters</p>
+      <p style="font-size:13px;color:#6b7a8d;margin-top:4px;">Type a longer query to start searching</p>
+    </div>
+  {% else %}
+    <div class="rounded-xl py-16 text-center" style="background:white;border:1px solid #e8edf2;">
+      <div style="font-size:48px;margin-bottom:12px;">🔍</div>
+      <p style="font-size:16px;font-weight:500;color:#293855;">Search across your data</p>
+      <p style="font-size:13px;color:#6b7a8d;margin-top:4px;">Find flowers, customers, suppliers, reservations, and payments</p>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

@@ -3,10 +3,13 @@
 namespace App\Controller;
 
 use App\Entity\Reservation;
+use App\Entity\FlowerBatch;
 use App\Form\ReservationType;
 use App\Repository\ReservationRepository;
+use App\Repository\FlowerBatchRepository;
 use App\Service\ActivityLogService;
 use App\Service\EmailNotificationService;
+use Doctrine\DBAL\LockMode;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -31,15 +34,22 @@ final class ReservationController extends AbstractController
     {
         $reservation = new Reservation();
         $reservation->setDateReserved(new \DateTime());
+        $reservation->setPaymentStatus('Unpaid');
+        $reservation->setReservationStatus('Pending');
         
         $form = $this->createForm(ReservationType::class, $reservation);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->beginTransaction();
+            try {
             // Validate stock availability before proceeding
             $stockErrors = [];
             foreach ($reservation->getReservationDetails() as $detail) {
                 $flower = $detail->getFlower();
+                // Lock flower row to prevent concurrent overselling
+                $entityManager->lock($flower, LockMode::PESSIMISTIC_WRITE);
+                $entityManager->refresh($flower);
                 if ($flower->getStockQuantity() < $detail->getQuantity()) {
                     $stockErrors[] = sprintf(
                         'Insufficient stock for "%s": requested %d, available %d.',
@@ -51,6 +61,7 @@ final class ReservationController extends AbstractController
             }
 
             if (!empty($stockErrors)) {
+                $entityManager->rollback();
                 foreach ($stockErrors as $error) {
                     $this->addFlash('danger', $error);
                 }
@@ -70,15 +81,26 @@ final class ReservationController extends AbstractController
                 $detail->setReservation($reservation);
                 $totalAmount += $subtotal;
                 
-                // Update flower stock
-                $newStock = $flower->getStockQuantity() - $detail->getQuantity();
-                $flower->setStockQuantity($newStock);
+                // Update flower stock — use FIFO batch deduction if batches exist
+                $batchRepo = $entityManager->getRepository(FlowerBatch::class);
+                if (!$flower->getBatches()->isEmpty()) {
+                    $batchRepo->deductStock($flower, $detail->getQuantity());
+                } else {
+                    $newStock = $flower->getStockQuantity() - $detail->getQuantity();
+                    $flower->setStockQuantity($newStock);
+                }
+
+                // Mark as Sold Out if no stock remaining
+                if ($flower->getStockQuantity() <= 0) {
+                    $flower->setStatus('Sold Out');
+                }
             }
             
             $reservation->setTotalAmount($totalAmount);
             
             $entityManager->persist($reservation);
             $entityManager->flush();
+            $entityManager->commit();
 
             $activityLog->logCreate('Reservation', $reservation->getId(), 'Reservation #' . $reservation->getId() . ' for ' . $reservation->getCustomer()->getFullName());
             
@@ -88,6 +110,14 @@ final class ReservationController extends AbstractController
             $this->addFlash('success', 'Reservation created successfully! Total: ₱' . number_format($totalAmount, 2));
 
             return $this->redirectToRoute('app_reservation_index', [], Response::HTTP_SEE_OTHER);
+            } catch (\Exception $e) {
+                $entityManager->rollback();
+                $this->addFlash('danger', 'An error occurred while creating the reservation. Please try again.');
+                return $this->render('reservation/new.html.twig', [
+                    'reservation' => $reservation,
+                    'form' => $form,
+                ]);
+            }
         }
 
         return $this->render('reservation/new.html.twig', [
@@ -119,11 +149,18 @@ final class ReservationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->beginTransaction();
+            try {
             // Restore stock for ALL original details first
+            $batchRepo = $entityManager->getRepository(FlowerBatch::class);
             foreach ($originalDetails as $detailId => $original) {
-                $original['flower']->setStockQuantity(
-                    $original['flower']->getStockQuantity() + $original['quantity']
-                );
+                if (!$original['flower']->getBatches()->isEmpty()) {
+                    $batchRepo->restoreStock($original['flower'], $original['quantity']);
+                } else {
+                    $original['flower']->setStockQuantity(
+                        $original['flower']->getStockQuantity() + $original['quantity']
+                    );
+                }
             }
 
             // Validate stock availability with restored quantities
@@ -143,9 +180,13 @@ final class ReservationController extends AbstractController
             if (!empty($stockErrors)) {
                 // Rollback: re-deduct the restored stock
                 foreach ($originalDetails as $detailId => $original) {
-                    $original['flower']->setStockQuantity(
-                        $original['flower']->getStockQuantity() - $original['quantity']
-                    );
+                    if (!$original['flower']->getBatches()->isEmpty()) {
+                        $batchRepo->deductStock($original['flower'], $original['quantity']);
+                    } else {
+                        $original['flower']->setStockQuantity(
+                            $original['flower']->getStockQuantity() - $original['quantity']
+                        );
+                    }
                 }
                 foreach ($stockErrors as $error) {
                     $this->addFlash('danger', $error);
@@ -166,16 +207,35 @@ final class ReservationController extends AbstractController
                 $totalAmount += $subtotal;
                 
                 // Deduct new quantities from stock
-                $flower->setStockQuantity($flower->getStockQuantity() - $detail->getQuantity());
+                if (!$flower->getBatches()->isEmpty()) {
+                    $batchRepo->deductStock($flower, $detail->getQuantity());
+                } else {
+                    $newStock = $flower->getStockQuantity() - $detail->getQuantity();
+                    $flower->setStockQuantity($newStock);
+                }
+
+                // Mark as Sold Out if no stock remaining
+                if ($flower->getStockQuantity() <= 0) {
+                    $flower->setStatus('Sold Out');
+                }
             }
             
             $reservation->setTotalAmount($totalAmount);
             $entityManager->flush();
+            $entityManager->commit();
 
             $activityLog->logUpdate('Reservation', $reservation->getId(), 'Reservation #' . $reservation->getId());
             $this->addFlash('success', 'Reservation updated successfully! New Total: ₱' . number_format($totalAmount, 2));
 
             return $this->redirectToRoute('app_reservation_index', [], Response::HTTP_SEE_OTHER);
+            } catch (\Exception $e) {
+                $entityManager->rollback();
+                $this->addFlash('danger', 'An error occurred while updating the reservation. Please try again.');
+                return $this->render('reservation/edit.html.twig', [
+                    'reservation' => $reservation,
+                    'form' => $form,
+                ]);
+            }
         }
 
         return $this->render('reservation/edit.html.twig', [
@@ -191,11 +251,20 @@ final class ReservationController extends AbstractController
             $reservationId = $reservation->getId();
             
             // Restore stock quantities before deleting
+            $batchRepo = $entityManager->getRepository(FlowerBatch::class);
             foreach ($reservation->getReservationDetails() as $detail) {
                 $flower = $detail->getFlower();
-                $flower->setStockQuantity(
-                    $flower->getStockQuantity() + $detail->getQuantity()
-                );
+                if (!$flower->getBatches()->isEmpty()) {
+                    $batchRepo->restoreStock($flower, $detail->getQuantity());
+                } else {
+                    $flower->setStockQuantity(
+                        $flower->getStockQuantity() + $detail->getQuantity()
+                    );
+                }
+                // Restore availability if stock was replenished
+                if ($flower->getStockQuantity() > 0 && $flower->getStatus() === 'Sold Out') {
+                    $flower->setStatus('Available');
+                }
             }
             
             $entityManager->remove($reservation);

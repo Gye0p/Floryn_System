@@ -126,7 +126,7 @@
               </div>
               <div>
                 <p class="text-sm font-semibold text-gray-900">Reservation #{{ notification_log.reservation.id }}</p>
-                <p class="text-xs text-gray-500">Total: ${{ notification_log.reservation.totalAmount|number_format(2) }}</p>
+                <p class="text-xs text-gray-500">Total: ₱{{ notification_log.reservation.totalAmount|number_format(2) }}</p>
               </div>
             </div>
             <a href="{{ path('app_reservation_show', {'id': notification_log.reservation.id}) }}"

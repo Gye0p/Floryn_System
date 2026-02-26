@@ -7,7 +7,7 @@
   {# Header #}
   <div class="mb-8">
     <h1 class="text-3xl font-bold text-gray-900 flex items-center">
-      <i class="fas fa-chart-bar text-[#5E548E] mr-3"></i>
+      <i class="fas fa-chart-bar text-[#293855] mr-3"></i>
       Reports Dashboard
     </h1>
     <p class="mt-2 text-gray-600">Generate and export comprehensive business reports</p>
@@ -22,7 +22,7 @@
           <div class="h-12 w-12 rounded-lg bg-green-100 flex items-center justify-center">
             <i class="fas fa-dollar-sign text-2xl text-green-600"></i>
           </div>
-          <i class="fas fa-arrow-right text-gray-400 group-hover:text-[#5E548E] transition-colors"></i>
+          <i class="fas fa-arrow-right text-gray-400 group-hover:text-[#293855] transition-colors"></i>
         </div>
         <h3 class="text-lg font-semibold text-gray-900 mb-2">Sales Report</h3>
         <p class="text-sm text-gray-600">Revenue, orders, and payment analytics</p>
@@ -36,7 +36,7 @@
           <div class="h-12 w-12 rounded-lg bg-blue-100 flex items-center justify-center">
             <i class="fas fa-boxes text-2xl text-blue-600"></i>
           </div>
-          <i class="fas fa-arrow-right text-gray-400 group-hover:text-[#5E548E] transition-colors"></i>
+          <i class="fas fa-arrow-right text-gray-400 group-hover:text-[#293855] transition-colors"></i>
         </div>
         <h3 class="text-lg font-semibold text-gray-900 mb-2">Inventory Report</h3>
         <p class="text-sm text-gray-600">Stock levels, value, and categories</p>
@@ -50,7 +50,7 @@
           <div class="h-12 w-12 rounded-lg bg-purple-100 flex items-center justify-center">
             <i class="fas fa-users text-2xl text-purple-600"></i>
           </div>
-          <i class="fas fa-arrow-right text-gray-400 group-hover:text-[#5E548E] transition-colors"></i>
+          <i class="fas fa-arrow-right text-gray-400 group-hover:text-[#293855] transition-colors"></i>
         </div>
         <h3 class="text-lg font-semibold text-gray-900 mb-2">Customer Report</h3>
         <p class="text-sm text-gray-600">Top customers and spending analysis</p>
@@ -64,7 +64,7 @@
           <div class="h-12 w-12 rounded-lg bg-orange-100 flex items-center justify-center">
             <i class="fas fa-truck text-2xl text-orange-600"></i>
           </div>
-          <i class="fas fa-arrow-right text-gray-400 group-hover:text-[#5E548E] transition-colors"></i>
+          <i class="fas fa-arrow-right text-gray-400 group-hover:text-[#293855] transition-colors"></i>
         </div>
         <h3 class="text-lg font-semibold text-gray-900 mb-2">Supplier Report</h3>
         <p class="text-sm text-gray-600">Supplier performance and inventory</p>
@@ -78,16 +78,30 @@
           <div class="h-12 w-12 rounded-lg bg-yellow-100 flex items-center justify-center">
             <i class="fas fa-trophy text-2xl text-yellow-600"></i>
           </div>
-          <i class="fas fa-arrow-right text-gray-400 group-hover:text-[#5E548E] transition-colors"></i>
+          <i class="fas fa-arrow-right text-gray-400 group-hover:text-[#293855] transition-colors"></i>
         </div>
         <h3 class="text-lg font-semibold text-gray-900 mb-2">Top Sellers</h3>
         <p class="text-sm text-gray-600">Best-selling flowers by volume</p>
       </div>
     </a>
+
+    {# Sold Flower History Card #}
+    <a href="{{ path('app_reports_sold_flower_history') }}" class="group">
+      <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6 border-l-4 border-rose-500">
+        <div class="flex items-center justify-between mb-4">
+          <div class="h-12 w-12 rounded-lg bg-rose-100 flex items-center justify-center">
+            <i class="fas fa-history text-2xl text-rose-600"></i>
+          </div>
+          <i class="fas fa-arrow-right text-gray-400 group-hover:text-[#293855] transition-colors"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Sold Flower History</h3>
+        <p class="text-sm text-gray-600">Sold-out flowers, units sold &amp; revenue</p>
+      </div>
+    </a>
   </div>
 
   {# Quick Stats #}
-  <div class="bg-gradient-to-r from-[#5E548E] to-[#4C4375] rounded-xl shadow-lg p-8 text-white">
+  <div class="bg-[#293855] rounded-xl shadow-lg p-8 text-white">
     <h2 class="text-2xl font-bold mb-6">Quick Export Options</h2>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       <a href="{{ path('app_reports_export_sales_csv') }}" 

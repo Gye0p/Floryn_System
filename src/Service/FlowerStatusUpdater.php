@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\Flower;
+use App\Entity\FlowerBatch;
 use Doctrine\ORM\EntityManagerInterface;
 
 class FlowerStatusUpdater
@@ -12,17 +13,24 @@ class FlowerStatusUpdater
     ) {}
 
     /**
-     * Update all flower statuses based on expiry dates
-     * - Fresh: More than 7 days until expiry
-     * - Good: 3-7 days until expiry  
-     * - Last Sale: 0-3 days until expiry (with 20% discount)
-     * - Expired: Past expiry date (marked as Unavailable)
+     * Update all flower and batch statuses based on expiry dates.
+     *
+     * Batch-level logic:
+     *  - Each batch gets its own freshnessStatus based on its expiryDate
+     *  - Expired batches: quantityRemaining → 0, active → false
+     *  - Last Sale batches: flower gets 20% discount (if any batch is Last Sale)
+     *
+     * Flower-level sync:
+     *  - stockQuantity = sum of all active batch remaining quantities
+     *  - expiryDate = earliest active batch expiry (drives freshness display)
+     *  - freshnessStatus = worst freshness among active batches
+     *  - status = Available / Sold Out / Unavailable based on remaining stock
      */
     public function updateFlowerStatuses(): array
     {
         $repository = $this->entityManager->getRepository(Flower::class);
         $flowers = $repository->findAll();
-        $today = new \DateTime();
+        $today = new \DateTime('today');
         $batchSize = 50;
         $i = 0;
         
@@ -35,8 +43,63 @@ class FlowerStatusUpdater
         ];
 
         foreach ($flowers as $flower) {
+            $batches = $flower->getBatches();
+            $hasBatches = !$batches->isEmpty();
+
+            // ── Process individual batches ──
+            if ($hasBatches) {
+                $hasLastSaleBatch = false;
+
+                foreach ($batches as $batch) {
+                    /** @var FlowerBatch $batch */
+                    if (!$batch->isActive() && $batch->getQuantityRemaining() <= 0) {
+                        continue; // Already fully consumed
+                    }
+
+                    $expiryDate = $batch->getExpiryDate();
+                    if (!$expiryDate) continue;
+
+                    $interval = $today->diff($expiryDate);
+                    $daysUntilExpiry = $interval->invert ? -$interval->days : $interval->days;
+
+                    if ($daysUntilExpiry < 0) {
+                        // Expired batch → zero out and deactivate
+                        $batch->setFreshnessStatus('Expired');
+                        $batch->setQuantityRemaining(0);
+                        $batch->setActive(false);
+                    } elseif ($daysUntilExpiry <= 3) {
+                        $batch->setFreshnessStatus('Last Sale');
+                        $hasLastSaleBatch = true;
+                    } elseif ($daysUntilExpiry <= 7) {
+                        $batch->setFreshnessStatus('Good');
+                    } else {
+                        $batch->setFreshnessStatus('Fresh');
+                    }
+                }
+
+                // Sync flower summary from its batches
+                $flower->syncFromBatches();
+
+                // Apply discount if any active batch is Last Sale
+                if ($hasLastSaleBatch && $flower->getStockQuantity() > 0) {
+                    $flower->setDiscountPrice($flower->getPrice() * 0.8);
+                } elseif ($flower->getStockQuantity() > 0) {
+                    $flower->setDiscountPrice(null);
+                }
+            }
+
+            // ── Determine flower-level freshness & status ──
             if (!$flower->getExpiryDate()) {
-                continue; // Skip flowers without expiry date
+                if (++$i % $batchSize === 0) $this->entityManager->flush();
+                continue;
+            }
+
+            // Skip flowers that are already sold out (stock = 0) — don't overwrite their status
+            if ($flower->getStockQuantity() <= 0 && $flower->getStatus() === 'Sold Out') {
+                $flower->setDiscountPrice(null);
+                $stats['expired']++;
+                if (++$i % $batchSize === 0) $this->entityManager->flush();
+                continue;
             }
 
             $expiryDate = $flower->getExpiryDate();
@@ -44,33 +107,38 @@ class FlowerStatusUpdater
             $daysUntilExpiry = $interval->invert ? -$interval->days : $interval->days;
 
             if ($daysUntilExpiry < 0) {
-                // Expired
+                // Expired — zero out stock, mark unavailable, record soldAt
                 $flower->setFreshnessStatus('Expired');
                 $flower->setStatus('Unavailable');
+                $flower->setStockQuantity(0);
+                $flower->setDiscountPrice(null);
+                if (!$flower->getSoldAt()) {
+                    $flower->setSoldAt(new \DateTime());
+                }
+                $stats['expired']++;
+            } elseif ($flower->getStockQuantity() <= 0) {
+                // Stock depleted but not yet marked — mark as Sold Out
+                $flower->setStatus('Sold Out');
+                $flower->setFreshnessStatus('Expired');
                 $flower->setDiscountPrice(null);
                 $stats['expired']++;
             } elseif ($daysUntilExpiry <= 3) {
-                // Last Sale (0-3 days) - Apply 20% discount
                 $flower->setFreshnessStatus('Last Sale');
                 $flower->setStatus('Available');
-                $discountPrice = $flower->getPrice() * 0.8; // 20% off
-                $flower->setDiscountPrice($discountPrice);
+                $flower->setDiscountPrice($flower->getPrice() * 0.8);
                 $stats['lastSale']++;
             } elseif ($daysUntilExpiry <= 7) {
-                // Good (4-7 days)
                 $flower->setFreshnessStatus('Good');
                 $flower->setStatus('Available');
-                $flower->setDiscountPrice(null);
+                if (!$hasBatches) $flower->setDiscountPrice(null);
                 $stats['good']++;
             } else {
-                // Fresh (8+ days)
                 $flower->setFreshnessStatus('Fresh');
                 $flower->setStatus('Available');
-                $flower->setDiscountPrice(null);
+                if (!$hasBatches) $flower->setDiscountPrice(null);
                 $stats['fresh']++;
             }
 
-            // Flush in batches to reduce memory usage
             if (++$i % $batchSize === 0) {
                 $this->entityManager->flush();
             }
@@ -83,22 +151,27 @@ class FlowerStatusUpdater
 
     /**
      * Read-only freshness stats (no DB writes)
+     * Only counts flowers that are actively in stock (excludes Sold Out and Unavailable)
      */
     public function getFreshnessStats(): array
     {
         $repository = $this->entityManager->getRepository(Flower::class);
         $flowers = $repository->findAll();
-        $today = new \DateTime();
+
+        // Filter out sold/unavailable/out-of-stock flowers
+        $activeFlowers = array_filter($flowers, fn(Flower $f) => 
+            $f->getStockQuantity() > 0 && !in_array($f->getStatus(), ['Sold Out', 'Unavailable'])
+        );
 
         $stats = [
             'fresh' => 0,
             'good' => 0,
             'lastSale' => 0,
             'expired' => 0,
-            'total' => count($flowers)
+            'total' => count($activeFlowers)
         ];
 
-        foreach ($flowers as $flower) {
+        foreach ($activeFlowers as $flower) {
             match ($flower->getFreshnessStatus()) {
                 'Fresh' => $stats['fresh']++,
                 'Good' => $stats['good']++,
@@ -113,6 +186,7 @@ class FlowerStatusUpdater
 
     /**
      * Get flowers that are expiring soon (within 3 days)
+     * Excludes sold out and unavailable flowers
      */
     public function getExpiringSoonFlowers(): array
     {
@@ -120,7 +194,12 @@ class FlowerStatusUpdater
         
         return $repository->createQueryBuilder('f')
             ->where('f.freshnessStatus = :lastSale')
+            ->andWhere('f.status != :soldOut')
+            ->andWhere('f.status != :unavailable')
+            ->andWhere('f.stockQuantity > 0')
             ->setParameter('lastSale', 'Last Sale')
+            ->setParameter('soldOut', 'Sold Out')
+            ->setParameter('unavailable', 'Unavailable')
             ->orderBy('f.expiryDate', 'ASC')
             ->getQuery()
             ->getResult();
@@ -128,6 +207,7 @@ class FlowerStatusUpdater
 
     /**
      * Get freshness distribution for dashboard charts
+     * Excludes sold out and unavailable flowers
      */
     public function getFreshnessDistribution(): array
     {
@@ -135,6 +215,11 @@ class FlowerStatusUpdater
         
         $result = $repository->createQueryBuilder('f')
             ->select('f.freshnessStatus, COUNT(f.id) as count')
+            ->where('f.status != :soldOut')
+            ->andWhere('f.status != :unavailable')
+            ->andWhere('f.stockQuantity > 0')
+            ->setParameter('soldOut', 'Sold Out')
+            ->setParameter('unavailable', 'Unavailable')
             ->groupBy('f.freshnessStatus')
             ->getQuery()
             ->getResult();
@@ -174,6 +259,7 @@ class FlowerStatusUpdater
 
     /**
      * Calculate total potential savings from discounted flowers
+     * Excludes sold out and unavailable flowers
      */
     public function getTotalSavings(): array
     {
@@ -182,7 +268,12 @@ class FlowerStatusUpdater
         $discountedFlowers = $repository->createQueryBuilder('f')
             ->where('f.freshnessStatus = :lastSale')
             ->andWhere('f.discountPrice IS NOT NULL')
+            ->andWhere('f.status != :soldOut')
+            ->andWhere('f.status != :unavailable')
+            ->andWhere('f.stockQuantity > 0')
             ->setParameter('lastSale', 'Last Sale')
+            ->setParameter('soldOut', 'Sold Out')
+            ->setParameter('unavailable', 'Unavailable')
             ->getQuery()
             ->getResult();
 
@@ -210,6 +301,7 @@ class FlowerStatusUpdater
     /**
      * Get freshness distribution by flower category
      * Returns array with category as key and freshness counts as values
+     * Excludes sold out and unavailable flowers
      */
     public function getFreshnessByCategory(): array
     {
@@ -219,6 +311,11 @@ class FlowerStatusUpdater
         $summary = [];
 
         foreach ($flowers as $flower) {
+            // Skip sold out, unavailable, and out-of-stock flowers
+            if ($flower->getStockQuantity() <= 0 || in_array($flower->getStatus(), ['Sold Out', 'Unavailable'])) {
+                continue;
+            }
+
             $category = $flower->getCategory();
             $status = $flower->getFreshnessStatus() ?: 'Unknown';
 
@@ -247,6 +344,7 @@ class FlowerStatusUpdater
     /**
      * Get freshness distribution by individual flower name  
      * Returns array with flower name as key and freshness counts as values
+     * Excludes sold out and unavailable flowers
      */
     public function getFreshnessByFlowerName(): array
     {
@@ -256,6 +354,11 @@ class FlowerStatusUpdater
         $summary = [];
 
         foreach ($flowers as $flower) {
+            // Skip sold out, unavailable, and out-of-stock flowers
+            if ($flower->getStockQuantity() <= 0 || in_array($flower->getStatus(), ['Sold Out', 'Unavailable'])) {
+                continue;
+            }
+
             $name = $flower->getName();
             $status = $flower->getFreshnessStatus() ?: 'Unknown';
 
@@ -266,6 +369,7 @@ class FlowerStatusUpdater
                     'Last Sale' => 0,
                     'Expired' => 0,
                     'total' => 0,
+                    'stockQuantity' => 0,
                     'category' => $flower->getCategory()
                 ];
             }
@@ -274,6 +378,7 @@ class FlowerStatusUpdater
                 $summary[$name][$status]++;
             }
             $summary[$name]['total']++;
+            $summary[$name]['stockQuantity'] += $flower->getStockQuantity();
         }
 
         // Sort by flower name

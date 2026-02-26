@@ -116,7 +116,7 @@ class ReservationTest extends TestCase
         $result = $this->reservation
             ->setPickupDate(new \DateTime())
             ->setTotalAmount('100')
-            ->setPaymentStatus('Pending')
+            ->setPaymentStatus('Unpaid')
             ->setReservationStatus('Pending')
             ->setDateReserved(new \DateTime());
 

@@ -4,264 +4,288 @@
 {% block page_title %}{{ flower.name }}{% endblock %}
 
 {% block body %}
-<div class="px-4 sm:px-6 lg:px-8">
-  <!-- Header -->
-  <div class="mb-6">
-    <nav class="flex" aria-label="Breadcrumb">
-      <ol class="flex items-center space-x-4">
-        <li>
-          <div>
-            <a href="{{ path('admin_dashboard') }}" class="text-gray-400 hover:text-gray-500">
-              <i class="fas fa-home"></i>
-              <span class="sr-only">Home</span>
-            </a>
-          </div>
-        </li>
-        <li>
-          <div class="flex items-center">
-            <i class="fas fa-chevron-right text-gray-400 mr-4"></i>
-            <a href="{{ path('app_flower_index') }}" class="text-sm font-medium text-gray-500 hover:text-gray-700">Flowers</a>
-          </div>
-        </li>
-        <li>
-          <div class="flex items-center">
-            <i class="fas fa-chevron-right text-gray-400 mr-4"></i>
-            <span class="text-sm font-medium text-gray-500">{{ flower.name }}</span>
-          </div>
-        </li>
-      </ol>
-    </nav>
-    
-    <!-- Action Buttons -->
-    <div class="mt-4 flex justify-between items-start">
+<div class="page-wrapper px-4 sm:px-6 lg:px-8">
+  <div class="breadcrumb">
+    <a href="{{ path('admin_dashboard') }}"><i class="fas fa-home"></i></a>
+    <span class="separator"><i class="fas fa-chevron-right"></i></span>
+    <a href="{{ path('app_flower_index') }}">Flowers</a>
+    <span class="separator"><i class="fas fa-chevron-right"></i></span>
+    <span class="current">{{ flower.name }}</span>
+  </div>
+
+  <div class="page-header">
+    <div class="page-header-info" style="display:flex;align-items:center;gap:14px;">
+      <div class="avatar lg" style="background:linear-gradient(135deg,#e88da0,#d65d7a);"><i class="fas fa-leaf" style="font-size:22px;"></i></div>
       <div>
-        <h1 class="text-2xl font-bold text-gray-900 flex items-center">
-          <div class="h-8 w-8 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 flex items-center justify-center mr-3">
-            <i class="fas fa-leaf text-white"></i>
-          </div>
-          {{ flower.name }}
-        </h1>
-        <p class="mt-2 text-sm text-gray-600">Complete information about this flower in your inventory.</p>
+        <h1 style="gap:0;">{{ flower.name }}</h1>
+        <p class="subtitle">Complete inventory details for this flower.</p>
       </div>
-      
-      <div class="flex space-x-3">
-        <a href="{{ path('app_flower_edit', {'id': flower.id}) }}" 
-           class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
-          <i class="fas fa-edit mr-2"></i>
-          Edit Flower
-        </a>
-        <a href="{{ path('app_flower_index') }}" 
-           class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors duration-200">
-          <i class="fas fa-arrow-left mr-2"></i>
-          Back to List
-        </a>
-      </div>
+    </div>
+    <div class="page-header-actions">
+      <a href="{{ path('app_flower_edit', {'id': flower.id}) }}" class="btn btn-primary"><i class="fas fa-edit"></i> Edit Flower</a>
+      <a href="{{ path('app_flower_index') }}" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Back to List</a>
     </div>
   </div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-    <!-- Main Information -->
-    <div class="lg:col-span-2">
-      <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-        <div class="px-6 py-4 bg-gradient-to-r from-emerald-50 to-teal-50 border-b border-emerald-200">
-          <h3 class="text-lg font-medium text-emerald-900 flex items-center">
-            <i class="fas fa-info-circle mr-2 text-emerald-600"></i>
-            Flower Details
-          </h3>
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+    <div class="lg:col-span-2 space-y-5">
+      <!-- Flower Details -->
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-icon blue"><i class="fas fa-info-circle"></i></div>
+          <h3>Flower Details</h3>
         </div>
-        
-        <div class="px-6 py-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <dt class="text-sm font-medium text-gray-500">Name</dt>
-              <dd class="mt-1 text-lg font-semibold text-gray-900">{{ flower.name }}</dd>
+        <div class="section-body">
+          <div class="detail-grid">
+            <div class="detail-item">
+              <div class="detail-label">Name</div>
+              <div class="detail-value" style="font-size:17px;font-weight:600;">{{ flower.name }}</div>
             </div>
-            
-            <div>
-              <dt class="text-sm font-medium text-gray-500">Category</dt>
-              <dd class="mt-1">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-                  {{ flower.category }}
-                </span>
-              </dd>
+            <div class="detail-item">
+              <div class="detail-label">Category</div>
+              <div><span class="pill navy">{{ flower.category }}</span></div>
             </div>
-            
-            <div>
-              <dt class="text-sm font-medium text-gray-500">Price per Unit</dt>
-              <dd class="mt-1 text-2xl font-bold text-emerald-600">${{ flower.price|number_format(2) }}</dd>
+            <div class="detail-item">
+              <div class="detail-label">Price per Unit</div>
+              <div class="detail-value large">₱{{ flower.price|number_format(2) }}</div>
             </div>
-            
-            <div>
-              <dt class="text-sm font-medium text-gray-500">Stock Quantity</dt>
-              <dd class="mt-1 flex items-center">
-                <span class="text-lg font-semibold {% if flower.stockQuantity < 5 %}text-red-600{% else %}text-gray-900{% endif %}">
-                  {{ flower.stockQuantity }} units
-                </span>
+            <div class="detail-item">
+              <div class="detail-label">Stock Quantity</div>
+              <div class="detail-value" style="display:flex;align-items:center;gap:8px;">
+                <span class="{% if flower.stockQuantity < 5 %}text-red-600{% else %}text-gray-900{% endif %}" style="font-size:17px;font-weight:600;">{{ flower.stockQuantity }} units</span>
                 {% if flower.stockQuantity < 5 %}
-                  <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                    Low Stock
-                  </span>
+                  <span class="pill red">Low Stock</span>
                 {% endif %}
-              </dd>
+              </div>
             </div>
-            
-            <div>
-              <dt class="text-sm font-medium text-gray-500">Freshness Status</dt>
-              <dd class="mt-1">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium 
-                  {% if flower.freshnessStatus == 'Fresh' %}bg-green-100 text-green-800
-                  {% elseif flower.freshnessStatus == 'Good' %}bg-yellow-100 text-yellow-800
-                  {% else %}bg-red-100 text-red-800{% endif %}">
-                  {% if flower.freshnessStatus == 'Fresh' %}
-                    <i class="fas fa-check-circle mr-1"></i>
-                  {% elseif flower.freshnessStatus == 'Good' %}
-                    <i class="fas fa-exclamation-circle mr-1"></i>
-                  {% else %}
-                    <i class="fas fa-times-circle mr-1"></i>
-                  {% endif %}
+            <div class="detail-item">
+              <div class="detail-label">Freshness Status</div>
+              <div>
+                <span class="pill {% if flower.freshnessStatus == 'Fresh' %}green{% elseif flower.freshnessStatus == 'Good' %}yellow{% elseif flower.freshnessStatus == 'Last Sale' %}orange{% else %}red{% endif %}">
+                  {% if flower.freshnessStatus == 'Fresh' %}<i class="fas fa-check-circle"></i>
+                  {% elseif flower.freshnessStatus == 'Good' %}<i class="fas fa-clock"></i>
+                  {% elseif flower.freshnessStatus == 'Last Sale' %}<i class="fas fa-fire"></i>
+                  {% else %}<i class="fas fa-times-circle"></i>{% endif %}
                   {{ flower.freshnessStatus }}
                 </span>
-              </dd>
+              </div>
             </div>
-            
-            <div>
-              <dt class="text-sm font-medium text-gray-500">Availability Status</dt>
-              <dd class="mt-1">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium 
-                  {% if flower.status == 'Available' %}bg-green-100 text-green-800
-                  {% elseif flower.status == 'Reserved' %}bg-blue-100 text-blue-800
-                  {% else %}bg-red-100 text-red-800{% endif %}">
+            <div class="detail-item">
+              <div class="detail-label">Availability Status</div>
+              <div>
+                <span class="pill {% if flower.status == 'Available' %}green{% elseif flower.status == 'Reserved' %}blue{% else %}red{% endif %}">
                   {{ flower.status }}
                 </span>
-              </dd>
+              </div>
             </div>
           </div>
         </div>
       </div>
-      
+
       <!-- Supplier Information -->
-      <div class="mt-6 bg-white shadow-lg rounded-lg overflow-hidden">
-        <div class="px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-200">
-          <h3 class="text-lg font-medium text-blue-900 flex items-center">
-            <i class="fas fa-truck mr-2 text-blue-600"></i>
-            Supplier Information
-          </h3>
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-icon purple"><i class="fas fa-truck"></i></div>
+          <h3>Supplier Information</h3>
         </div>
-        
-        <div class="px-6 py-6">
+        <div class="section-body">
           {% if flower.supplier %}
-            <div class="flex items-center">
-              <div class="flex-shrink-0">
-                <div class="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
-                  <i class="fas fa-building text-blue-600"></i>
-                </div>
+            <div class="list-item" style="border:none;background:transparent;padding:0;">
+              <div class="list-item-avatar" style="background:#eaeefc;border-radius:12px;"><i class="fas fa-building" style="color:#4265d6;"></i></div>
+              <div class="list-item-content">
+                <div class="list-item-title" style="font-size:15px;">{{ flower.supplier.supplierName }}</div>
+                <div class="list-item-subtitle">Contact: {{ flower.supplier.contactPerson }} &bull; {{ flower.supplier.phone }}</div>
               </div>
-              <div class="ml-4">
-                <h4 class="text-lg font-medium text-gray-900">{{ flower.supplier.supplierName }}</h4>
-                <p class="text-sm text-gray-500">Contact: {{ flower.supplier.contactPerson }}</p>
-                <p class="text-sm text-gray-500">Phone: {{ flower.supplier.phone }}</p>
-              </div>
+              <a href="{{ path('app_supplier_show', {'id': flower.supplier.id}) }}" class="btn btn-ghost" style="font-size:12px;"><i class="fas fa-external-link-alt"></i> View</a>
             </div>
           {% else %}
-            <p class="text-gray-500 italic">No supplier assigned</p>
+            <p style="color:var(--muted);font-size:13px;font-style:italic;">No supplier assigned</p>
           {% endif %}
         </div>
       </div>
+
+      <!-- Batch Inventory -->
+      {% set activeBatches = flower.activeBatches %}
+      {% set allBatches = flower.batches %}
+      {% if allBatches|length > 0 %}
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-icon amber"><i class="fas fa-boxes"></i></div>
+          <h3>Batch Inventory <span style="font-size:12px;font-weight:400;color:var(--muted);margin-left:6px;">({{ activeBatches|length }} active{{ allBatches|length > activeBatches|length ? ', ' ~ (allBatches|length - activeBatches|length) ~ ' depleted' : '' }})</span></h3>
+        </div>
+        <div class="section-body" style="padding:0;">
+          <div class="overflow-x-auto">
+            <table class="fg-table" style="width:100%;font-size:13px;">
+              <thead>
+                <tr>
+                  <th style="padding:10px 14px;">Batch</th>
+                  <th style="padding:10px 14px;">Remaining</th>
+                  <th style="padding:10px 14px;">Expiry</th>
+                  <th style="padding:10px 14px;">Freshness</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for batch in allBatches %}
+                <tr style="{% if not batch.active %}opacity:0.5;background:#f9fafb;{% endif %}">
+                  <td style="padding:10px 14px;">
+                    <div style="font-weight:600;color:var(--navy);font-size:12px;">#{{ batch.id }}</div>
+                    <div style="font-size:11px;color:var(--muted);">Received {{ batch.dateReceived|date('M d, Y') }}</div>
+                    <div style="font-size:10px;color:var(--muted);">Qty received: {{ batch.quantityReceived }}</div>
+                  </td>
+                  <td style="padding:10px 14px;">
+                    <div class="stock-cell">
+                      <div class="stock-num {% if batch.quantityRemaining == 0 %}low{% elseif batch.quantityRemaining < 5 %}low{% else %}ok{% endif %}">{{ batch.quantityRemaining }}</div>
+                    </div>
+                  </td>
+                  <td style="padding:10px 14px;">
+                    {% if batch.expiryDate %}
+                      {% set batchDays = batch.daysUntilExpiry %}
+                      <div class="{% if batchDays < 3 %}text-red-600{% elseif batchDays < 7 %}text-yellow-600{% endif %}" style="font-size:12px;">
+                        {{ batch.expiryDate|date('M d, Y') }}
+                      </div>
+                      <div style="font-size:10px;" class="{% if batchDays < 0 %}text-red-500{% elseif batchDays < 3 %}text-red-500{% elseif batchDays < 7 %}text-yellow-500{% else %}text-gray-500{% endif %}">
+                        {% if batchDays < 0 %}Expired {{ batchDays|abs }}d ago
+                        {% elseif batchDays == 0 %}Expires today
+                        {% else %}{{ batchDays }}d left{% endif %}
+                      </div>
+                    {% else %}
+                      <span style="color:var(--muted);font-size:11px;">—</span>
+                    {% endif %}
+                  </td>
+                  <td style="padding:10px 14px;">
+                    {% if not batch.active %}
+                      <span class="pill red" style="font-size:10px;">Depleted</span>
+                    {% else %}
+                      <span class="pill {% if batch.freshnessStatus == 'Fresh' %}green{% elseif batch.freshnessStatus == 'Good' %}yellow{% elseif batch.freshnessStatus == 'Last Sale' %}orange{% else %}red{% endif %}" style="font-size:10px;">
+                        {{ batch.freshnessStatus ?? 'N/A' }}
+                      </span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      {% endif %}
     </div>
 
-    <!-- Sidebar Information -->
-    <div class="lg:col-span-1">
-      <!-- Date Information -->
-      <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-        <div class="px-6 py-4 bg-gradient-to-r from-purple-50 to-pink-50 border-b border-purple-200">
-          <h3 class="text-lg font-medium text-purple-900 flex items-center">
-            <i class="fas fa-calendar-alt mr-2 text-purple-600"></i>
-            Important Dates
-          </h3>
+    <div class="space-y-5">
+      <!-- Important Dates -->
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-icon amber"><i class="fas fa-calendar-alt"></i></div>
+          <h3>Important Dates</h3>
         </div>
-        
-        <div class="px-6 py-6 space-y-4">
+        <div class="section-body space-y-5">
           <div>
-            <dt class="text-sm font-medium text-gray-500">Date Received</dt>
-            <dd class="mt-1 text-sm text-gray-900">
-              {% if flower.dateReceived %}
-                <div class="flex items-center">
-                  <i class="fas fa-calendar text-gray-400 mr-2"></i>
-                  {{ flower.dateReceived|date('F j, Y') }}
-                </div>
-                <div class="text-xs text-gray-500 ml-6">
-                  ({{ date().diff(flower.dateReceived).days }} days ago)
-                </div>
-              {% else %}
-                <span class="text-gray-400 italic">Not recorded</span>
-              {% endif %}
-            </dd>
+            <div class="detail-label">Date Received</div>
+            {% if flower.dateReceived %}
+              <div class="detail-value" style="display:flex;align-items:center;gap:6px;font-size:14px;">
+                <i class="fas fa-calendar" style="color:var(--muted);font-size:12px;"></i>
+                {{ flower.dateReceived|date('F j, Y') }}
+              </div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px;margin-left:20px;">({{ date().diff(flower.dateReceived).days }} days ago)</div>
+            {% else %}
+              <span style="color:var(--muted);font-size:13px;font-style:italic;">Not recorded</span>
+            {% endif %}
           </div>
-          
-          <div class="border-t border-gray-200 pt-4">
-            <dt class="text-sm font-medium text-gray-500">Expiry Date</dt>
-            <dd class="mt-1 text-sm text-gray-900">
-              {% if flower.expiryDate %}
-                {% set today = date() %}
-                {% set expiryDays = date(flower.expiryDate).diff(today).days %}
-                <div class="flex items-center {% if expiryDays < 3 %}text-red-600{% elseif expiryDays < 7 %}text-yellow-600{% else %}text-gray-900{% endif %}">
-                  <i class="fas fa-clock mr-2"></i>
-                  {{ flower.expiryDate|date('F j, Y') }}
-                </div>
-                <div class="text-xs ml-6 {% if expiryDays < 3 %}text-red-500{% elseif expiryDays < 7 %}text-yellow-500{% else %}text-gray-500{% endif %}">
-                  {% if expiryDays < 0 %}
-                    Expired {{ expiryDays|abs }} days ago
-                  {% elseif expiryDays == 0 %}
-                    Expires today!
-                  {% else %}
-                    {{ expiryDays }} days remaining
-                  {% endif %}
-                </div>
-              {% else %}
-                <span class="text-gray-400 italic">Not set</span>
-              {% endif %}
-            </dd>
+          <div style="border-top:1px solid var(--border);padding-top:16px;">
+            <div class="detail-label">Expiry Date</div>
+            {% if flower.expiryDate %}
+              {% set today = date() %}
+              {% set expiryDays = date(flower.expiryDate).diff(today).days %}
+              <div class="detail-value {% if expiryDays < 3 %}text-red-600{% elseif expiryDays < 7 %}text-yellow-600{% endif %}" style="display:flex;align-items:center;gap:6px;font-size:14px;">
+                <i class="fas fa-clock" style="font-size:12px;"></i>
+                {{ flower.expiryDate|date('F j, Y') }}
+              </div>
+              <div style="font-size:11px;margin-top:2px;margin-left:20px;" class="{% if expiryDays < 3 %}text-red-500{% elseif expiryDays < 7 %}text-yellow-500{% else %}text-gray-500{% endif %}">
+                {% if expiryDays < 0 %}Expired {{ expiryDays|abs }} days ago
+                {% elseif expiryDays == 0 %}Expires today!
+                {% else %}{{ expiryDays }} days remaining{% endif %}
+              </div>
+            {% else %}
+              <span style="color:var(--muted);font-size:13px;font-style:italic;">Not set</span>
+            {% endif %}
           </div>
         </div>
       </div>
-      
+
       <!-- Quick Stats -->
-      <div class="mt-6 bg-white shadow-lg rounded-lg overflow-hidden">
-        <div class="px-6 py-4 bg-gradient-to-r from-emerald-50 to-teal-50 border-b border-emerald-200">
-          <h3 class="text-lg font-medium text-emerald-900 flex items-center">
-            <i class="fas fa-chart-bar mr-2 text-emerald-600"></i>
-            Quick Stats
-          </h3>
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-icon green"><i class="fas fa-chart-bar"></i></div>
+          <h3>Quick Stats</h3>
         </div>
-        
-        <div class="px-6 py-6 space-y-4">
+        <div class="section-body space-y-4">
           <div class="flex justify-between items-center">
-            <dt class="text-sm font-medium text-gray-500">Total Value</dt>
-            <dd class="text-lg font-bold text-emerald-600">
-              ${{ (flower.price * flower.stockQuantity)|number_format(2) }}
-            </dd>
+            <span class="detail-label" style="margin-bottom:0;">Total Value</span>
+            <span class="detail-value large" style="font-size:18px;">₱{{ (flower.price * flower.stockQuantity)|number_format(2) }}</span>
           </div>
-          
-          <div class="flex justify-between items-center border-t border-gray-200 pt-4">
-            <dt class="text-sm font-medium text-gray-500">Flower ID</dt>
-            <dd class="text-sm font-mono text-gray-900">#{{ flower.id }}</dd>
+          <div class="flex justify-between items-center" style="border-top:1px solid var(--border);padding-top:12px;">
+            <span class="detail-label" style="margin-bottom:0;">Flower ID</span>
+            <span class="detail-value mono">#{{ flower.id }}</span>
           </div>
         </div>
       </div>
-      
-      <!-- Actions -->
-      <div class="mt-6 bg-white shadow-lg rounded-lg overflow-hidden">
-        <div class="px-6 py-4 bg-gradient-to-r from-red-50 to-pink-50 border-b border-red-200">
-          <h3 class="text-lg font-medium text-red-900 flex items-center">
-            <i class="fas fa-exclamation-triangle mr-2 text-red-600"></i>
-            Danger Zone
-          </h3>
+
+      {% if flower.status == 'Sold Out' or flower.stockQuantity <= 0 %}
+      <!-- Restock Section (sold out) -->
+      <div class="section-card" style="margin-top:0;border:2px solid #bbf7d0;background:#f0fdf4;">
+        <div class="section-header" style="background:#dcfce7;">
+          <div class="section-icon green"><i class="fas fa-plus-circle"></i></div>
+          <h3 style="color:#16a34a;">Restock This Flower</h3>
         </div>
-        
-        <div class="px-6 py-6">
-          <p class="text-sm text-gray-600 mb-4">
-            Permanently delete this flower from your inventory. This action cannot be undone.
-          </p>
+        <div class="section-body">
+          <p style="font-size:13px;color:#374151;margin-bottom:16px;">This flower is currently <strong>Sold Out</strong>{% if flower.soldAt %} since {{ flower.soldAt|date('M d, Y') }}{% endif %}. Add new stock to make it available again.</p>
+          <form action="{{ path('app_flower_restock', {'id': flower.id}) }}" method="post" class="space-y-4">
+            <input type="hidden" name="_token" value="{{ csrf_token('restock' ~ flower.id) }}">
+            <div>
+              <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">New Stock Quantity</label>
+              <input type="number" name="stock_quantity" min="1" required placeholder="e.g. 20" style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;">
+            </div>
+            <div>
+              <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">New Expiry Date</label>
+              <input type="date" name="expiry_date" required min="{{ 'now'|date('Y-m-d') }}" style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;"><i class="fas fa-redo" style="margin-right:6px;"></i> Restock Flower</button>
+          </form>
+        </div>
+      </div>
+      {% else %}
+      <!-- Add Batch Section (in stock) -->
+      <div class="section-card" style="margin-top:0;border:1px solid #e0e7ff;background:#eef2ff;">
+        <div class="section-header" style="background:#e0e7ff;">
+          <div class="section-icon blue"><i class="fas fa-plus-circle"></i></div>
+          <h3 style="color:#4265d6;">Add New Batch</h3>
+        </div>
+        <div class="section-body">
+          <p style="font-size:13px;color:#374151;margin-bottom:16px;">Add a new delivery batch with its own expiry date. Existing batches remain unaffected.</p>
+          <form action="{{ path('app_flower_restock', {'id': flower.id}) }}" method="post" class="space-y-4">
+            <input type="hidden" name="_token" value="{{ csrf_token('restock' ~ flower.id) }}">
+            <div>
+              <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Batch Quantity</label>
+              <input type="number" name="stock_quantity" min="1" required placeholder="e.g. 20" style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;">
+            </div>
+            <div>
+              <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Expiry Date</label>
+              <input type="date" name="expiry_date" required min="{{ 'now'|date('Y-m-d') }}" style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;"><i class="fas fa-plus" style="margin-right:6px;"></i> Add Batch</button>
+          </form>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Danger Zone -->
+      <div class="danger-zone" style="margin-top:0;">
+        <div class="danger-zone-header">
+          <i class="fas fa-exclamation-triangle"></i>
+          <h3>Danger Zone</h3>
+        </div>
+        <div class="danger-zone-body">
+          <p>Permanently delete this flower from your inventory. This action cannot be undone.</p>
           {{ include('flower/_delete_form.html.twig') }}
         </div>
       </div>
