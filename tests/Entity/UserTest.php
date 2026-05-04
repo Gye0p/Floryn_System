@@ -28,7 +28,7 @@ class UserTest extends TestCase
         $user = new User();
         $roles = $user->getRoles();
 
-        $this->assertContains('ROLE_STAFF', $roles);
+        $this->assertContains('ROLE_USER', $roles);
     }
 
     public function testSetRoles(): void
@@ -38,16 +38,16 @@ class UserTest extends TestCase
 
         $roles = $user->getRoles();
         $this->assertContains('ROLE_ADMIN', $roles);
-        $this->assertContains('ROLE_STAFF', $roles); // default always present
+        $this->assertContains('ROLE_USER', $roles); // default always present
     }
 
     public function testRolesAreUnique(): void
     {
         $user = new User();
-        $user->setRoles(['ROLE_STAFF', 'ROLE_STAFF', 'ROLE_ADMIN']);
+        $user->setRoles(['ROLE_USER', 'ROLE_USER', 'ROLE_ADMIN']);
 
         $roles = $user->getRoles();
-        $this->assertCount(2, $roles); // ROLE_STAFF + ROLE_ADMIN
+        $this->assertCount(2, $roles); // ROLE_USER + ROLE_ADMIN
     }
 
     public function testSetPassword(): void

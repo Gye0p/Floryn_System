@@ -3,7 +3,7 @@
 namespace App\Tests\Entity;
 
 use App\Entity\NotificationLog;
-use App\Entity\Customer;
+use App\Entity\User;
 use App\Entity\Reservation;
 use PHPUnit\Framework\TestCase;
 
@@ -48,7 +48,7 @@ class NotificationLogTest extends TestCase
 
     public function testSetCustomer(): void
     {
-        $customer = new Customer();
+        $customer = new User();
         $this->log->setCustomer($customer);
         $this->assertSame($customer, $this->log->getCustomer());
     }

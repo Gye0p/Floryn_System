@@ -4,7 +4,6 @@ namespace App\Tests\Entity;
 
 use App\Entity\Flower;
 use App\Entity\Supplier;
-use App\Entity\InventoryLog;
 use App\Entity\ReservationDetail;
 use PHPUnit\Framework\TestCase;
 
@@ -91,29 +90,6 @@ class FlowerTest extends TestCase
 
         $this->flower->setSupplier($supplier);
         $this->assertSame($supplier, $this->flower->getSupplier());
-    }
-
-    public function testInventoryLogsCollection(): void
-    {
-        $this->assertCount(0, $this->flower->getInventoryLogs());
-    }
-
-    public function testAddInventoryLog(): void
-    {
-        $log = new InventoryLog();
-        $this->flower->addInventoryLog($log);
-
-        $this->assertCount(1, $this->flower->getInventoryLogs());
-        $this->assertSame($this->flower, $log->getFlower());
-    }
-
-    public function testRemoveInventoryLog(): void
-    {
-        $log = new InventoryLog();
-        $this->flower->addInventoryLog($log);
-        $this->flower->removeInventoryLog($log);
-
-        $this->assertCount(0, $this->flower->getInventoryLogs());
     }
 
     public function testReservationDetailsCollection(): void

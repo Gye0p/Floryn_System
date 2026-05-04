@@ -3,7 +3,7 @@
 namespace App\Tests\Entity;
 
 use App\Entity\Reservation;
-use App\Entity\Customer;
+use App\Entity\User;
 use App\Entity\Payment;
 use App\Entity\ReservationDetail;
 use App\Entity\NotificationLog;
@@ -57,7 +57,7 @@ class ReservationTest extends TestCase
 
     public function testSetCustomer(): void
     {
-        $customer = new Customer();
+        $customer = new User();
         $this->reservation->setCustomer($customer);
         $this->assertSame($customer, $this->reservation->getCustomer());
     }
