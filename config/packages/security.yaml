@@ -5,8 +5,10 @@ security:
             algorithm: auto
 
     role_hierarchy:
+        ROLE_STAFF: ROLE_USER
         ROLE_MANAGER: ROLE_STAFF
         ROLE_ADMIN: ROLE_MANAGER
+        # ROLE_CUSTOMER inherits only ROLE_USER (no staff access)
 
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
@@ -19,9 +21,15 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+        api_public:
+            pattern: ^/api/(register|check-approval)
+            stateless: true
+            security: false
         api_login:
             pattern: ^/api/login
             stateless: true
+            provider: app_user_provider
+            user_checker: App\Security\UserChecker
             json_login:
                 check_path: /api/login
                 username_path: username
@@ -31,10 +39,12 @@ security:
         api:
             pattern: ^/api
             stateless: true
+            provider: app_user_provider
             jwt: ~
         main:
             lazy: true
             provider: app_user_provider
+            user_checker: App\Security\UserChecker
             logout:
                 path: app_logout
                 target: app_login
@@ -42,15 +52,6 @@ security:
                 - App\Security\UserAuthenticator
                 - App\Security\GoogleAuthenticator
             entry_point: App\Security\UserAuthenticator
-
-            remember_me:
-                secret: '%kernel.secret%'
-                lifetime: 604800
-                path: /
-                # by default, the feature is enabled by checking a checkbox in the
-                # login form, uncomment the following line to always enable it.
-                #always_remember_me: true
-
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
@@ -62,9 +63,17 @@ security:
     # Note: Only the *first* access control that matches will be used
     access_control:
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
+        - { path: ^/api/register, roles: PUBLIC_ACCESS }
+        - { path: ^/api/check-approval, roles: PUBLIC_ACCESS }
+        - { path: ^/api/verify-email, roles: PUBLIC_ACCESS }
+        - { path: ^/api/customer, roles: ROLE_CUSTOMER }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/$, roles: PUBLIC_ACCESS }
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/register, roles: PUBLIC_ACCESS }
+        - { path: ^/verify-email, roles: PUBLIC_ACCESS }
+        - { path: ^/about, roles: PUBLIC_ACCESS }
+        - { path: ^/contact, roles: PUBLIC_ACCESS }
         - { path: ^/connect/google, roles: PUBLIC_ACCESS }
         - { path: ^/admin/users, roles: ROLE_ADMIN }
         - { path: ^/admin/activity-logs, roles: ROLE_ADMIN }
