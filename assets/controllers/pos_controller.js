@@ -142,6 +142,7 @@ export default class extends Controller {
     const name = card.dataset.flowerName;
     const price = parseFloat(card.dataset.flowerEffective);
     const maxStock = parseInt(card.dataset.flowerStock);
+    const image = card.dataset.flowerImage || '';
 
     const existing = this.cart.find(i => i.flowerId === flowerId);
     if (existing) {
@@ -151,7 +152,7 @@ export default class extends Controller {
       }
       existing.quantity++;
     } else {
-      this.cart.push({ flowerId, name, price, quantity: 1, maxStock });
+      this.cart.push({ flowerId, name, price, quantity: 1, maxStock, image });
     }
 
     this._renderCart();
@@ -203,6 +204,11 @@ export default class extends Controller {
 
     container.innerHTML = this.cart.map(item => `
       <div class="flex items-center gap-3 px-4 py-3">
+        <div class="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0" style="background:#fdf2f8;border:1px solid #f3e8ff;">
+          ${item.image
+            ? `<img src="${this._escHtml(item.image)}" alt="${this._escHtml(item.name)}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.parentElement.innerHTML='🌸'; this.parentElement.style.display='flex'; this.parentElement.style.alignItems='center'; this.parentElement.style.justifyContent='center';">`
+            : '🌸'}
+        </div>
         <div class="flex-1 min-w-0">
           <div class="text-sm font-medium text-gray-900 truncate">${this._escHtml(item.name)}</div>
           <div class="text-[11px] text-gray-500">₱${item.price.toFixed(2)} each</div>

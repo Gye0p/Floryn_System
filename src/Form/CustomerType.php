@@ -2,7 +2,7 @@
 
 namespace App\Form;
 
-use App\Entity\Customer;
+use App\Entity\User;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -16,14 +16,13 @@ class CustomerType extends AbstractType
             ->add('phone')
             ->add('email')
             ->add('address')
-            ->add('dateRegistered')
         ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => Customer::class,
+            'data_class' => User::class,
         ]);
     }
 }

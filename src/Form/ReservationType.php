@@ -2,7 +2,7 @@
 
 namespace App\Form;
 
-use App\Entity\Customer;
+use App\Entity\User;
 use App\Entity\Reservation;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -18,8 +18,14 @@ class ReservationType extends AbstractType
     {
         $builder
             ->add('customer', EntityType::class, [
-                'class' => Customer::class,
+                'class' => User::class,
                 'choice_label' => 'fullName',
+                'query_builder' => function (\App\Repository\UserRepository $repo) {
+                    return $repo->createQueryBuilder('u')
+                        ->where('u.roles LIKE :role')
+                        ->setParameter('role', '%ROLE_CUSTOMER%')
+                        ->orderBy('u.fullName', 'ASC');
+                },
                 'placeholder' => 'Select a customer',
                 'attr' => ['class' => 'form-select'],
                 'label' => 'Customer',
@@ -35,7 +41,7 @@ class ReservationType extends AbstractType
                 'allow_add' => true,
                 'allow_delete' => true,
                 'by_reference' => false,
-                'label' => 'Flowers',
+                'label' => false,
                 'attr' => ['class' => 'reservation-details-collection'],
             ])
             ->add('paymentStatus', ChoiceType::class, [

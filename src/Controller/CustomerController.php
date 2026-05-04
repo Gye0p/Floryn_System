@@ -2,9 +2,9 @@
 
 namespace App\Controller;
 
-use App\Entity\Customer;
+use App\Entity\User;
 use App\Form\CustomerType;
-use App\Repository\CustomerRepository;
+use App\Repository\UserRepository;
 use App\Service\ActivityLogService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,21 +18,31 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 final class CustomerController extends AbstractController
 {
     #[Route(name: 'app_customer_index', methods: ['GET'])]
-    public function index(CustomerRepository $customerRepository): Response
+    public function index(UserRepository $userRepository): Response
     {
         return $this->render('customer/index.html.twig', [
-            'customers' => $customerRepository->findAll(),
+            'customers' => $userRepository->findCustomers(),
         ]);
     }
 
     #[Route('/new', name: 'app_customer_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager, ActivityLogService $activityLog): Response
     {
-        $customer = new Customer();
+        $customer = new User();
+        $customer->setRoles(['ROLE_CUSTOMER']);
+        $customer->setIsApproved(true);
+        $customer->setCreatedAt(new \DateTime());
+        // Walk-in / staff-created customers get a non-loginable password
+        $customer->setPassword('__no_password__');
+
         $form = $this->createForm(CustomerType::class, $customer);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Generate a username from fullName if not set
+            if (!$customer->getUsername()) {
+                $customer->setUsername('customer_' . time() . '_' . random_int(100, 999));
+            }
             $entityManager->persist($customer);
             $entityManager->flush();
 
@@ -49,7 +59,7 @@ final class CustomerController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_customer_show', methods: ['GET'])]
-    public function show(Customer $customer): Response
+    public function show(User $customer): Response
     {
         return $this->render('customer/show.html.twig', [
             'customer' => $customer,
@@ -57,7 +67,7 @@ final class CustomerController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_customer_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Customer $customer, EntityManagerInterface $entityManager, ActivityLogService $activityLog): Response
+    public function edit(Request $request, User $customer, EntityManagerInterface $entityManager, ActivityLogService $activityLog): Response
     {
         $form = $this->createForm(CustomerType::class, $customer);
         $form->handleRequest($request);
@@ -78,7 +88,7 @@ final class CustomerController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_customer_delete', methods: ['POST'])]
-    public function delete(Request $request, Customer $customer, EntityManagerInterface $entityManager, ActivityLogService $activityLog): Response
+    public function delete(Request $request, User $customer, EntityManagerInterface $entityManager, ActivityLogService $activityLog): Response
     {
         if ($this->isCsrfTokenValid('delete'.$customer->getId(), $request->getPayload()->getString('_token'))) {
             $customerName = $customer->getFullName();

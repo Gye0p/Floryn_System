@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Contact Us — Floryn Garden</title>
+<meta name="description" content="Get in touch with Floryn Garden. Questions, custom orders, or feedback — we'd love to hear from you."/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Jost:wght@200;300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+/* ── TOKENS ── */
+:root{
+  --ink:#18191A; --forest:#243B2E; --moss:#3A5C47; --sage:#7A9E87;
+  --cream:#E8DEC8; --parch:#DECDAF; --blush:#C9A090; --petal:#E0C2B0;
+  --rose:#B85C42; --gold:#A87830; --glt:#C89848; --white:#EDE5D0;
+  --light-border:rgba(26,26,26,.09); --r:16px;
+  --s1:8px; --s2:16px; --s3:24px; --s4:32px; --s5:40px; --s6:48px;
+  --s7:56px; --s8:64px; --s9:72px; --s10:80px; --s12:96px; --s14:112px;
+  --text-xs:.7rem; --text-sm:.8125rem; --text-base:.9375rem;
+  --text-lg:1.125rem; --text-xl:1.375rem; --text-2xl:1.875rem;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;font-size:16px;scrollbar-width:none;}
+html::-webkit-scrollbar{display:none;}
+body{background:var(--white);color:var(--ink);font-family:'Jost',sans-serif;font-weight:400;overflow-x:hidden;line-height:1.6;-webkit-font-smoothing:antialiased;}
+img{display:block;max-width:100%;}
+a{text-decoration:none;cursor:pointer;}
+
+/* ── CURSOR ── */
+#cd,#cr{position:fixed;top:0;left:0;border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);will-change:transform;}
+#cd{width:6px;height:6px;background:var(--forest);transition:background .2s;}
+#cr{width:38px;height:38px;border:1.5px solid var(--forest);transition:width .22s,height .22s,border-color .22s;}
+body.ch #cr{width:56px;height:56px;border-color:var(--rose);}
+body.ch #cd{background:var(--rose);}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:0 var(--s12);height:80px;background:rgba(36,59,46,.97);backdrop-filter:blur(24px);border-bottom:1px solid rgba(255,255,255,.07);transition:height .3s;}
+.nav-logo{font-family:'Cormorant Garamond',serif;font-size:1.75rem;font-weight:300;letter-spacing:.3em;color:var(--white);}
+.nav-logo em{font-style:normal;color:var(--glt);}
+.nav-links{display:flex;gap:var(--s5);align-items:center;}
+.nav-right{display:flex;align-items:center;gap:var(--s2);}
+.nav-toggle{
+  display:none;
+  width:44px;height:44px;border-radius:14px;
+  border:1px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.05);
+  color:rgba(253,250,244,.9);
+  cursor:pointer;
+}
+.nav-toggle svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;}
+.nav-links a{font-size:var(--text-xs);letter-spacing:.18em;text-transform:uppercase;color:rgba(253,250,244,.62);transition:color .25s;font-weight:400;}
+.nav-links a:hover,.nav-links a.active{color:rgba(253,250,244,.95);}
+.nav-cta{background:var(--rose);color:var(--white)!important;padding:11px 28px;border-radius:100px;font-size:var(--text-xs)!important;letter-spacing:.16em;box-shadow:0 4px 20px rgba(184,92,66,.35);transition:background .25s,transform .25s!important;}
+.nav-cta:hover{background:var(--gold)!important;transform:translateY(-2px)!important;}
+
+/* ── PAGE HERO ── */
+.page-hero{padding-top:160px;padding-bottom:var(--s12);padding-left:var(--s12);padding-right:var(--s12);background:linear-gradient(152deg,#0e1812 0%,#1c3025 45%,#132418 100%);position:relative;overflow:hidden;}
+.page-hero-glow{position:absolute;inset:0;background:radial-gradient(ellipse 55% 75% at 74% 26%,rgba(184,92,66,.18) 0%,transparent 55%);}
+.page-hero-inner{position:relative;z-index:2;max-width:600px;}
+.page-eyebrow{font-size:var(--text-xs);letter-spacing:.34em;text-transform:uppercase;color:var(--rose);margin-bottom:var(--s2);font-weight:500;display:flex;align-items:center;gap:14px;}
+.page-eyebrow::before{content:'';width:24px;height:1px;background:var(--rose);}
+.page-h1{font-family:'Cormorant Garamond',serif;font-size:clamp(3rem,5.5vw,5rem);font-weight:300;line-height:1.05;color:var(--white);margin-bottom:var(--s3);letter-spacing:-.01em;}
+.page-h1 em{font-style:italic;color:var(--petal);}
+.page-sub{font-size:var(--text-base);font-weight:300;color:rgba(253,250,244,.55);max-width:420px;line-height:1.85;}
+.breadcrumb{display:flex;align-items:center;gap:10px;margin-bottom:var(--s4);}
+.breadcrumb a,.breadcrumb span{font-size:var(--text-xs);letter-spacing:.14em;text-transform:uppercase;color:rgba(253,250,244,.38);}
+.breadcrumb a:hover{color:var(--petal);}
+.breadcrumb .sep{color:rgba(253,250,244,.2);}
+.breadcrumb .cur{color:var(--petal);}
+
+/* ── CONTACT LAYOUT ── */
+.contact-wrap{padding:var(--s14) var(--s12);display:grid;grid-template-columns:1fr 1.4fr;gap:var(--s10);align-items:start;}
+
+/* ── CONTACT INFO SIDEBAR ── */
+.contact-info{position:sticky;top:100px;}
+.eyebrow{font-size:var(--text-xs);letter-spacing:.34em;text-transform:uppercase;color:var(--rose);margin-bottom:var(--s2);font-weight:500;display:flex;align-items:center;gap:14px;}
+.eyebrow::before{content:'';width:24px;height:1px;background:var(--rose);}
+.contact-h2{font-family:'Cormorant Garamond',serif;font-size:clamp(2.2rem,3.5vw,3.5rem);font-weight:300;line-height:1.1;letter-spacing:-.01em;margin-bottom:var(--s2);}
+.contact-h2 em{font-style:italic;color:var(--forest);}
+.contact-tagline{font-size:var(--text-base);font-weight:300;color:rgba(26,26,26,.6);line-height:1.85;margin-bottom:var(--s6);max-width:340px;}
+.info-items{display:flex;flex-direction:column;gap:var(--s3);}
+.info-item{display:flex;align-items:flex-start;gap:var(--s2);}
+.info-icon{width:44px;height:44px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.info-icon svg{width:20px;height:20px;stroke-width:1.5;fill:none;}
+.ic-rose{background:rgba(184,92,66,.09);} .ic-rose svg{stroke:var(--rose);}
+.ic-green{background:rgba(36,59,46,.07);} .ic-green svg{stroke:var(--forest);}
+.ic-gold{background:rgba(168,120,48,.09);} .ic-gold svg{stroke:var(--gold);}
+.info-text{}
+.info-label{font-size:var(--text-xs);letter-spacing:.18em;text-transform:uppercase;color:var(--sage);margin-bottom:3px;font-weight:500;}
+.info-val{font-size:var(--text-base);font-weight:400;color:var(--ink);}
+.info-val a{color:var(--forest);transition:color .2s;}
+.info-val a:hover{color:var(--rose);}
+.social-row{display:flex;gap:10px;margin-top:var(--s4);}
+.soc-btn{width:40px;height:40px;border:1px solid rgba(26,26,26,.12);border-radius:50%;display:flex;align-items:center;justify-content:center;color:rgba(26,26,26,.4);transition:border-color .25s,color .25s,background .25s;}
+.soc-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;}
+.soc-btn:hover{border-color:var(--rose);color:var(--rose);}
+
+/* ── BREVO FORM CONTAINER ── */
+.form-card{background:var(--white);border-radius:24px;padding:var(--s7);border:1px solid var(--light-border);box-shadow:0 12px 48px rgba(26,26,26,.06);}
+.form-card-header{margin-bottom:var(--s5);}
+.form-card-title{font-family:'Cormorant Garamond',serif;font-size:var(--text-2xl);font-weight:400;color:var(--ink);margin-bottom:8px;}
+.form-card-sub{font-size:var(--text-sm);font-weight:300;color:rgba(26,26,26,.52);line-height:1.65;}
+
+/* ── BREVO EMBED OVERRIDES ── */
+#sib-container{padding:0!important;background:transparent!important;border:none!important;}
+.sib-form{padding:0!important;}
+.sib-form-block{padding:0!important;margin-bottom:var(--s3)!important;}
+.entry__label{font-family:'Jost',sans-serif!important;font-size:var(--text-xs)!important;letter-spacing:.14em!important;text-transform:uppercase!important;color:rgba(26,26,26,.55)!important;font-weight:500!important;margin-bottom:8px!important;}
+.input{font-family:'Jost',sans-serif!important;font-size:var(--text-base)!important;border:1.5px solid rgba(26,26,26,.12)!important;border-radius:12px!important;padding:14px 18px!important;background:var(--parch)!important;color:var(--ink)!important;transition:border-color .2s!important;}
+.input:focus{border-color:var(--forest)!important;outline:none!important;}
+.sib-default-btn,.clickable__arrow{background:var(--forest)!important;font-family:'Jost',sans-serif!important;font-size:var(--text-xs)!important;letter-spacing:.18em!important;text-transform:uppercase!important;border-radius:100px!important;padding:16px 42px!important;transition:background .25s!important;}
+.sib-default-btn:hover,.clickable__arrow:hover{background:var(--rose)!important;}
+
+/* ── MAP / HOURS ── */
+.map-hours{padding:0 var(--s12) var(--s12);}
+.map-hours-grid{display:grid;grid-template-columns:1.6fr 1fr;gap:var(--s6);}
+.map-wrap{border-radius:20px;overflow:hidden;border:1px solid var(--light-border);}
+.map-wrap iframe{width:100%;height:360px;border:none;display:block;}
+.hours-card{background:var(--cream);border-radius:20px;padding:var(--s5);border:1px solid var(--light-border);}
+.hours-title{font-family:'Cormorant Garamond',serif;font-size:var(--text-xl);font-weight:400;color:var(--ink);margin-bottom:var(--s3);}
+.hours-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(26,26,26,.07);}
+.hours-row:last-child{border-bottom:none;}
+.hday{font-size:var(--text-sm);color:rgba(26,26,26,.6);font-weight:400;}
+.htime{font-size:var(--text-sm);font-weight:500;color:var(--forest);}
+.htime.closed{color:rgba(26,26,26,.3);}
+
+/* ── FOOTER ── */
+footer{background:var(--ink);color:var(--cream);padding:var(--s12) var(--s12) var(--s6);}
+.ftop{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:var(--s8);padding-bottom:var(--s8);border-bottom:1px solid rgba(255,255,255,.07);}
+.flogo{font-family:'Cormorant Garamond',serif;font-size:1.85rem;font-weight:300;letter-spacing:.26em;color:var(--white);margin-bottom:var(--s2);display:block;}
+.flogo em{font-style:normal;color:var(--rose);}
+.fdesc{font-size:var(--text-sm);font-weight:300;color:rgba(245,239,224,.36);line-height:1.85;max-width:260px;margin-bottom:var(--s4);}
+.fsoc{display:flex;gap:10px;}
+.fsb-wrap{width:36px;height:36px;border:1px solid rgba(255,255,255,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;transition:border-color .25s;}
+.fsb-wrap:hover{border-color:var(--rose);}
+.fsb-wrap svg{width:14px;height:14px;stroke:rgba(245,239,224,.38);fill:none;stroke-width:2;transition:stroke .25s;}
+.fsb-wrap:hover svg{stroke:var(--rose);}
+.fcol-title{font-size:.7rem;letter-spacing:.26em;text-transform:uppercase;color:var(--glt);margin-bottom:var(--s3);font-weight:400;}
+.fcol ul{list-style:none;display:flex;flex-direction:column;gap:var(--s2);}
+.fcol ul a{font-size:var(--text-sm);font-weight:300;color:rgba(245,239,224,.36);transition:color .25s;}
+.fcol ul a:hover{color:var(--cream);}
+.fbot{padding-top:var(--s4);display:flex;justify-content:space-between;align-items:center;}
+.fcopy{font-size:.7rem;font-weight:300;color:rgba(245,239,224,.2);}
+.fcopy em{font-style:normal;color:var(--rose);}
+.flove{font-size:.7rem;color:rgba(245,239,224,.2);display:flex;align-items:center;gap:5px;}
+.flove svg{width:12px;height:12px;fill:var(--rose);stroke:none;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1000px){
+  .contact-wrap{grid-template-columns:1fr;gap:var(--s8);}
+  .contact-info{position:static;}
+  .map-hours-grid{grid-template-columns:1fr;}
+}
+@media(max-width:900px){
+  nav{padding:0 var(--s4);}
+  .page-hero,.contact-wrap,.map-hours{padding-left:var(--s4);padding-right:var(--s4);}
+  .page-hero{padding-top:140px;}
+  .ftop{grid-template-columns:1fr 1fr;gap:var(--s6);}
+}
+@media(max-width:600px){
+  nav{padding:0 var(--s3);}
+  .nav-toggle{display:inline-flex;align-items:center;justify-content:center;}
+  .nav-links{
+    display:none;position:absolute;top:80px;left:0;right:0;
+    padding:16px var(--s3);
+    flex-direction:column;gap:var(--s2);
+    background:rgba(36,59,46,.98);
+    backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+    border-bottom:1px solid rgba(255,255,255,.07);
+  }
+  #nav.nav-open .nav-links{display:flex;}
+  .page-hero{padding:120px var(--s3) var(--s8);}
+  .contact-wrap,.map-hours{padding:var(--s9) var(--s3);}
+  .map-hours{padding-top:0;}
+  .ftop{grid-template-columns:1fr;}.fbot{flex-direction:column;gap:var(--s2);}
+}
+</style>
+</head>
+<body>
+
+<div id="cd"></div>
+<div id="cr"></div>
+
+{# ── NAV ── #}
+<nav id="nav">
+  <a href="{{ path('app_home') }}" class="nav-logo">FLORYN<em>.</em></a>
+  <div class="nav-right">
+    <button id="nav-toggle" class="nav-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false">
+      <svg viewBox="0 0 24 24"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+    </button>
+    <div class="nav-links">
+      <a href="{{ path('app_home') }}">Home</a>
+      <a href="{{ path('app_about') }}">About Us</a>
+      <a href="{{ path('app_contact') }}" class="active">Contact</a>
+      <a href="{{ path('app_login') }}" class="nav-cta">Order Now</a>
+    </div>
+  </div>
+</nav>
+
+{# ── PAGE HERO ── #}
+<div class="page-hero">
+  <div class="page-hero-glow"></div>
+  <div class="page-hero-inner">
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <a href="{{ path('app_home') }}">Home</a>
+      <span class="sep">·</span>
+      <span class="cur">Contact Us</span>
+    </nav>
+    <div class="page-eyebrow">We'd Love to Hear from You</div>
+    <h1 class="page-h1">Get in <em>touch</em></h1>
+    <p class="page-sub">Have a question, a custom reservation request, or just want to say hello? Fill out the form and we'll get back to you within 24 hours.</p>
+  </div>
+</div>
+
+{# ── CONTACT LAYOUT ── #}
+<div class="contact-wrap">
+
+  {# ── LEFT: Contact info ── #}
+  <div class="contact-info">
+    <div class="eyebrow">Contact Information</div>
+    <h2 class="contact-h2">Let's <em>talk flowers</em></h2>
+    <p class="contact-tagline">Whether it's a bulk wedding reservation, a pickup time question, or feedback on your experience — we're here.</p>
+
+    <div class="info-items">
+      <div class="info-item">
+        <div class="info-icon ic-rose"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+        <div class="info-text">
+          <div class="info-label">Address</div>
+          <div class="info-val">123 Flower Street, Dumaguete City<br>Negros Oriental, Philippines</div>
+        </div>
+      </div>
+      <div class="info-item">
+        <div class="info-icon ic-green"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.07 1.18 2 2 0 012 .01h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92v2z"/></svg></div>
+        <div class="info-text">
+          <div class="info-label">Phone</div>
+          <div class="info-val"><a href="tel:+639123456789">+63 912 345 6789</a></div>
+        </div>
+      </div>
+      <div class="info-item">
+        <div class="info-icon ic-gold"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+        <div class="info-text">
+          <div class="info-label">Email</div>
+          <div class="info-val"><a href="mailto:hello@floryn.ph">hello@floryn.ph</a></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="social-row">
+      <a href="#" class="soc-btn" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg></a>
+      <a href="#" class="soc-btn" aria-label="Instagram"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
+      <a href="#" class="soc-btn" aria-label="Twitter / X"><svg viewBox="0 0 24 24"><path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"/></svg></a>
+    </div>
+  </div>
+
+  {# ── RIGHT: Brevo Embedded Form ── #}
+  <div class="form-card">
+    <div class="form-card-header">
+      <div class="form-card-title">Send us a message</div>
+      <p class="form-card-sub">We'll respond within one business day. For urgent orders, call us directly.</p>
+    </div>
+
+    {#
+      ── BREVO EMBEDDED FORM ──
+      Replace the iframe src below with your actual Brevo form embed URL.
+      To get it: Brevo → Email Marketing → Forms → Create a form → "Share" → copy the embed URL.
+      The iframe approach avoids any script conflicts and works with Brevo, Google Forms, Typeform, etc.
+    #}
+    <iframe
+      id="brevo-contact-form"
+      src="https://docs.google.com/forms/d/e/1FAIpQLScm_sW676mS22qOKOD605tWsSOvn2_1Bru4dUAjr4kVX7VcmA/viewform?embedded=true"
+      style="width:100%;height:800px;border:none;border-radius:12px;"
+      frameborder="0"
+      marginheight="0"
+      marginwidth="0"
+      title="Floryn Contact Form"
+    >Loading…</iframe>
+
+    {#
+      ── FALLBACK: Native HTML form shown while Brevo form URL is not yet configured ──
+      You can delete everything below this comment once your Brevo URL is set above.
+    #}
+    <noscript>
+      <p style="color:rgba(26,26,26,.5);font-size:.875rem;margin-top:1rem;">
+        JavaScript is required to load the contact form.<br>
+        Please email us at <a href="mailto:hello@floryn.ph" style="color:var(--forest);">hello@floryn.ph</a> instead.
+      </p>
+    </noscript>
+  </div>
+</div>
+
+{# ── MAP & HOURS ── #}
+<div class="map-hours">
+  <div class="map-hours-grid">
+    <div class="map-wrap">
+      {# Replace src with your actual Google Maps embed URL via maps.google.com → Share → Embed #}
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3929.4!2d123.3!3d9.3!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zOcKwMTgnMDAuMCJOIDEyM8KwMTgnMDAuMCJF!5e0!3m2!1sen!2sph!4v1234567890"
+        allowfullscreen
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        title="Floryn Garden Location"
+      ></iframe>
+    </div>
+    <div class="hours-card">
+      <div class="hours-title">Store Hours</div>
+      <div class="hours-row"><span class="hday">Monday – Friday</span><span class="htime">8:00 AM – 6:00 PM</span></div>
+      <div class="hours-row"><span class="hday">Saturday</span><span class="htime">9:00 AM – 5:00 PM</span></div>
+      <div class="hours-row"><span class="hday">Sunday</span><span class="htime">10:00 AM – 3:00 PM</span></div>
+      <div class="hours-row" style="margin-top:var(--s2);padding-top:var(--s2);border-top:1px solid rgba(26,26,26,.1);border-bottom:none;">
+        <span class="hday" style="font-weight:500;color:var(--ink);">Same-day reservations</span>
+        <span class="htime">Reserve by 12:00 PM</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# ── FOOTER ── #}
+<footer>
+  <div class="ftop">
+    <div>
+      <span class="flogo">FLORYN<em>.</em></span>
+      <p class="fdesc">Fresh flowers, handcrafted with love, ready for your pickup. Making moments beautiful — one bloom at a time.</p>
+      <div class="fsoc">
+        <a href="#" class="fsb-wrap"><svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg></a>
+        <a href="#" class="fsb-wrap"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
+        <a href="#" class="fsb-wrap"><svg viewBox="0 0 24 24"><path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"/></svg></a>
+      </div>
+    </div>
+    <div class="fcol">
+      <div class="fcol-title">Navigate</div>
+      <ul>
+        <li><a href="{{ path('app_home') }}">Home</a></li>
+        <li><a href="{{ path('app_about') }}">About Us</a></li>
+        <li><a href="{{ path('app_contact') }}">Contact</a></li>
+        <li><a href="{{ path('app_login') }}">Order Now</a></li>
+      </ul>
+    </div>
+    <div class="fcol">
+      <div class="fcol-title">Shop</div>
+      <ul>
+        <li><a href="{{ path('app_home') }}#products">All Flowers</a></li>
+        <li><a href="{{ path('app_home') }}#occasions">Occasions</a></li>
+        <li><a href="{{ path('app_home') }}#order">How to Order</a></li>
+      </ul>
+    </div>
+    <div class="fcol">
+      <div class="fcol-title">Contact</div>
+      <ul>
+        <li><a href="{{ path('app_contact') }}">Send a Message</a></li>
+        <li><a href="mailto:hello@floryn.ph">hello@floryn.ph</a></li>
+        <li><a href="#">+63 912 345 6789</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="fbot">
+    <div class="fcopy">© {{ "now"|date("Y") }} <em>Floryn</em>. All rights reserved.</div>
+    <div class="flove">Made with <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg> for every special moment</div>
+  </div>
+</footer>
+
+<script>
+  const cd=document.getElementById('cd'),cr=document.getElementById('cr');
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cd.style.transform=`translate(${mx}px,${my}px) translate(-50%,-50%)`;});
+  (function loop(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;cr.style.transform=`translate(${rx}px,${ry}px) translate(-50%,-50%)`;requestAnimationFrame(loop);})();
+  document.querySelectorAll('a,button,.info-item').forEach(el=>{
+    el.addEventListener('mouseenter',()=>document.body.classList.add('ch'));
+    el.addEventListener('mouseleave',()=>document.body.classList.remove('ch'));
+  });
+  const nav=document.getElementById('nav');
+  const navLinks=nav?.querySelector('.nav-links');
+  const navToggle=document.getElementById('nav-toggle');
+
+  function syncNavMenuPosition(){
+    if(!navLinks||!nav)return;
+    navLinks.style.top=`${nav.offsetHeight}px`;
+  }
+
+  navToggle?.addEventListener('click',()=>{
+    const isOpen=nav.classList.toggle('nav-open');
+    navToggle.setAttribute('aria-expanded',String(isOpen));
+    if(isOpen) syncNavMenuPosition();
+  });
+
+  navLinks?.querySelectorAll('a').forEach(a=>{
+    a.addEventListener('click',()=>{
+      nav.classList.remove('nav-open');
+      navToggle?.setAttribute('aria-expanded','false');
+    });
+  });
+
+  window.addEventListener('scroll',()=>{
+    nav.style.height=window.scrollY>50?'60px':'80px';
+    syncNavMenuPosition();
+  });
+
+  syncNavMenuPosition();
+</script>
+</body>
+</html>

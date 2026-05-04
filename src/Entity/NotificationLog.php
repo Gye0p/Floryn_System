@@ -28,7 +28,7 @@ class NotificationLog
 
     #[ORM\ManyToOne(inversedBy: 'notificationLogs')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Customer $customer = null;
+    private ?User $customer = null;
 
     #[ORM\ManyToOne(inversedBy: 'notificationLogs')]
     private ?Reservation $reservation = null;
@@ -86,12 +86,12 @@ class NotificationLog
         return $this;
     }
 
-    public function getCustomer(): ?Customer
+    public function getCustomer(): ?User
     {
         return $this->customer;
     }
 
-    public function setCustomer(?Customer $customer): static
+    public function setCustomer(?User $customer): static
     {
         $this->customer = $customer;
 

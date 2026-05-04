@@ -1,4 +1,9 @@
-{{ form_start(form, {'attr': {'class': 'form-section', 'novalidate': 'novalidate'}}) }}
+{{ form_start(form, {'attr': {
+  'class': 'form-section',
+  'novalidate': 'novalidate',
+  'data-controller': 'flower-category',
+  'data-flower-category-map-value': form.vars.flower_category_map|json_encode|e('html_attr')
+}}) }}
 
   <div class="form-section-header">
     <div class="section-icon blue"><i class="fas fa-leaf"></i></div>
@@ -9,21 +14,35 @@
     <div class="form-grid">
       <div class="form-group">
         {{ form_label(form.name, null, {'label_attr': {'class': 'block text-sm font-semibold text-gray-700 mb-1.5'}}) }}
-        {{ form_widget(form.name, {'attr': {'class': 'w-full rounded-lg border border-gray-200 px-3.5 py-2.5 text-sm focus:border-[#4265d6] focus:ring-[#4265d6] transition', 'placeholder': 'Enter flower name'}}) }}
+        {{ form_widget(form.name, {'attr': {
+          'class': 'w-full rounded-lg border border-gray-200 px-3.5 py-2.5 text-sm focus:border-[#4265d6] focus:ring-[#4265d6] transition',
+          'data-flower-category-target': 'name',
+          'data-action': 'change->flower-category#onNameChange'
+        }}) }}
         {{ form_errors(form.name) }}
       </div>
       <div class="form-group">
-        {{ form_label(form.category, null, {'label_attr': {'class': 'block text-sm font-semibold text-gray-700 mb-1.5'}}) }}
-        {{ form_widget(form.category, {'attr': {'class': 'w-full rounded-lg border border-gray-200 px-3.5 py-2.5 text-sm focus:border-[#4265d6] focus:ring-[#4265d6] transition', 'placeholder': 'e.g., Rose, Tulip, Lily'}}) }}
+        {{ form_widget(form.category, {'attr': {'data-flower-category-target': 'category'}}) }}
+        {{ form_label(form.categoryDisplay, null, {'label_attr': {'class': 'block text-sm font-semibold text-gray-700 mb-1.5'}}) }}
+        {{ form_widget(form.categoryDisplay, {'attr': {
+          'class': 'w-full rounded-lg border border-gray-200 px-3.5 py-2.5 text-sm bg-gray-50 text-gray-700',
+          'data-flower-category-target': 'categoryDisplay'
+        }}) }}
         {{ form_errors(form.category) }}
+      </div>
+      <div class="form-group">
+        {{ form_label(form.imageFilename, null, {'label_attr': {'class': 'block text-sm font-semibold text-gray-700 mb-1.5'}}) }}
+        {{ form_widget(form.imageFilename, {'attr': {'class': 'w-full rounded-lg border border-gray-200 px-3.5 py-2.5 text-sm focus:border-[#4265d6] focus:ring-[#4265d6] transition', 'placeholder': 'e.g., red_rose.jpg'}}) }}
+        <p class="text-xs text-gray-500 mt-1">Stored as filename only. Files should exist in <strong>public/uploads/flowers/</strong>.</p>
+        {{ form_errors(form.imageFilename) }}
       </div>
       <div class="form-group">
         {{ form_label(form.price, null, {'label_attr': {'class': 'block text-sm font-semibold text-gray-700 mb-1.5'}}) }}
         <div class="relative">
-          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <span class="text-gray-400 text-sm font-medium">₱</span>
           </div>
-          {{ form_widget(form.price, {'attr': {'class': 'w-full pl-8 rounded-lg border border-gray-200 px-3.5 py-2.5 text-sm focus:border-[#4265d6] focus:ring-[#4265d6] transition', 'placeholder': '0.00', 'step': '0.01', 'type': 'number'}}) }}
+          {{ form_widget(form.price, {'attr': {'class': 'w-full rounded-lg border border-gray-200 py-2.5 text-sm focus:border-[#4265d6] focus:ring-[#4265d6] transition', 'placeholder': '0.00', 'step': '0.01', 'type': 'number', 'style': 'padding-left: 28px; padding-right: 14px;'}}) }}
         </div>
         {{ form_errors(form.price) }}
       </div>

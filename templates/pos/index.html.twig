@@ -17,7 +17,8 @@
        discountPrice: f.discountPrice,
        effectivePrice: f.discountPrice > 0 ? f.discountPrice : f.price,
        stock: f.stockQuantity,
-       freshness: f.freshnessStatus
+       freshness: f.freshnessStatus,
+       image: f.imageFilename ? asset('uploads/flowers/' ~ f.imageFilename) : null
      })|json_encode }}"
      data-pos-customers-value="{{ customers|map(c => {
        id: c.id,
@@ -91,20 +92,34 @@
                data-flower-discount="{{ flower.discountPrice ?? 0 }}"
                data-flower-effective="{{ flower.discountPrice > 0 ? flower.discountPrice : flower.price }}"
                data-flower-stock="{{ flower.stockQuantity }}"
+               data-flower-image="{{ flower.imageFilename ? asset('uploads/flowers/' ~ flower.imageFilename) : '' }}"
                data-flower-freshness="{{ flower.freshnessStatus }}">
-            <div class="p-4">
-              <div class="flex items-start justify-between mb-2">
-                <div class="flex items-center justify-center w-10 h-10 rounded-lg" style="background:#fdf2f8;">
-                  <span style="font-size:20px;">🌸</span>
+            <div class="relative h-28" style="background:#f9fafb;border-bottom:1px solid #f1f5f9;">
+              {% if flower.imageFilename %}
+                <img
+                  src="{{ asset('uploads/flowers/' ~ flower.imageFilename) }}"
+                  alt="{{ flower.name }}"
+                  class="w-full h-full object-cover"
+                  loading="lazy"
+                  onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');"
+                >
+                <div class="hidden absolute inset-0 items-center justify-center" style="background:#fdf2f8;">
+                  <span style="font-size:24px;">🌸</span>
                 </div>
-                <span class="inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium
-                  {% if flower.freshnessStatus == 'Fresh' %}bg-green-100 text-green-800
-                  {% elseif flower.freshnessStatus == 'Good' %}bg-yellow-100 text-yellow-800
-                  {% elseif flower.freshnessStatus == 'Last Sale' %}bg-orange-100 text-orange-800
-                  {% else %}bg-red-100 text-red-800{% endif %}">
-                  {{ flower.freshnessStatus }}
-                </span>
-              </div>
+              {% else %}
+                <div class="absolute inset-0 flex items-center justify-center" style="background:#fdf2f8;">
+                  <span style="font-size:24px;">🌸</span>
+                </div>
+              {% endif %}
+              <span class="absolute top-2 right-2 inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium shadow-sm
+                {% if flower.freshnessStatus == 'Fresh' %}bg-green-100 text-green-800
+                {% elseif flower.freshnessStatus == 'Good' %}bg-yellow-100 text-yellow-800
+                {% elseif flower.freshnessStatus == 'Last Sale' %}bg-orange-100 text-orange-800
+                {% else %}bg-red-100 text-red-800{% endif %}">
+                {{ flower.freshnessStatus }}
+              </span>
+            </div>
+            <div class="p-4">
               <h3 class="text-sm font-semibold text-gray-900 truncate" title="{{ flower.name }}">{{ flower.name }}</h3>
               <p class="text-[11px] text-gray-500 mb-2">{{ flower.category }}</p>
               <div class="flex items-center justify-between">
@@ -227,19 +242,15 @@
         </div>
         <div class="p-4 space-y-3">
           <div class="grid grid-cols-3 gap-2">
-            {% set methods = ['Cash', 'GCash', 'Credit Card', 'Debit Card', 'PayMaya', 'Bank Transfer'] %}
+            {% set methods = ['Cash', 'PayPal'] %}
             {% for method in methods %}
               <button type="button" data-action="pos#selectPayment"
                       data-payment-method="{{ method }}"
                       data-pos-target="paymentBtn"
-                      class="pos-payment-btn py-2 px-2 rounded-lg text-[11px] font-medium text-center transition-all duration-200"
+                      class="pos-payment-btn py-3 px-4 rounded-lg text-sm font-medium text-center transition-all duration-200"
                       style="border:1px solid #e8edf2;color:#6b7a8d;">
-                {% if method == 'Cash' %}<i class="fas fa-money-bill-alt block text-base mb-0.5"></i>
-                {% elseif method == 'GCash' %}<i class="fas fa-mobile-alt block text-base mb-0.5"></i>
-                {% elseif method == 'Credit Card' %}<i class="fas fa-credit-card block text-base mb-0.5"></i>
-                {% elseif method == 'Debit Card' %}<i class="fas fa-credit-card block text-base mb-0.5"></i>
-                {% elseif method == 'PayMaya' %}<i class="fas fa-wallet block text-base mb-0.5"></i>
-                {% elseif method == 'Bank Transfer' %}<i class="fas fa-university block text-base mb-0.5"></i>
+                {% if method == 'Cash' %}<i class="fas fa-money-bill-alt block text-lg mb-1"></i>
+                {% elseif method == 'PayPal' %}<i class="fab fa-paypal block text-lg mb-1"></i>
                 {% endif %}
                 {{ method }}
               </button>

@@ -2,12 +2,12 @@
 
 namespace App\Controller;
 
-use App\Entity\Customer;
+use App\Entity\User;
 use App\Entity\Flower;
 use App\Entity\Payment;
 use App\Entity\Reservation;
 use App\Entity\ReservationDetail;
-use App\Repository\CustomerRepository;
+use App\Repository\UserRepository;
 use App\Repository\FlowerBatchRepository;
 use App\Repository\FlowerRepository;
 use App\Service\ActivityLogService;
@@ -26,7 +26,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class PosController extends AbstractController
 {
     #[Route('', name: 'app_pos', methods: ['GET'])]
-    public function index(FlowerRepository $flowerRepository, CustomerRepository $customerRepository): Response
+    public function index(FlowerRepository $flowerRepository, UserRepository $userRepository): Response
     {
         // Only show flowers that are available and in stock
         $flowers = $flowerRepository->createQueryBuilder('f')
@@ -39,7 +39,7 @@ class PosController extends AbstractController
             ->getQuery()
             ->getResult();
 
-        $customers = $customerRepository->findBy([], ['fullName' => 'ASC']);
+        $customers = $userRepository->findCustomers();
 
         return $this->render('pos/index.html.twig', [
             'flowers' => $flowers,
@@ -83,14 +83,16 @@ class PosController extends AbstractController
     }
 
     #[Route('/search-customers', name: 'app_pos_search_customers', methods: ['GET'])]
-    public function searchCustomers(Request $request, CustomerRepository $customerRepository): JsonResponse
+    public function searchCustomers(Request $request, UserRepository $userRepository): JsonResponse
     {
         $query = $request->query->get('q', '');
 
-        $customers = $customerRepository->createQueryBuilder('c')
-            ->where('c.fullName LIKE :q OR c.phone LIKE :q OR c.email LIKE :q')
+        $customers = $userRepository->createQueryBuilder('u')
+            ->where('u.roles LIKE :role')
+            ->andWhere('u.fullName LIKE :q OR u.phone LIKE :q OR u.email LIKE :q')
+            ->setParameter('role', '%ROLE_CUSTOMER%')
             ->setParameter('q', '%' . $query . '%')
-            ->orderBy('c.fullName', 'ASC')
+            ->orderBy('u.fullName', 'ASC')
             ->setMaxResults(10)
             ->getQuery()
             ->getResult();
@@ -114,7 +116,7 @@ class PosController extends AbstractController
         Request $request,
         EntityManagerInterface $em,
         FlowerRepository $flowerRepository,
-        CustomerRepository $customerRepository,
+        UserRepository $userRepository,
         ActivityLogService $activityLog,
         EmailNotificationService $emailNotification
     ): JsonResponse {
@@ -136,14 +138,14 @@ class PosController extends AbstractController
         $em->beginTransaction();
 
         try {
-            // 1. Resolve or create Customer
+            // 1. Resolve or create customer User
             $customer = null;
             if (!empty($data['customerId'])) {
-                $customer = $customerRepository->find($data['customerId']);
+                $customer = $userRepository->find($data['customerId']);
             }
 
             if (!$customer) {
-                // Walk-in customer — create a new one
+                // Walk-in customer — create a new User with ROLE_CUSTOMER
                 $customerName = trim($data['customerName'] ?? 'Walk-in Customer');
                 $customerPhone = trim($data['customerPhone'] ?? '');
                 $customerEmail = trim($data['customerEmail'] ?? '');
@@ -152,12 +154,16 @@ class PosController extends AbstractController
                     $customerName = 'Walk-in Customer';
                 }
 
-                $customer = new Customer();
+                $customer = new User();
+                $customer->setUsername('walkin_' . time() . '_' . random_int(100, 999));
+                $customer->setRoles(['ROLE_CUSTOMER']);
+                $customer->setPassword('__no_password__');
+                $customer->setIsApproved(true);
+                $customer->setCreatedAt(new \DateTime());
                 $customer->setFullName($customerName);
                 $customer->setPhone($customerPhone ?: '+639000000000');
                 $customer->setEmail($customerEmail ?: 'walkin-' . time() . '@floryngarden.local');
                 $customer->setAddress($data['customerAddress'] ?? 'Walk-in');
-                $customer->setDateRegistered(new \DateTime());
                 $em->persist($customer);
             }
 

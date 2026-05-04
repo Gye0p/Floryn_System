@@ -15,38 +15,142 @@
     </div>
   </div>
 
-  <div class="stat-grid">
-    <div class="stat-card">
-      <div class="stat-icon blue"><i class="fas fa-truck"></i></div>
-      <div class="stat-content">
-        <div class="stat-label">Total Suppliers</div>
-        <div class="stat-value">{{ suppliers|length }}</div>
+  {# ── Summary Stats ── #}
+  {% set totalFlowers = 0 %}
+  {% set totalStock = 0 %}
+  {% set thisMonth = 0 %}
+  {% set dailyDeliveries = 0 %}
+  {% for supplier in suppliers %}
+    {% set totalFlowers = totalFlowers + supplier.flowers|length %}
+    {% for flower in supplier.flowers %}
+      {% set totalStock = totalStock + flower.stockQuantity %}
+    {% endfor %}
+    {% if supplier.dateAdded and supplier.dateAdded|date('Y-m') == date()|date('Y-m') %}{% set thisMonth = thisMonth + 1 %}{% endif %}
+    {% if supplier.deliverySchedule and 'daily' in supplier.deliverySchedule|lower %}{% set dailyDeliveries = dailyDeliveries + 1 %}{% endif %}
+  {% endfor %}
+
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="relative overflow-hidden rounded-xl p-5" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;">
+      <div class="flex items-center gap-3">
+        <div class="flex items-center justify-center w-11 h-11 rounded-lg" style="background:rgba(255,255,255,.18);"><i class="fas fa-truck text-lg"></i></div>
+        <div>
+          <div style="font-size:11px;opacity:.8;text-transform:uppercase;letter-spacing:1px;">Total Suppliers</div>
+          <div style="font-size:26px;font-weight:700;line-height:1.2;">{{ suppliers|length }}</div>
+        </div>
       </div>
+      <i class="fas fa-truck" style="position:absolute;right:-6px;bottom:-8px;font-size:70px;opacity:.08;"></i>
     </div>
-    <div class="stat-card">
-      <div class="stat-icon green"><i class="fas fa-seedling"></i></div>
-      <div class="stat-content">
-        <div class="stat-label">Active Flowers</div>
-        <div class="stat-value">{% set totalFlowers = 0 %}{% for supplier in suppliers %}{% set totalFlowers = totalFlowers + supplier.flowers|length %}{% endfor %}{{ totalFlowers }}</div>
+    <div class="relative overflow-hidden rounded-xl p-5" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;">
+      <div class="flex items-center gap-3">
+        <div class="flex items-center justify-center w-11 h-11 rounded-lg" style="background:rgba(255,255,255,.18);"><i class="fas fa-seedling text-lg"></i></div>
+        <div>
+          <div style="font-size:11px;opacity:.8;text-transform:uppercase;letter-spacing:1px;">Flowers Supplied</div>
+          <div style="font-size:26px;font-weight:700;line-height:1.2;">{{ totalFlowers }}</div>
+          <div style="font-size:11px;opacity:.7;">{{ totalStock }} units in stock</div>
+        </div>
       </div>
+      <i class="fas fa-seedling" style="position:absolute;right:-6px;bottom:-8px;font-size:70px;opacity:.08;"></i>
     </div>
-    <div class="stat-card">
-      <div class="stat-icon purple"><i class="fas fa-calendar-plus"></i></div>
-      <div class="stat-content">
-        <div class="stat-label">Added This Month</div>
-        <div class="stat-value">{% set thisMonth = 0 %}{% for supplier in suppliers %}{% if supplier.dateAdded and supplier.dateAdded|date('Y-m') == date()|date('Y-m') %}{% set thisMonth = thisMonth + 1 %}{% endif %}{% endfor %}{{ thisMonth }}</div>
+    <div class="relative overflow-hidden rounded-xl p-5" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:#fff;">
+      <div class="flex items-center gap-3">
+        <div class="flex items-center justify-center w-11 h-11 rounded-lg" style="background:rgba(255,255,255,.18);"><i class="fas fa-calendar-plus text-lg"></i></div>
+        <div>
+          <div style="font-size:11px;opacity:.8;text-transform:uppercase;letter-spacing:1px;">Added This Month</div>
+          <div style="font-size:26px;font-weight:700;line-height:1.2;">{{ thisMonth }}</div>
+        </div>
       </div>
+      <i class="fas fa-calendar-plus" style="position:absolute;right:-6px;bottom:-8px;font-size:70px;opacity:.08;"></i>
     </div>
-    <div class="stat-card">
-      <div class="stat-icon amber"><i class="fas fa-clock"></i></div>
-      <div class="stat-content">
-        <div class="stat-label">Daily Deliveries</div>
-        <div class="stat-value">{% set dailyDeliveries = 0 %}{% for supplier in suppliers %}{% if supplier.deliverySchedule and 'daily' in supplier.deliverySchedule|lower %}{% set dailyDeliveries = dailyDeliveries + 1 %}{% endif %}{% endfor %}{{ dailyDeliveries }}</div>
+    <div class="relative overflow-hidden rounded-xl p-5" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;">
+      <div class="flex items-center gap-3">
+        <div class="flex items-center justify-center w-11 h-11 rounded-lg" style="background:rgba(255,255,255,.18);"><i class="fas fa-clock text-lg"></i></div>
+        <div>
+          <div style="font-size:11px;opacity:.8;text-transform:uppercase;letter-spacing:1px;">Daily Deliveries</div>
+          <div style="font-size:26px;font-weight:700;line-height:1.2;">{{ dailyDeliveries }}</div>
+        </div>
       </div>
+      <i class="fas fa-clock" style="position:absolute;right:-6px;bottom:-8px;font-size:70px;opacity:.08;"></i>
     </div>
   </div>
 
   {% if suppliers is not empty %}
+
+  {# ── Supplier Card Grid ── #}
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 mb-8">
+    {% for supplier in suppliers %}
+      <div class="rounded-xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
+        {# Card Header #}
+        <div class="flex items-center gap-3 px-5 py-4 border-b border-gray-50" style="background:linear-gradient(135deg,#f0f5ff,#e8f4fd);">
+          <div class="flex items-center justify-center w-11 h-11 rounded-lg text-white" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8);">
+            <i class="fas fa-industry" style="font-size:14px;"></i>
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="font-semibold text-sm truncate" style="color:var(--navy);">{{ supplier.supplierName }}</div>
+            {% if supplier.contactPerson %}
+              <div class="text-xs truncate" style="color:var(--muted);"><i class="fas fa-user-tie" style="margin-right:3px;font-size:9px;"></i>{{ supplier.contactPerson }}</div>
+            {% endif %}
+          </div>
+          {% if supplier.deliverySchedule %}
+            <span class="pill {% if 'daily' in supplier.deliverySchedule|lower %}green{% elseif 'weekly' in supplier.deliverySchedule|lower %}blue{% else %}gray{% endif %}" style="font-size:10px;white-space:nowrap;">{{ supplier.deliverySchedule }}</span>
+          {% endif %}
+        </div>
+
+        {# Card Body #}
+        <div class="px-5 py-4 space-y-3">
+          {# Contact Row #}
+          <div class="flex flex-col gap-1.5 text-xs" style="color:#4b5563;">
+            {% if supplier.phone %}
+              <div class="flex items-center gap-2">
+                <i class="fas fa-phone-alt" style="color:#3b82f6;width:14px;text-align:center;font-size:10px;"></i>
+                <a href="tel:{{ supplier.phone }}" class="hover:underline" style="color:#3b82f6;">{{ supplier.phone }}</a>
+              </div>
+            {% endif %}
+            {% if supplier.email %}
+              <div class="flex items-center gap-2">
+                <i class="fas fa-envelope" style="color:#3b82f6;width:14px;text-align:center;font-size:10px;"></i>
+                <a href="mailto:{{ supplier.email }}" class="hover:underline truncate" style="color:#3b82f6;">{{ supplier.email }}</a>
+              </div>
+            {% endif %}
+            {% if supplier.address %}
+              <div class="flex items-start gap-2">
+                <i class="fas fa-map-marker-alt" style="color:#6b7280;width:14px;text-align:center;font-size:10px;margin-top:2px;"></i>
+                <span class="line-clamp-2" style="color:#6b7280;">{{ supplier.address }}</span>
+              </div>
+            {% endif %}
+          </div>
+
+          {# Flowers and Stats #}
+          <div class="flex items-center gap-3 pt-2 border-t border-gray-50">
+            <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium" style="background:#f0fdf4;color:#15803d;">
+              <i class="fas fa-leaf" style="font-size:10px;"></i> {{ supplier.flowers|length }} flower{{ supplier.flowers|length != 1 ? 's' : '' }}
+            </div>
+            {% set supplierStock = 0 %}
+            {% for flower in supplier.flowers %}{% set supplierStock = supplierStock + flower.stockQuantity %}{% endfor %}
+            <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium" style="background:#eff6ff;color:#1d4ed8;">
+              <i class="fas fa-cubes" style="font-size:10px;"></i> {{ supplierStock }} units
+            </div>
+            {% if supplier.dateAdded %}
+              <div class="ml-auto text-xs" style="color:#9ca3af;" title="Added {{ supplier.dateAdded|date('M j, Y') }}">
+                <i class="far fa-calendar" style="font-size:10px;margin-right:2px;"></i>{{ supplier.dateAdded|date('M Y') }}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        {# Card Footer #}
+        <div class="flex items-center gap-2 px-5 py-3 border-t border-gray-100" style="background:#fafbfc;">
+          <a href="{{ path('app_supplier_show', {'id': supplier.id}) }}" class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors" style="color:#3b82f6;background:#eff6ff;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">
+            <i class="fas fa-eye" style="font-size:11px;"></i> View Details
+          </a>
+          <a href="{{ path('app_supplier_edit', {'id': supplier.id}) }}" class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors" style="color:#6b7280;background:#f3f4f6;" onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">
+            <i class="fas fa-edit" style="font-size:11px;"></i> Edit
+          </a>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  {# ── Data Table (for search, sort, export) ── #}
   <div class="table-card"
        data-controller="floryn-table"
        data-floryn-table-page-size-value="10"
@@ -55,7 +159,7 @@
        data-floryn-table-no-sort-cols-value="[5]"
        data-floryn-table-entity-name-value="suppliers">
 
-    <div class="table-card-header"><h3>All Suppliers</h3></div>
+    <div class="table-card-header"><h3><i class="fas fa-list-ul" style="margin-right:6px;color:var(--muted);font-size:14px;"></i>Supplier Directory</h3></div>
 
     <div class="fg-toolbar">
       <div class="fg-toolbar-left">
@@ -129,9 +233,11 @@
   {% else %}
     <div class="section-card">
       <div class="empty-state">
-        <div class="empty-state-icon"><i class="fas fa-truck"></i></div>
-        <h3>No suppliers found</h3>
-        <p>Build your supply chain by adding your first supplier.</p>
+        <div class="empty-state-icon" style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border-radius:50%;width:80px;height:80px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+          <i class="fas fa-truck" style="font-size:28px;color:#3b82f6;"></i>
+        </div>
+        <h3>No suppliers yet</h3>
+        <p style="max-width:340px;margin:0 auto 16px;">Build your supply chain by adding your first flower supplier to start tracking deliveries and inventory sources.</p>
         <a href="{{ path('app_supplier_new') }}" class="btn btn-primary"><i class="fas fa-truck-loading"></i> Add Your First Supplier</a>
       </div>
     </div>

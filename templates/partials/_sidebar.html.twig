@@ -3,13 +3,8 @@
 <aside class="flex flex-col h-full w-full" style="background:#293855;">
   
   {# Logo #}
-  <div class="py-7 px-6" style="border-bottom:1px solid rgba(194,231,201,0.12);">
-    <div style="font-family:'Bricolage Grotesque',serif;font-size:26px;font-weight:700;color:#c2e7c9;letter-spacing:-0.5px;">
-      Floryn Garden
-    </div>
-    <div style="font-size:11px;color:rgba(194,231,201,0.5);letter-spacing:2px;text-transform:uppercase;margin-top:2px;">
-      Flower Management
-    </div>
+  <div class="py-5 px-5 flex items-center justify-center" style="border-bottom:1px solid rgba(194,231,201,0.12);">
+    <img src="{{ asset('images/WEBDEV.png') }}" alt="Floryn Garden" style="max-height:100px;width:auto;object-fit:contain;">
   </div>
 
   {# Navigation #}
@@ -41,6 +36,7 @@
       
       {% set storeMenu = [
         {'route': 'app_pos', 'prefix': 'app_pos', 'icon': 'fa-cash-register', 'label': 'Point of Sale'},
+        {'route': 'app_bouquet_index', 'prefix': 'app_bouquet_', 'icon': 'fa-spa', 'label': 'Bouquets'},
         {'route': 'app_payment_index', 'prefix': 'app_payment_', 'icon': 'fa-credit-card', 'label': 'Payments'},
         {'route': 'app_notification_log_index', 'prefix': 'app_notification_log_', 'icon': 'fa-bell', 'label': 'Notifications'}
       ] %}
@@ -56,6 +52,7 @@
       {% endfor %}
     </div>
 
+    {% if is_granted('ROLE_MANAGER') %}
     <div class="mb-7">
       <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(194,231,201,0.35);padding:0 12px;margin-bottom:8px;">Reports</div>
       
@@ -66,6 +63,7 @@
         <span>Analytics</span>
       </a>
     </div>
+    {% endif %}
 
     {# Admin Only Links #}
     {% if is_granted('ROLE_ADMIN') %}
@@ -73,10 +71,22 @@
         <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(194,231,201,0.35);padding:0 12px;margin-bottom:8px;">Administration</div>
         
         <a href="{{ path('app_user_index') }}"
-           class="sidebar-link flex items-center gap-2.5 px-3 py-2.5 rounded-lg mb-0.5 transition-all duration-200{% if currentRoute starts with 'app_user_' %} active{% endif %}"
+           class="sidebar-link flex items-center gap-2.5 px-3 py-2.5 rounded-lg mb-0.5 transition-all duration-200{% if currentRoute starts with 'app_user_' and currentRoute != 'app_user_pending' %} active{% endif %}"
            style="font-size:14px;">
           <span class="sidebar-icon"><i class="fas fa-shield-alt"></i></span>
           <span>User Management</span>
+        </a>
+
+        {% set pendingCount = pending_users_count() %}
+        <a href="{{ path('app_user_pending') }}"
+           class="sidebar-link flex items-center gap-2.5 px-3 py-2.5 rounded-lg mb-0.5 transition-all duration-200{% if currentRoute == 'app_user_pending' %} active{% endif %}"
+           style="font-size:14px;">
+          <span class="sidebar-icon"><i class="fas fa-user-clock"></i></span>
+          <span class="flex-1">Pending Approvals</span>
+          {% if pendingCount > 0 %}
+            <span class="ml-auto inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-bold"
+                  style="background:#f59e0b;color:#fff;min-width:20px;">{{ pendingCount }}</span>
+          {% endif %}
         </a>
 
         <a href="{{ path('app_activity_log_index') }}"

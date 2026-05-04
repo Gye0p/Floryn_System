@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\Customer;
+use App\Entity\User;
 use App\Entity\Flower;
 use App\Entity\Payment;
 use App\Entity\Reservation;
@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[IsGranted('ROLE_USER')]
+#[IsGranted('ROLE_STAFF')]
 class SearchController extends AbstractController
 {
     public function __construct(
@@ -57,12 +57,12 @@ class SearchController extends AbstractController
             ];
         }
 
-        // Search Customers
-        $customers = $this->em->getRepository(Customer::class)
-            ->createQueryBuilder('c')
-            ->where('LOWER(c.fullName) LIKE :q')
-            ->orWhere('LOWER(c.email) LIKE :q')
-            ->orWhere('LOWER(c.phone) LIKE :q')
+        // Search Customers (ROLE_CUSTOMER users)
+        $customers = $this->em->getRepository(User::class)
+            ->createQueryBuilder('u')
+            ->where('u.roles LIKE :role')
+            ->andWhere('LOWER(u.fullName) LIKE :q OR LOWER(u.email) LIKE :q OR LOWER(u.phone) LIKE :q')
+            ->setParameter('role', '%ROLE_CUSTOMER%')
             ->setParameter('q', '%' . mb_strtolower($q) . '%')
             ->setMaxResults(5)
             ->getQuery()
@@ -199,11 +199,11 @@ class SearchController extends AbstractController
                 ->getQuery()
                 ->getResult();
 
-            $customers = $this->em->getRepository(Customer::class)
-                ->createQueryBuilder('c')
-                ->where('LOWER(c.fullName) LIKE :q')
-                ->orWhere('LOWER(c.email) LIKE :q')
-                ->orWhere('LOWER(c.phone) LIKE :q')
+            $customers = $this->em->getRepository(User::class)
+                ->createQueryBuilder('u')
+                ->where('u.roles LIKE :role')
+                ->andWhere('LOWER(u.fullName) LIKE :q OR LOWER(u.email) LIKE :q OR LOWER(u.phone) LIKE :q')
+                ->setParameter('role', '%ROLE_CUSTOMER%')
                 ->setParameter('q', $like)
                 ->setMaxResults(20)
                 ->getQuery()

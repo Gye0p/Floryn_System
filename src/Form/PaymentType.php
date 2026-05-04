@@ -24,11 +24,7 @@ class PaymentType extends AbstractType
             ->add('paymentMethod', ChoiceType::class, [
                 'choices' => [
                     'Cash' => 'Cash',
-                    'Credit Card' => 'Credit Card',
-                    'Debit Card' => 'Debit Card',
-                    'GCash' => 'GCash',
-                    'PayMaya' => 'PayMaya',
-                    'Bank Transfer' => 'Bank Transfer',
+                    'PayPal' => 'PayPal',
                 ],
                 'placeholder' => 'Select payment method',
                 'attr' => ['class' => 'form-select'],

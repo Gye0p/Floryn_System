@@ -53,8 +53,9 @@ export default class extends Controller {
     const temp = document.createElement('div');
     temp.innerHTML = html;
 
-    const flowerWidget = temp.querySelector('[id*="_flower"]')?.parentElement?.innerHTML || '';
-    const quantityWidget = temp.querySelector('[id*="_quantity"]')?.parentElement?.innerHTML || '';
+    // Extract only the controls so we can render labels once in this template.
+    const flowerWidget = temp.querySelector('select[id*="_flower"]')?.outerHTML || '';
+    const quantityWidget = temp.querySelector('input[id*="_quantity"]')?.outerHTML || '';
 
     // Build the row markup
     const row = document.createElement('div');

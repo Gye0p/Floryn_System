@@ -73,6 +73,13 @@ class Flower
     #[ORM\Column(length: 50)]
     private ?string $status = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Regex(
+        pattern: '/^[a-z0-9_\-]+\.(jpg|jpeg|png|webp)$/i',
+        message: 'Image filename must be a valid image file (jpg, jpeg, png, or webp).'
+    )]
+    private ?string $imageFilename = null;
+
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTime $soldAt = null;
 
@@ -88,22 +95,22 @@ class Flower
     private Collection $batches;
 
     /**
-     * @var Collection<int, InventoryLog>
-     */
-    #[ORM\OneToMany(targetEntity: InventoryLog::class, mappedBy: 'flower')]
-    private Collection $inventoryLogs;
-
-    /**
      * @var Collection<int, ReservationDetail>
      */
     #[ORM\OneToMany(targetEntity: ReservationDetail::class, mappedBy: 'flower')]
     private Collection $reservationDetails;
 
+    /**
+     * @var Collection<int, BouquetItem>
+     */
+    #[ORM\OneToMany(targetEntity: BouquetItem::class, mappedBy: 'flower')]
+    private Collection $bouquetItems;
+
     public function __construct()
     {
-        $this->inventoryLogs = new ArrayCollection();
         $this->reservationDetails = new ArrayCollection();
         $this->batches = new ArrayCollection();
+        $this->bouquetItems = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -215,6 +222,18 @@ class Flower
     public function setStatus(string $status): static
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    public function getImageFilename(): ?string
+    {
+        return $this->imageFilename;
+    }
+
+    public function setImageFilename(?string $imageFilename): static
+    {
+        $this->imageFilename = $imageFilename;
 
         return $this;
     }
@@ -341,36 +360,6 @@ class Flower
     }
 
     /**
-     * @return Collection<int, InventoryLog>
-     */
-    public function getInventoryLogs(): Collection
-    {
-        return $this->inventoryLogs;
-    }
-
-    public function addInventoryLog(InventoryLog $inventoryLog): static
-    {
-        if (!$this->inventoryLogs->contains($inventoryLog)) {
-            $this->inventoryLogs->add($inventoryLog);
-            $inventoryLog->setFlower($this);
-        }
-
-        return $this;
-    }
-
-    public function removeInventoryLog(InventoryLog $inventoryLog): static
-    {
-        if ($this->inventoryLogs->removeElement($inventoryLog)) {
-            // set the owning side to null (unless already changed)
-            if ($inventoryLog->getFlower() === $this) {
-                $inventoryLog->setFlower(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
      * @return Collection<int, ReservationDetail>
      */
     public function getReservationDetails(): Collection
@@ -394,6 +383,35 @@ class Flower
             // set the owning side to null (unless already changed)
             if ($reservationDetail->getFlower() === $this) {
                 $reservationDetail->setFlower(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, BouquetItem>
+     */
+    public function getBouquetItems(): Collection
+    {
+        return $this->bouquetItems;
+    }
+
+    public function addBouquetItem(BouquetItem $bouquetItem): static
+    {
+        if (!$this->bouquetItems->contains($bouquetItem)) {
+            $this->bouquetItems->add($bouquetItem);
+            $bouquetItem->setFlower($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBouquetItem(BouquetItem $bouquetItem): static
+    {
+        if ($this->bouquetItems->removeElement($bouquetItem)) {
+            if ($bouquetItem->getFlower() === $this) {
+                $bouquetItem->setFlower(null);
             }
         }
 

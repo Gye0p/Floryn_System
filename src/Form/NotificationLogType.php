@@ -2,7 +2,7 @@
 
 namespace App\Form;
 
-use App\Entity\Customer;
+use App\Entity\User;
 use App\Entity\NotificationLog;
 use App\Entity\Reservation;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -40,8 +40,14 @@ class NotificationLogType extends AbstractType
                 'attr' => ['class' => 'form-select'],
             ])
             ->add('customer', EntityType::class, [
-                'class' => Customer::class,
-                'choice_label' => 'id',
+                'class' => User::class,
+                'choice_label' => 'fullName',
+                'query_builder' => function (\App\Repository\UserRepository $repo) {
+                    return $repo->createQueryBuilder('u')
+                        ->where('u.roles LIKE :role')
+                        ->setParameter('role', '%ROLE_CUSTOMER%')
+                        ->orderBy('u.fullName', 'ASC');
+                },
             ])
             ->add('reservation', EntityType::class, [
                 'class' => Reservation::class,

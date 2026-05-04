@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Repository\FlowerRepository;
-use App\Repository\CustomerRepository;
+use App\Repository\UserRepository;
 use App\Repository\ReservationRepository;
 use App\Repository\ReservationDetailRepository;
 use App\Repository\PaymentRepository;
@@ -119,10 +119,10 @@ class ReportController extends AbstractController
 
     #[Route('/customers', name: 'app_reports_customers')]
     public function customerReport(
-        CustomerRepository $customerRepo,
+        UserRepository $userRepo,
         ReservationRepository $reservationRepo
     ): Response {
-        $customers = $customerRepo->findAll();
+        $customers = $userRepo->findCustomers();
 
         $customerStats = [];
         foreach ($customers as $customer) {
@@ -264,10 +264,10 @@ class ReportController extends AbstractController
 
     #[Route('/export/customers-csv', name: 'app_reports_export_customers_csv')]
     public function exportCustomersCsv(
-        CustomerRepository $customerRepo,
+        UserRepository $userRepo,
         ReservationRepository $reservationRepo
     ): Response {
-        $customers = $customerRepo->findAll();
+        $customers = $userRepo->findCustomers();
 
         $csv = "ID,Full Name,Email,Phone,Address,Date Registered,Total Orders,Total Spent\n";
 
@@ -282,7 +282,7 @@ class ReportController extends AbstractController
                 str_replace('"', '""', $customer->getEmail()),
                 str_replace('"', '""', $customer->getPhone()),
                 str_replace('"', '""', $customer->getAddress() ?? ''),
-                $customer->getDateRegistered() ? $customer->getDateRegistered()->format('Y-m-d') : '',
+                $customer->getCreatedAt() ? $customer->getCreatedAt()->format('Y-m-d') : '',
                 count($reservations),
                 $totalSpent
             );

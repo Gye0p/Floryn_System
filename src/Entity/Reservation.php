@@ -42,7 +42,7 @@ class Reservation
 
     #[ORM\ManyToOne(inversedBy: 'reservations')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Customer $customer = null;
+    private ?User $customer = null;
 
     /**
      * @var Collection<int, ReservationDetail>
@@ -130,12 +130,12 @@ class Reservation
         return $this;
     }
 
-    public function getCustomer(): ?Customer
+    public function getCustomer(): ?User
     {
         return $this->customer;
     }
 
-    public function setCustomer(?Customer $customer): static
+    public function setCustomer(?User $customer): static
     {
         $this->customer = $customer;
 

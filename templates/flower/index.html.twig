@@ -98,7 +98,15 @@
             <tr>
               <td class="px-4 py-3">
                 <div class="flex items-center gap-3">
-                  <div class="avatar sm" style="background:linear-gradient(135deg,#e88da0,#d65d7a);"><i class="fas fa-leaf" style="font-size:13px;"></i></div>
+                  {% if flower.imageFilename %}
+                    <img
+                      src="{{ asset('uploads/flowers/' ~ flower.imageFilename) }}"
+                      alt="{{ flower.name }}"
+                      style="width:36px;height:36px;border-radius:10px;object-fit:cover;background:#f3f4f6;"
+                    >
+                  {% else %}
+                    <div class="avatar sm" style="background:linear-gradient(135deg,#e88da0,#d65d7a);"><i class="fas fa-leaf" style="font-size:13px;"></i></div>
+                  {% endif %}
                   <div>
                     <div style="font-weight:600;color:var(--navy);font-size:13px;">{{ flower.name }}</div>
                     <div style="font-size:11px;color:var(--muted);">ID: {{ flower.id }}</div>
@@ -193,7 +201,15 @@
             <tr style="background:#fafafa;">
               <td class="px-4 py-3">
                 <div class="flex items-center gap-3">
-                  <div class="avatar sm" style="background:linear-gradient(135deg,#d1d5db,#9ca3af);"><i class="fas fa-leaf" style="font-size:13px;"></i></div>
+                  {% if flower.imageFilename %}
+                    <img
+                      src="{{ asset('uploads/flowers/' ~ flower.imageFilename) }}"
+                      alt="{{ flower.name }}"
+                      style="width:36px;height:36px;border-radius:10px;object-fit:cover;background:#f3f4f6;opacity:0.75;"
+                    >
+                  {% else %}
+                    <div class="avatar sm" style="background:linear-gradient(135deg,#d1d5db,#9ca3af);"><i class="fas fa-leaf" style="font-size:13px;"></i></div>
+                  {% endif %}
                   <div>
                     <div style="font-weight:600;color:#6b7280;font-size:13px;">{{ flower.name }}</div>
                     <div style="font-size:11px;color:var(--muted);">ID: {{ flower.id }}</div>
