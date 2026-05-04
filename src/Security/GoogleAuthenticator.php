@@ -52,14 +52,20 @@ class GoogleAuthenticator extends OAuth2Authenticator implements AuthenticationE
                 // 1. Check if user exists by Google ID
                 $existingUser = $this->userRepository->findOneBy(['googleId' => $googleId]);
                 if ($existingUser) {
+                    // Auto-verify Google users — Google already confirms email ownership
+                    if (!$existingUser->isVerified()) {
+                        $existingUser->setIsVerified(true);
+                        $this->entityManager->flush();
+                    }
                     return $existingUser;
                 }
 
                 // 2. Check if user exists by email
                 $existingUser = $this->userRepository->findOneBy(['email' => $email]);
                 if ($existingUser) {
-                    // Link Google account to existing user
+                    // Link Google account to existing user and auto-verify
                     $existingUser->setGoogleId($googleId);
+                    $existingUser->setIsVerified(true);
                     $this->entityManager->flush();
                     return $existingUser;
                 }
@@ -70,11 +76,12 @@ class GoogleAuthenticator extends OAuth2Authenticator implements AuthenticationE
                 if ($existingUser) {
                     $existingUser->setGoogleId($googleId);
                     $existingUser->setEmail($email);
+                    $existingUser->setIsVerified(true);
                     $this->entityManager->flush();
                     return $existingUser;
                 }
 
-                // 4. Create new user from Google data
+                // 4. Create new user from Google data — pending approval
                 $user = new User();
                 $user->setUsername($username);
                 $user->setEmail($email);
@@ -82,6 +89,9 @@ class GoogleAuthenticator extends OAuth2Authenticator implements AuthenticationE
                 // Set a random password since Google users don't need one
                 $user->setPassword(bin2hex(random_bytes(32)));
                 $user->setRoles(['ROLE_STAFF']);
+                $user->setIsApproved(false);
+                $user->setIsVerified(true); // Google confirms email ownership
+                $user->setCreatedAt(new \DateTime());
 
                 $this->entityManager->persist($user);
                 $this->entityManager->flush();

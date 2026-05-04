@@ -2,7 +2,6 @@
 
 namespace App\Service;
 
-use App\Entity\Customer;
 use App\Entity\Reservation;
 use App\Entity\Payment;
 use App\Entity\Flower;
@@ -14,7 +13,7 @@ class EmailNotificationService
 {
     private MailerInterface $mailer;
     private LoggerInterface $logger;
-    private string $fromEmail = 'noreply@floryngarden.com';
+    private string $fromEmail = 'gyeoptorres@gmail.com';
     private string $fromName = 'Floryn Garden System';
 
     public function __construct(MailerInterface $mailer, LoggerInterface $logger)

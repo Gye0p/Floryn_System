@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Repository\FlowerRepository;
-use App\Repository\CustomerRepository;
+use App\Repository\UserRepository;
 use App\Repository\ReservationRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -49,9 +49,9 @@ class ApiController extends AbstractController
      * GET /api/customers — List all customers
      */
     #[Route('/customers', name: 'customers', methods: ['GET'])]
-    public function customers(CustomerRepository $customerRepository): JsonResponse
+    public function customers(UserRepository $userRepository): JsonResponse
     {
-        $customers = $customerRepository->findAll();
+        $customers = $userRepository->findCustomers();
         $data = [];
 
         foreach ($customers as $customer) {
@@ -61,7 +61,7 @@ class ApiController extends AbstractController
                 'phone' => $customer->getPhone(),
                 'email' => $customer->getEmail(),
                 'address' => $customer->getAddress(),
-                'dateRegistered' => $customer->getDateRegistered()?->format('Y-m-d'),
+                'dateRegistered' => $customer->getCreatedAt()?->format('Y-m-d'),
                 'reservationCount' => $customer->getReservations()->count(),
             ];
         }
@@ -99,12 +99,12 @@ class ApiController extends AbstractController
     #[Route('/dashboard', name: 'dashboard', methods: ['GET'])]
     public function dashboard(
         FlowerRepository $flowerRepository,
-        CustomerRepository $customerRepository,
+        UserRepository $userRepository,
         ReservationRepository $reservationRepository,
     ): JsonResponse {
         return $this->json([
             'totalFlowers' => count($flowerRepository->findAll()),
-            'totalCustomers' => count($customerRepository->findAll()),
+            'totalCustomers' => $userRepository->countCustomers(),
             'totalReservations' => count($reservationRepository->findAll()),
             'lowStockFlowers' => count($flowerRepository->findLowStock(5)),
         ]);

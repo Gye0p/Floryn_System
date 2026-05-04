@@ -46,28 +46,82 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getSingleScalarResult();
     }
 
-    //    /**
-    //     * @return User[] Returns an array of User objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('u')
-    //            ->andWhere('u.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('u.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    /**
+     * Count users with ROLE_CUSTOMER
+     */
+    public function countCustomers(): int
+    {
+        return (int) $this->createQueryBuilder('u')
+            ->select('COUNT(u.id)')
+            ->where('u.roles LIKE :role')
+            ->setParameter('role', '%ROLE_CUSTOMER%')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 
-    //    public function findOneBySomeField($value): ?User
-    //    {
-    //        return $this->createQueryBuilder('u')
-    //            ->andWhere('u.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    /**
+     * @return User[] Returns all users with ROLE_CUSTOMER, ordered by fullName
+     */
+    public function findCustomers(): array
+    {
+        return $this->createQueryBuilder('u')
+            ->where('u.roles LIKE :role')
+            ->setParameter('role', '%ROLE_CUSTOMER%')
+            ->orderBy('u.fullName', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Find a customer user by email.
+     */
+    public function findCustomerByEmail(string $email): ?User
+    {
+        return $this->createQueryBuilder('u')
+            ->where('u.email = :email')
+            ->andWhere('u.roles LIKE :role')
+            ->setParameter('email', $email)
+            ->setParameter('role', '%ROLE_CUSTOMER%')
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    /**
+     * @return User[] Returns all users that are pending admin approval
+     */
+    public function findPendingUsers(): array
+    {
+        return $this->createQueryBuilder('u')
+            ->where('u.isApproved = :approved')
+            ->setParameter('approved', false)
+            ->orderBy('u.createdAt', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return User[] Returns all approved users
+     */
+    public function findApprovedUsers(): array
+    {
+        return $this->createQueryBuilder('u')
+            ->where('u.isApproved = :approved')
+            ->setParameter('approved', true)
+            ->orderBy('u.id', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Count users awaiting admin approval
+     */
+    public function countPendingUsers(): int
+    {
+        return (int) $this->createQueryBuilder('u')
+            ->select('COUNT(u.id)')
+            ->where('u.isApproved = :approved')
+            ->setParameter('approved', false)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }

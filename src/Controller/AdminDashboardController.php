@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Repository\FlowerRepository;
 use App\Repository\SupplierRepository;
-use App\Repository\CustomerRepository;
 use App\Repository\ReservationRepository;
 use App\Repository\PaymentRepository;
 use App\Repository\UserRepository;
@@ -22,7 +21,6 @@ class AdminDashboardController extends AbstractController
     public function index(
         FlowerRepository $flowerRepo,
         SupplierRepository $supplierRepo,
-        CustomerRepository $customerRepo,
         ReservationRepository $reservationRepo,
         PaymentRepository $paymentRepo,
         UserRepository $userRepo,
@@ -48,7 +46,7 @@ class AdminDashboardController extends AbstractController
             ->getSingleScalarResult();
         $totalFlowers = $totalFlowerRecords - $soldOutCount - $unavailableCount - (int) $zeroStockCount;
         $totalSuppliers = $supplierRepo->count([]);
-        $totalCustomers = $customerRepo->count([]);
+        $totalCustomers = $userRepo->countCustomers();
         $totalReservations = $reservationRepo->count([]);
         $totalPayments = $paymentRepo->count([]);
         

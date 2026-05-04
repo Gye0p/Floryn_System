@@ -22,8 +22,44 @@ class UserManagementController extends AbstractController
     public function index(UserRepository $userRepository): Response
     {
         return $this->render('user_management/index.html.twig', [
-            'users' => $userRepository->findAll(),
+            'users' => $userRepository->findApprovedUsers(),
         ]);
+    }
+
+    #[Route('/pending', name: 'app_user_pending', methods: ['GET'])]
+    public function pending(UserRepository $userRepository): Response
+    {
+        return $this->render('user_management/pending.html.twig', [
+            'pendingUsers' => $userRepository->findPendingUsers(),
+        ]);
+    }
+
+    #[Route('/{id}/approve', name: 'app_user_approve', methods: ['POST'])]
+    public function approve(Request $request, User $user, EntityManagerInterface $entityManager, ActivityLogService $activityLog): Response
+    {
+        if ($this->isCsrfTokenValid('approve'.$user->getId(), $request->getPayload()->getString('_token'))) {
+            $user->setIsApproved(true);
+            $entityManager->flush();
+            $activityLog->logUpdate('User', $user->getId(), $user->getUsername() . ' (Account Approved)');
+            $this->addFlash('success', 'Account for "' . $user->getUsername() . '" has been approved. They can now log in.');
+        }
+
+        return $this->redirectToRoute('app_user_pending', [], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/{id}/reject', name: 'app_user_reject', methods: ['POST'])]
+    public function reject(Request $request, User $user, EntityManagerInterface $entityManager, ActivityLogService $activityLog): Response
+    {
+        if ($this->isCsrfTokenValid('reject'.$user->getId(), $request->getPayload()->getString('_token'))) {
+            $userId   = $user->getId();
+            $username = $user->getUsername();
+            $entityManager->remove($user);
+            $entityManager->flush();
+            $activityLog->logDelete('User', $userId, $username . ' (Registration Rejected)');
+            $this->addFlash('warning', 'Registration for "' . $username . '" has been rejected and removed.');
+        }
+
+        return $this->redirectToRoute('app_user_pending', [], Response::HTTP_SEE_OTHER);
     }
 
     #[Route('/new', name: 'app_user_new', methods: ['GET', 'POST'])]
@@ -38,6 +74,10 @@ class UserManagementController extends AbstractController
             $plainPassword = $form->get('plainPassword')->getData();
             $hashedPassword = $passwordHasher->hashPassword($user, $plainPassword);
             $user->setPassword($hashedPassword);
+
+            // Admin-created users are auto-approved
+            $user->setIsApproved(true);
+            $user->setCreatedAt(new \DateTime());
 
             $entityManager->persist($user);
             $entityManager->flush();
@@ -98,23 +138,28 @@ class UserManagementController extends AbstractController
     public function delete(Request $request, User $user, EntityManagerInterface $entityManager, ActivityLogService $activityLog): Response
     {
         // Prevent admin from deleting themselves
-        if ($user === $this->getUser()) {
-            $this->addFlash('danger', 'You cannot delete your own account.');
+        if ($user->getId() === $this->getUser()?->getId()) {
+            $this->addFlash('error', 'You cannot delete your own account.');
             return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        if ($this->isCsrfTokenValid('delete'.$user->getId(), $request->getPayload()->getString('_token'))) {
-            // Capture user info before deleting
-            $userId = $user->getId();
-            $username = $user->getUsername();
+        if (!$this->isCsrfTokenValid('delete'.$user->getId(), $request->getPayload()->getString('_token'))) {
+            $this->addFlash('error', 'Invalid security token. Please try again.');
+            return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
+        }
 
+        // Capture user info before deleting
+        $userId = $user->getId();
+        $username = $user->getUsername();
+
+        try {
             $entityManager->remove($user);
             $entityManager->flush();
 
-            // Log after successful deletion
             $activityLog->logDelete('User', $userId, $username);
-
-            $this->addFlash('success', 'User deleted successfully!');
+            $this->addFlash('success', 'User "' . $username . '" deleted successfully!');
+        } catch (\Exception $e) {
+            $this->addFlash('error', 'Cannot delete user "' . $username . '". They may have associated records (reservations or orders) that must be removed first.');
         }
 
         return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
