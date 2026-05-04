@@ -1,0 +1,182 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Bouquets - Floryn Garden{% endblock %}
+{% block page_title %}Bouquet Management{% endblock %}
+
+{% block body %}
+<div class="page-wrapper px-4 sm:px-6 lg:px-8">
+  <div class="page-header">
+    <div class="page-header-info">
+      <h1><i class="fas fa-spa" style="color:#4265d6;font-size:22px;"></i> Bouquets</h1>
+      <p class="subtitle">Build custom bouquets from available flower stock. Stock is deducted as flowers are added.</p>
+    </div>
+    <div class="page-header-actions">
+      <button type="button" class="btn btn-primary" id="btn-new-bouquet">
+        <i class="fas fa-plus"></i> New Bouquet
+      </button>
+    </div>
+  </div>
+
+  {# Stats #}
+  {% set draftCount = bouquets|filter(b => b.status == 'Draft')|length %}
+  {% set readyCount = bouquets|filter(b => b.status == 'Ready')|length %}
+  {% set soldCount  = bouquets|filter(b => b.status == 'Sold')|length %}
+  <div class="stat-grid" style="grid-template-columns:repeat(4,1fr);">
+    <div class="stat-card">
+      <div class="stat-icon blue"><i class="fas fa-spa"></i></div>
+      <div class="stat-content"><div class="stat-label">Total</div><div class="stat-value">{{ bouquets|length }}</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon amber"><i class="fas fa-pencil-alt"></i></div>
+      <div class="stat-content"><div class="stat-label">Draft</div><div class="stat-value">{{ draftCount }}</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+      <div class="stat-content"><div class="stat-label">Ready</div><div class="stat-value">{{ readyCount }}</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon purple"><i class="fas fa-shopping-bag"></i></div>
+      <div class="stat-content"><div class="stat-label">Sold</div><div class="stat-value">{{ soldCount }}</div></div>
+    </div>
+  </div>
+
+  {% for label, messages in app.flashes %}
+    {% for msg in messages %}
+      <div class="alert alert-{{ label }} mb-4">{{ msg }}</div>
+    {% endfor %}
+  {% endfor %}
+
+  {% if bouquets is empty %}
+    <div class="table-card p-12 text-center text-gray-400">
+      <i class="fas fa-spa text-5xl mb-4 block"></i>
+      <p class="text-lg">No bouquets yet. Click <strong>New Bouquet</strong> to start building.</p>
+    </div>
+  {% else %}
+    <div class="table-card">
+      <div class="table-card-header"><h3>All Bouquets</h3></div>
+      <div class="overflow-x-auto">
+        <table class="fg-table min-w-full">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Flowers</th>
+              <th>Total Price</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for bouquet in bouquets %}
+              <tr>
+                <td class="text-gray-400">{{ bouquet.id }}</td>
+                <td class="font-semibold">{{ bouquet.name }}</td>
+                <td>
+                  {% if bouquet.items is empty %}
+                    <span class="text-gray-400">—</span>
+                  {% else %}
+                    <div class="flex flex-wrap gap-1">
+                      {% for item in bouquet.items %}
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          {{ item.quantity }}× {{ item.flower.name }}
+                        </span>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                </td>
+                <td class="font-semibold">₱{{ bouquet.totalPrice|number_format(2) }}</td>
+                <td>
+                  {% if bouquet.status == 'Draft' %}
+                    <span class="badge badge-warning">Draft</span>
+                  {% elseif bouquet.status == 'Ready' %}
+                    <span class="badge badge-success">Ready</span>
+                  {% elseif bouquet.status == 'Sold' %}
+                    <span class="badge badge-primary">Sold</span>
+                  {% elseif bouquet.status == 'Cancelled' %}
+                    <span class="badge badge-danger">Cancelled</span>
+                  {% else %}
+                    <span class="badge">{{ bouquet.status }}</span>
+                  {% endif %}
+                </td>
+                <td class="text-gray-500 text-sm">{{ bouquet.createdAt|date('M d, Y') }}</td>
+                <td>
+                  <a href="{{ path('app_bouquet_show', {id: bouquet.id}) }}" class="btn btn-sm btn-outline">
+                    <i class="fas fa-eye"></i> View
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+{# ── New Bouquet Modal ── #}
+<div id="modal-new-bouquet" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 mx-4">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-bold text-gray-800"><i class="fas fa-spa mr-2" style="color:#4265d6;"></i>New Bouquet</h2>
+      <button type="button" id="btn-close-modal" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+    </div>
+    <form id="form-new-bouquet">
+      <input type="hidden" name="_token" value="{{ csrf_token('bouquet_new') }}">
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Bouquet Name <span class="text-red-500">*</span></label>
+          <input type="text" name="name" required placeholder="e.g. Spring Romance"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <textarea name="description" rows="2" placeholder="Optional description..."
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"></textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+          <textarea name="notes" rows="2" placeholder="Internal notes..."
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"></textarea>
+        </div>
+      </div>
+      <div id="form-error" class="hidden mt-3 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm"></div>
+      <div class="flex gap-3 mt-6">
+        <button type="button" id="btn-close-modal-2" class="flex-1 btn btn-outline">Cancel</button>
+        <button type="submit" class="flex-1 btn btn-primary"><i class="fas fa-plus mr-1"></i>Create & Open</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  <script>
+    const modal = document.getElementById('modal-new-bouquet');
+    document.getElementById('btn-new-bouquet').addEventListener('click', () => modal.classList.remove('hidden'));
+    document.getElementById('btn-close-modal').addEventListener('click', () => modal.classList.add('hidden'));
+    document.getElementById('btn-close-modal-2').addEventListener('click', () => modal.classList.add('hidden'));
+
+    document.getElementById('form-new-bouquet').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const errBox = document.getElementById('form-error');
+      errBox.classList.add('hidden');
+
+      const formData = new FormData(form);
+      const resp = await fetch('{{ path('app_bouquet_new') }}', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await resp.json();
+
+      if (data.success) {
+        window.location.href = '/bouquet/' + data.id;
+      } else {
+        errBox.textContent = data.error;
+        errBox.classList.remove('hidden');
+      }
+    });
+  </script>
+{% endblock %}
