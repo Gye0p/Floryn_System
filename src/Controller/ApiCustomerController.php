@@ -10,6 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mercure\HubInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -138,7 +139,11 @@ class ApiCustomerController extends AbstractController
                 'discountPrice'   => $flower->getDiscountPrice(),
                 'stockQuantity'   => $flower->getStockQuantity(),
                 'freshnessStatus' => $flower->getFreshnessStatus(),
+                'status'          => $flower->getStatus(),
                 'imageFilename'   => $flower->getImageFilename(),
+                'imageUrl'        => $flower->getImageFilename()
+                    ? '/uploads/flowers/' . $flower->getImageFilename()
+                    : null,
                 'dateReceived'    => $flower->getDateReceived()?->format('Y-m-d'),
                 'expiryDate'      => $flower->getExpiryDate()?->format('Y-m-d'),
                 'supplier'        => $flower->getSupplier()?->getSupplierName(),
@@ -287,14 +292,82 @@ class ApiCustomerController extends AbstractController
         $data = [];
         foreach ($user->getNotificationLogs() as $log) {
             $data[] = [
-                'id' => $log->getId(),
-                'message' => $log->getMessage(),
-                'channel' => $log->getChannel(),
-                'status' => $log->getStatus(),
+                'id'       => $log->getId(),
+                'message'  => $log->getMessage(),
+                'channel'  => $log->getChannel(),
+                'status'   => $log->getStatus(),
                 'dateSent' => $log->getDateSent()?->format('Y-m-d H:i:s'),
             ];
         }
 
         return $this->json(['notifications' => $data, 'total' => count($data)]);
+    }
+
+    // ── FCM Token ──
+
+    /**
+     * POST /api/customer/fcm-token — Register or update device FCM token
+     * Body: { "token": "<fcm_device_token>" }
+     */
+    #[Route('/fcm-token', name: 'fcm_token', methods: ['POST'])]
+    public function registerFcmToken(Request $request, EntityManagerInterface $em): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $data = json_decode($request->getContent(), true);
+
+        $token = trim($data['token'] ?? '');
+
+        if (empty($token)) {
+            return $this->json(['error' => 'FCM token is required.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $user->setFcmToken($token);
+        $em->flush();
+
+        return $this->json(['message' => 'FCM token registered successfully.']);
+    }
+
+    // ── Mercure Real-Time Token ──
+
+    /**
+     * GET /api/customer/mercure-token
+     *
+     * Returns a signed Mercure subscriber JWT scoped to this customer's
+     * reservation topic (/reservations/{userId}), plus the hub URL.
+     * The React Native app uses this to open an EventSource connection
+     * and receive instant push updates when a reservation status changes.
+     */
+    #[Route('/mercure-token', name: 'mercure_token', methods: ['GET'])]
+    public function mercureToken(HubInterface $hub): JsonResponse
+    {
+        /** @var User $user */
+        $user  = $this->getUser();
+        $topic = '/reservations/' . $user->getId();
+
+        // Build a Mercure subscriber JWT (HS256) scoped to this user's topic.
+        $secret  = $_ENV['MERCURE_JWT_SECRET'] ?? '!ChangeThisMercureHubJWTSecretKey!';
+        $header  = $this->base64UrlEncode(json_encode(['typ' => 'JWT', 'alg' => 'HS256']));
+        $payload = $this->base64UrlEncode(json_encode([
+            'mercure' => ['subscribe' => [$topic]],
+            'exp'     => time() + 3600, // valid for 1 hour
+        ]));
+        $signature = $this->base64UrlEncode(
+            hash_hmac('sha256', "$header.$payload", $secret, true)
+        );
+        $jwt = "$header.$payload.$signature";
+
+        return $this->json([
+            'token'   => $jwt,
+            'hub_url' => $hub->getPublicUrl(),
+            'topic'   => $topic,
+        ]);
+    }
+
+    // ── Helpers ──
+
+    private function base64UrlEncode(string $data): string
+    {
+        return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
     }
 }

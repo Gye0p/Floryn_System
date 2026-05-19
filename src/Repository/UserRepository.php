@@ -78,12 +78,45 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     public function findCustomerByEmail(string $email): ?User
     {
         return $this->createQueryBuilder('u')
-            ->where('u.email = :email')
+            ->where('LOWER(u.email) = LOWER(:email)')
             ->andWhere('u.roles LIKE :role')
-            ->setParameter('email', $email)
+            ->setParameter('email', trim($email))
             ->setParameter('role', '%ROLE_CUSTOMER%')
             ->getQuery()
             ->getOneOrNullResult();
+    }
+
+    /**
+     * Case-insensitive email lookup (Google tokens may differ in casing).
+     */
+    public function findOneByEmail(string $email): ?User
+    {
+        return $this->createQueryBuilder('u')
+            ->where('LOWER(u.email) = LOWER(:email)')
+            ->setParameter('email', trim($email))
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    public function findOneByGoogleId(string $googleId): ?User
+    {
+        return $this->findOneBy(['googleId' => $googleId]);
+    }
+
+    /**
+     * Resolve a mobile Google sign-in user: googleId first, then email.
+     */
+    public function findForGoogleSignIn(?string $googleId, string $email): ?User
+    {
+        if ($googleId !== null && $googleId !== '') {
+            $byGoogleId = $this->findOneByGoogleId($googleId);
+            if ($byGoogleId !== null) {
+                return $byGoogleId;
+            }
+        }
+
+        return $this->findOneByEmail($email);
     }
 
     /**

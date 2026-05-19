@@ -3,6 +3,9 @@
 namespace App\Controller;
 
 use App\Repository\UserRepository;
+use App\Service\GoogleIdTokenVerifier;
+use App\Service\GoogleTokenVerificationException;
+use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -17,67 +20,65 @@ class ApiFirebaseLoginController extends AbstractController
      * POST /api/firebase-login
      * Body: { "firebase_token": "eyJ..." }
      *
-     * Verifies a Firebase ID token against Google's public tokeninfo endpoint,
-     * then issues a Symfony JWT for the matching approved user account.
-     *
-     * Used by the mobile app for Google Sign-In, where no password is available
-     * to call the standard /api/login endpoint.
+     * Verifies a Google OAuth2 ID token, then issues a Symfony JWT for the
+     * matching approved customer account (lookup by googleId, then email).
      */
     #[Route('/firebase-login', name: 'firebase_login', methods: ['POST'])]
     public function firebaseLogin(
         Request $request,
         UserRepository $userRepository,
         JWTTokenManagerInterface $jwtManager,
+        GoogleIdTokenVerifier $tokenVerifier,
+        EntityManagerInterface $entityManager,
     ): JsonResponse {
         $data = json_decode($request->getContent(), true);
-        $firebaseToken = $data['firebase_token'] ?? null;
+        $idToken = $data['firebase_token'] ?? null;
 
-        if (empty($firebaseToken)) {
+        if (empty($idToken)) {
             return $this->json(
                 ['error' => 'firebase_token is required.'],
                 Response::HTTP_BAD_REQUEST
             );
         }
 
-        // ── Verify with Google tokeninfo ──────────────────────────────────────
-        // Google will reject expired or tampered tokens, returning an error key.
-        $url     = 'https://oauth2.googleapis.com/tokeninfo?id_token=' . urlencode($firebaseToken);
-        $context = stream_context_create(['http' => ['timeout' => 10, 'ignore_errors' => true]]);
-        $raw     = file_get_contents($url, false, $context);
+        try {
+            $claims = $tokenVerifier->verify($idToken);
+        } catch (GoogleTokenVerificationException $e) {
+            $payload = ['error' => $e->getMessage()];
+            if ($e->getDetail() !== null) {
+                $payload['detail'] = $e->getDetail();
+            }
 
-        if ($raw === false) {
-            return $this->json(
-                ['error' => 'Could not reach token verification service. Try again.'],
-                Response::HTTP_SERVICE_UNAVAILABLE
-            );
+            return $this->json($payload, $e->getStatusCode());
         }
 
-        $tokenInfo = json_decode($raw, true);
-
-        if (!empty($tokenInfo['error'])) {
-            return $this->json(
-                ['error' => 'Invalid or expired Firebase token.'],
-                Response::HTTP_UNAUTHORIZED
-            );
-        }
-
-        // ── Extract email from the verified token ─────────────────────────────
-        $email = $tokenInfo['email'] ?? null;
-        if (empty($email)) {
-            return $this->json(
-                ['error' => 'Email not found in Firebase token payload.'],
-                Response::HTTP_UNAUTHORIZED
-            );
-        }
-
-        // ── Look up the user in Symfony's database ────────────────────────────
-        $user = $userRepository->findOneBy(['email' => $email]);
+        $user = $userRepository->findForGoogleSignIn($claims['googleId'], $claims['email']);
 
         if (!$user) {
             return $this->json([
-                'error'  => 'No Floryn account found for this Google account.',
-                'hint'   => 'Please register with this email first.',
+                'error' => 'No Floryn account found for this Google account.',
+                'hint'  => 'Please register with this email first.',
             ], Response::HTTP_NOT_FOUND);
+        }
+
+        if (!$user->isCustomer()) {
+            return $this->json([
+                'error' => 'This Google account is not linked to a customer account.',
+            ], Response::HTTP_FORBIDDEN);
+        }
+
+        // Link Google ID to an email/password account created via /api/register.
+        $linked = false;
+        if ($claims['googleId'] !== null && $user->getGoogleId() !== $claims['googleId']) {
+            $user->setGoogleId($claims['googleId']);
+            $linked = true;
+        }
+        if (!$user->isVerified()) {
+            $user->setIsVerified(true);
+            $linked = true;
+        }
+        if ($linked) {
+            $entityManager->flush();
         }
 
         if (!$user->isApproved()) {
@@ -87,7 +88,6 @@ class ApiFirebaseLoginController extends AbstractController
             ], Response::HTTP_FORBIDDEN);
         }
 
-        // ── Issue a Symfony JWT ───────────────────────────────────────────────
         $token = $jwtManager->create($user);
 
         return $this->json([
