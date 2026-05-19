@@ -1,0 +1,44 @@
+# Git Attributes – Floryn Garden
+# Enforce consistent line endings across platforms
+
+# Default: normalize all text files to LF on commit
+* text=auto eol=lf
+
+# Shell scripts must always use LF (Linux containers require this)
+*.sh text eol=lf
+
+# PHP files: normalize to LF
+*.php text eol=lf
+
+# Web files
+*.html text eol=lf
+*.twig text eol=lf
+*.css  text eol=lf
+*.js   text eol=lf
+*.ts   text eol=lf
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml  text eol=lf
+*.xml  text eol=lf
+*.md   text eol=lf
+*.env  text eol=lf
+
+# Windows scripts (keep CRLF for local execution)
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+*.ps1  text eol=crlf
+
+# Binary files — do not modify
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.svg  binary
+*.woff binary
+*.woff2 binary
+*.ttf  binary
+*.eot  binary
+*.pdf  binary
+*.zip  binary
+*.pem  binary
