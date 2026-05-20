@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
+use App\Service\EmailNotificationService;
 use App\Service\GoogleIdTokenVerifier;
 use App\Service\GoogleTokenVerificationException;
 use Doctrine\ORM\EntityManagerInterface;
@@ -30,6 +31,7 @@ class ApiRegistrationController extends AbstractController
         EntityManagerInterface $entityManager,
         UserRepository $userRepository,
         ValidatorInterface $validator,
+        EmailNotificationService $emailNotifier,
     ): JsonResponse {
         $data = json_decode($request->getContent(), true);
 
@@ -87,6 +89,9 @@ class ApiRegistrationController extends AbstractController
         $entityManager->persist($user);
         $entityManager->flush();
 
+        // Send registration pending approval email via Brevo SMTP
+        $emailNotifier->sendRegistrationPendingEmail($user->getEmail(), $user->getFullName());
+
         return $this->registrationSuccessResponse($user);
     }
 
@@ -104,6 +109,7 @@ class ApiRegistrationController extends AbstractController
         UserRepository $userRepository,
         ValidatorInterface $validator,
         GoogleIdTokenVerifier $tokenVerifier,
+        EmailNotificationService $emailNotifier,
     ): JsonResponse {
         $data = json_decode($request->getContent(), true);
         $idToken = $data['firebase_token'] ?? null;
@@ -168,6 +174,9 @@ class ApiRegistrationController extends AbstractController
 
         $entityManager->persist($user);
         $entityManager->flush();
+
+        // Send registration pending approval email via Brevo SMTP
+        $emailNotifier->sendRegistrationPendingEmail($user->getEmail(), $user->getFullName());
 
         return $this->registrationSuccessResponse($user);
     }

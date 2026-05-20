@@ -9,6 +9,8 @@ use App\Repository\ReservationRepository;
 use App\Repository\FlowerBatchRepository;
 use App\Service\ActivityLogService;
 use App\Service\EmailNotificationService;
+use App\Service\FcmNotificationService;
+use App\Service\WebSocketNotifier;
 use Doctrine\DBAL\LockMode;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -135,8 +137,14 @@ final class ReservationController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_reservation_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Reservation $reservation, EntityManagerInterface $entityManager, ActivityLogService $activityLog): Response
-    {
+    public function edit(
+        Request $request,
+        Reservation $reservation,
+        EntityManagerInterface $entityManager,
+        ActivityLogService $activityLog,
+        FcmNotificationService $fcmNotification,
+        WebSocketNotifier $webSocketNotifier,
+    ): Response {
         $originalDetails = [];
         foreach ($reservation->getReservationDetails() as $detail) {
             $originalDetails[$detail->getId()] = [
@@ -225,6 +233,20 @@ final class ReservationController extends AbstractController
             $entityManager->commit();
 
             $activityLog->logUpdate('Reservation', $reservation->getId(), 'Reservation #' . $reservation->getId());
+
+            // Notify customer via FCM push notification (works when app is closed)
+            $customer = $reservation->getCustomer();
+            if ($customer) {
+                $fcmNotification->sendReservationStatusUpdate($customer, $reservation);
+            }
+
+            // Notify customer via WebSocket (works when app is open)
+            $webSocketNotifier->broadcastReservationUpdate(
+                $reservation->getId(),
+                $customer?->getId() ?? 0,
+                $reservation->getReservationStatus()
+            );
+
             $this->addFlash('success', 'Reservation updated successfully! New Total: ₱' . number_format($totalAmount, 2));
 
             return $this->redirectToRoute('app_reservation_index', [], Response::HTTP_SEE_OTHER);

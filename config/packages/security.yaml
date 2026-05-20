@@ -22,7 +22,7 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         api_public:
-            pattern: ^/api/(register(/google)?|check-approval|firebase-login)
+            pattern: ^/api/(register(/google)?|check-approval|firebase-login|password-reset)
             stateless: true
             security: false
         api_login:
@@ -67,6 +67,7 @@ security:
         - { path: ^/api/register/google, roles: PUBLIC_ACCESS }
         - { path: ^/api/check-approval, roles: PUBLIC_ACCESS }
         - { path: ^/api/firebase-login, roles: PUBLIC_ACCESS }
+        - { path: ^/api/password-reset, roles: PUBLIC_ACCESS }
         - { path: ^/api/verify-email, roles: PUBLIC_ACCESS }
         - { path: ^/api/customer, roles: ROLE_CUSTOMER }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }

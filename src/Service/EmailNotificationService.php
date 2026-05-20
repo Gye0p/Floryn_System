@@ -340,4 +340,60 @@ class EmailNotificationService
             </div>
         ";
     }
+
+    /**
+     * Send registration pending approval email to user
+     */
+    public function sendRegistrationPendingEmail(string $userEmail, string $fullName): void
+    {
+        try {
+            $email = (new Email())
+                ->from($this->fromEmail)
+                ->to($userEmail)
+                ->subject('Welcome to Floryn Garden — Account Pending Approval')
+                ->html($this->getRegistrationPendingHtml($fullName));
+
+            $this->mailer->send($email);
+            $this->logger->info('Registration pending email sent', [
+                'email' => $userEmail,
+            ]);
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to send registration pending email', [
+                'error' => $e->getMessage(),
+                'email' => $userEmail,
+            ]);
+        }
+    }
+
+    private function getRegistrationPendingHtml(string $fullName): string
+    {
+        return "
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;'>
+                <div style='background: linear-gradient(135deg, #1A6B4A 0%, #0F5237 100%); color: white; padding: 30px; border-radius: 10px 10px 0 0;'>
+                    <h1 style='margin: 0; font-size: 28px;'>🌸 Welcome to Floryn Garden!</h1>
+                </div>
+                
+                <div style='background: white; padding: 30px; border: 1px solid #ddd; border-top: none;'>
+                    <p style='font-size: 16px; color: #333;'>Dear {$fullName},</p>
+                    <p style='font-size: 14px; color: #666; line-height: 1.6;'>
+                        Thank you for registering with Floryn Garden! Your account has been created successfully.
+                    </p>
+                    
+                    <div style='background: #FEF3C7; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #F59E0B;'>
+                        <h3 style='margin-top: 0; color: #92400E;'>⏳ Pending Approval</h3>
+                        <p style='margin: 5px 0; color: #92400E;'>Your account is currently awaiting admin approval. You will be notified once your account has been activated.</p>
+                    </div>
+                    
+                    <p style='font-size: 14px; color: #666; margin-top: 30px;'>
+                        Once approved, you can sign in using the Floryn Garden app to browse flowers, make reservations, and more.
+                    </p>
+                </div>
+                
+                <div style='background: #f8f9fa; padding: 20px; text-align: center; border-radius: 0 0 10px 10px;'>
+                    <p style='margin: 0; font-size: 12px; color: #666;'>© 2026 Floryn Garden System. All rights reserved.</p>
+                </div>
+            </div>
+        ";
+    }
 }
+

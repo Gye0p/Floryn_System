@@ -65,6 +65,24 @@ class EmailVerificationService
     }
 
     /**
+     * Send a login notification email to a user who signed in via Google OAuth.
+     */
+    public function sendGoogleLoginEmail(User $user): void
+    {
+        $email = (new TemplatedEmail())
+            ->from(new Address('gyeoptorres@gmail.com', 'Floryn Garden System'))
+            ->to(new Address((string)$user->getEmail()))
+            ->subject('You just signed in to Floryn Garden 🌸')
+            ->htmlTemplate('emails/google_login.html.twig')
+            ->context([
+                'user' => $user,
+                'loginTime' => new \DateTime(),
+            ]);
+
+        $this->mailer->send($email);
+    }
+
+    /**
      * Convenience helper — true when the user has not yet verified their email.
      */
     public function needsVerification(User $user): bool
