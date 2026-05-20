@@ -4,6 +4,7 @@ namespace App\Security;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
+use App\Service\EmailVerificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use KnpU\OAuth2ClientBundle\Security\Authenticator\OAuth2Authenticator;
@@ -26,6 +27,7 @@ class GoogleAuthenticator extends OAuth2Authenticator implements AuthenticationE
         private EntityManagerInterface $entityManager,
         private RouterInterface $router,
         private UserRepository $userRepository,
+        private EmailVerificationService $emailVerificationService,
     ) {
     }
 
@@ -88,7 +90,7 @@ class GoogleAuthenticator extends OAuth2Authenticator implements AuthenticationE
                 $user->setGoogleId($googleId);
                 // Set a random password since Google users don't need one
                 $user->setPassword(bin2hex(random_bytes(32)));
-                $user->setRoles(['ROLE_STAFF']);
+                $user->setRoles(['ROLE_CUSTOMER']);
                 $user->setIsApproved(false);
                 $user->setIsVerified(true); // Google confirms email ownership
                 $user->setCreatedAt(new \DateTime());
@@ -103,6 +105,16 @@ class GoogleAuthenticator extends OAuth2Authenticator implements AuthenticationE
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
+        /** @var User $user */
+        $user = $token->getUser();
+
+        // Send Brevo login-notification email — fail silently so auth is never blocked
+        try {
+            $this->emailVerificationService->sendGoogleLoginEmail($user);
+        } catch (\Throwable $e) {
+            // Log or ignore — email failure must not interrupt login
+        }
+
         return new RedirectResponse($this->router->generate('admin_dashboard'));
     }
 
