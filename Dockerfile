@@ -38,7 +38,8 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # ── Apache: enable mod_rewrite + set DocumentRoot to /public ─
-RUN a2enmod rewrite
+RUN a2dismod -f mpm_event mpm_worker \
+    && a2enmod mpm_prefork rewrite
 RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|g' \
         /etc/apache2/sites-available/000-default.conf \
     && echo '<Directory /var/www/html/public>\n\
