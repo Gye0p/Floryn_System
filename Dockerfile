@@ -45,6 +45,7 @@ RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|g' \
     && echo '<Directory /var/www/html/public>\n\
     AllowOverride All\n\
     Require all granted\n\
+    FallbackResource /index.php\n\
 </Directory>' >> /etc/apache2/sites-available/000-default.conf
 
 # ── PHP production config ─────────────────────────────────────

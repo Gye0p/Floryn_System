@@ -66,5 +66,10 @@ php bin/console cache:clear --env=prod --no-debug
 echo "==> Running database migrations..."
 php bin/console doctrine:migrations:migrate --no-interaction --env=prod
 
+if [ "$RUN_PROD_SEED" = "1" ]; then
+    echo "==> Seeding production data..."
+    php bin/console app:seed-production --env=prod
+fi
+
 echo "==> Startup complete. Starting Apache..."
 exec apache2-foreground
