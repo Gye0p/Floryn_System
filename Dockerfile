@@ -1,7 +1,7 @@
 # ============================================================
 # Floryn Garden – Production Dockerfile for Railway
 # ============================================================
-FROM php:8.2-apache
+FROM php:8.4-apache
 
 # ── System dependencies ──────────────────────────────────────
 RUN apt-get update && apt-get install -y \
