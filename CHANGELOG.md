@@ -8,6 +8,17 @@ This project follows [Semantic Versioning](https://semver.org/) and [Conventiona
 
 ## [Unreleased]
 
+### Added
+- Customer API: `GET /api/customer/payments`, `GET /api/customer/payments/{id}`
+- Customer API: `POST /api/customer/reservations/{id}/cancel` (stock restore)
+- Customer API: `GET /api/customer/bouquets`, `GET /api/customer/bouquets/{id}`
+- JWT refresh tokens: `POST /api/token/refresh`, `RefreshToken` entity, 30-day TTL (`REFRESH_TOKEN_TTL`)
+- Documentation: `docs/API.md`, `docs/MOBILE_SYNC_GUIDE.md`, `docs/DEMO_CHECKLIST.md`
+
+### Changed
+- Staff dashboard API (`/api/flowers`, `/api/customers`, etc.) now requires `ROLE_STAFF` (customers cannot read all shop data)
+- `ApiFirebaseLogin` returns `refresh_token` alongside JWT
+
 ### Fixed
 - Apache on Railway not forwarding `Authorization: Bearer` to PHP, causing `401 JWT Token not found` on all authenticated API routes while `/api/login` still worked
 - Added `public/.htaccess` rewrite rule and Dockerfile `SetEnvIf` for `HTTP_AUTHORIZATION`

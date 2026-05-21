@@ -8,13 +8,14 @@ use App\Repository\ReservationRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 /**
- * API endpoints for accessing data with JWT authentication.
- * All routes require a valid JWT token in the Authorization header:
- *   Authorization: Bearer <token>
+ * Staff/admin API endpoints (inventory dashboard data).
+ * Requires ROLE_STAFF — customers must use /api/customer/* instead.
  */
 #[Route('/api', name: 'api_')]
+#[IsGranted('ROLE_STAFF')]
 class ApiController extends AbstractController
 {
     /**

@@ -1,10 +1,12 @@
 # Floryn Garden — Mobile Application Architecture Guide
 
-> **Purpose**: Complete architecture and workflow reference for building a dynamic customer-facing mobile application (React Native with JavaScript) that consumes the existing Floryn Garden Management System backend APIs.
+> **Updated May 2026** — For the current route list and samples, use **[docs/API.md](docs/API.md)** and **[docs/MOBILE_SYNC_GUIDE.md](docs/MOBILE_SYNC_GUIDE.md)**. This file retains architecture notes; some sections below are historical.
 >
-> **Date**: February 27, 2026
+> **Live customer API** (`ROLE_CUSTOMER`): `/api/customer/*` — profile, flowers, bouquets, reservations (create/cancel), payments, notifications, FCM, Mercure.
 >
-> **Backend Stack**: Symfony 6 · Doctrine ORM · MySQL 8.0 · LexikJWTAuthenticationBundle · RS256
+> **Auth**: `POST /api/login` and `POST /api/firebase-login` return `token` + `refresh_token`. Refresh via `POST /api/token/refresh`.
+>
+> **Security**: Staff routes `/api/flowers`, `/api/customers`, etc. require `ROLE_STAFF` — customer JWT receives **403**.
 
 ---
 

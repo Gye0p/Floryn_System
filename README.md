@@ -19,7 +19,8 @@ A full-stack web application built with **Symfony 7.3** for managing all operati
 | 🔐 **Authentication** | Email/password, Google OAuth, JWT API tokens |
 | 👑 **Admin Dashboard** | User management, role assignment, activity logs |
 | 🔔 **Real-time Notifications** | Powered by Symfony Mercure (SSE push) |
-| 📱 **REST API** | JWT-secured API for companion mobile app |
+| 📱 **REST API** | JWT + refresh tokens; customer API at `/api/customer/*` |
+| 📲 **Mobile docs** | [docs/API.md](docs/API.md), [MOBILE_SYNC_GUIDE.md](docs/MOBILE_SYNC_GUIDE.md) |
 
 ---
 
@@ -182,6 +183,16 @@ On deploy, the container automatically:
 2. Generates JWT keypair
 3. Compiles frontend assets (`npm run build`)
 4. Runs database migrations
+
+---
+
+## 📚 API & Mobile Documentation
+
+| Document | Purpose |
+|----------|---------|
+| [docs/API.md](docs/API.md) | Full route list with request/response samples |
+| [docs/MOBILE_SYNC_GUIDE.md](docs/MOBILE_SYNC_GUIDE.md) | Real-time sync (Mercure + FCM) setup |
+| [docs/DEMO_CHECKLIST.md](docs/DEMO_CHECKLIST.md) | Presentation demo script |
 
 ---
 

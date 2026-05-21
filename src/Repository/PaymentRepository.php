@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Payment;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -14,6 +15,33 @@ class PaymentRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Payment::class);
+    }
+
+    /**
+     * @return Payment[]
+     */
+    public function findForCustomer(User $customer): array
+    {
+        return $this->createQueryBuilder('p')
+            ->innerJoin('p.reservation', 'r')
+            ->addSelect('r')
+            ->where('r.customer = :customer')
+            ->setParameter('customer', $customer)
+            ->orderBy('p.paymentDate', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findOneForCustomer(int $paymentId, User $customer): ?Payment
+    {
+        return $this->createQueryBuilder('p')
+            ->innerJoin('p.reservation', 'r')
+            ->where('p.id = :id')
+            ->andWhere('r.customer = :customer')
+            ->setParameter('id', $paymentId)
+            ->setParameter('customer', $customer)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 
     //    /**

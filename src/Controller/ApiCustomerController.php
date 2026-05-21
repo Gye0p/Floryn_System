@@ -2,12 +2,18 @@
 
 namespace App\Controller;
 
+use App\Entity\Bouquet;
 use App\Entity\FlowerBatch;
+use App\Entity\Payment;
 use App\Entity\Reservation;
 use App\Entity\ReservationDetail;
 use App\Entity\User;
+use App\Repository\BouquetRepository;
+use App\Repository\FlowerBatchRepository;
 use App\Repository\FlowerRepository;
+use App\Repository\PaymentRepository;
 use App\Repository\ReservationRepository;
+use App\Service\FcmNotificationService;
 use App\Service\WebSocketNotifier;
 use Doctrine\DBAL\LockMode;
 use Doctrine\ORM\EntityManagerInterface;
@@ -457,6 +463,160 @@ class ApiCustomerController extends AbstractController
         ]);
     }
 
+    // ── Bouquets (catalog) ──
+
+    /**
+     * GET /api/customer/bouquets — Browse ready-made bouquets
+     */
+    #[Route('/bouquets', name: 'bouquets', methods: ['GET'])]
+    public function bouquets(BouquetRepository $bouquetRepo): JsonResponse
+    {
+        $bouquets = $bouquetRepo->findByStatus('Ready');
+        $data = [];
+
+        foreach ($bouquets as $bouquet) {
+            $data[] = $this->serializeBouquet($bouquet);
+        }
+
+        return $this->json(['bouquets' => $data, 'total' => count($data)]);
+    }
+
+    /**
+     * GET /api/customer/bouquets/{id} — Single bouquet detail
+     */
+    #[Route('/bouquets/{id}', name: 'bouquet_detail', methods: ['GET'])]
+    public function bouquetDetail(int $id, BouquetRepository $bouquetRepo): JsonResponse
+    {
+        $bouquet = $bouquetRepo->find($id);
+
+        if (!$bouquet || $bouquet->getStatus() !== 'Ready') {
+            return $this->json(['error' => 'Bouquet not found.'], Response::HTTP_NOT_FOUND);
+        }
+
+        return $this->json($this->serializeBouquet($bouquet, includeItems: true));
+    }
+
+    // ── Payments ──
+
+    /**
+     * GET /api/customer/payments — Payment history for own reservations
+     */
+    #[Route('/payments', name: 'payments', methods: ['GET'])]
+    public function payments(PaymentRepository $paymentRepo): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $data = [];
+
+        foreach ($paymentRepo->findForCustomer($user) as $payment) {
+            $data[] = $this->serializePayment($payment);
+        }
+
+        return $this->json(['payments' => $data, 'total' => count($data)]);
+    }
+
+    /**
+     * GET /api/customer/payments/{id} — Single payment detail
+     */
+    #[Route('/payments/{id}', name: 'payment_detail', methods: ['GET'])]
+    public function paymentDetail(int $id, PaymentRepository $paymentRepo): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        $payment = $paymentRepo->findOneForCustomer($id, $user);
+        if (!$payment) {
+            return $this->json(['error' => 'Payment not found.'], Response::HTTP_NOT_FOUND);
+        }
+
+        return $this->json($this->serializePayment($payment, detailed: true));
+    }
+
+    /**
+     * POST /api/customer/reservations/{id}/cancel — Cancel own pending/confirmed reservation
+     */
+    #[Route('/reservations/{id}/cancel', name: 'reservation_cancel', methods: ['POST'])]
+    public function cancelReservation(
+        int $id,
+        ReservationRepository $reservationRepo,
+        EntityManagerInterface $em,
+        WebSocketNotifier $webSocketNotifier,
+        FcmNotificationService $fcmNotification,
+    ): JsonResponse {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        $reservation = $reservationRepo->findOneBy(['id' => $id, 'customer' => $user]);
+        if (!$reservation) {
+            return $this->json(['error' => 'Reservation not found.'], Response::HTTP_NOT_FOUND);
+        }
+
+        if ($reservation->getReservationStatus() === 'Cancelled') {
+            return $this->json(['error' => 'Reservation is already cancelled.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        if (!in_array($reservation->getReservationStatus(), ['Pending', 'Confirmed'], true)) {
+            return $this->json([
+                'error' => 'Only pending or confirmed reservations can be cancelled.',
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        if ($reservation->getPaymentStatus() === 'Paid') {
+            return $this->json([
+                'error' => 'Paid reservations cannot be cancelled via the app. Please contact the shop.',
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        $em->beginTransaction();
+
+        try {
+            $batchRepo = $em->getRepository(FlowerBatch::class);
+            foreach ($reservation->getReservationDetails() as $detail) {
+                $flower = $detail->getFlower();
+                if ($flower === null) {
+                    continue;
+                }
+                if (!$flower->getBatches()->isEmpty()) {
+                    $batchRepo->restoreStock($flower, $detail->getQuantity());
+                } else {
+                    $flower->setStockQuantity($flower->getStockQuantity() + $detail->getQuantity());
+                }
+                if ($flower->getStockQuantity() > 0 && $flower->getStatus() === 'Sold Out') {
+                    $flower->setStatus('Available');
+                }
+            }
+
+            $reservation->setReservationStatus('Cancelled');
+            $em->flush();
+            $em->commit();
+
+            $fcmNotification->sendReservationStatusUpdate($user, $reservation);
+            $webSocketNotifier->broadcastReservationUpdate(
+                $reservation->getId(),
+                $user->getId(),
+                'Cancelled',
+                'reservation_updated'
+            );
+
+            return $this->json([
+                'message' => 'Reservation cancelled successfully.',
+                'reservation' => [
+                    'id' => $reservation->getId(),
+                    'reservationStatus' => $reservation->getReservationStatus(),
+                    'paymentStatus' => $reservation->getPaymentStatus(),
+                ],
+            ]);
+        } catch (\Throwable) {
+            if ($em->getConnection()->isTransactionActive()) {
+                $em->rollback();
+            }
+
+            return $this->json([
+                'error' => 'An error occurred while cancelling the reservation.',
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
     // ── Notifications ──
 
     /**
@@ -544,6 +704,69 @@ class ApiCustomerController extends AbstractController
     }
 
     // ── Helpers ──
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function serializePayment(Payment $payment, bool $detailed = false): array
+    {
+        $reservation = $payment->getReservation();
+        $payload = [
+            'id' => $payment->getId(),
+            'amountPaid' => $payment->getAmountPaid(),
+            'paymentMethod' => $payment->getPaymentMethod(),
+            'referenceNo' => $payment->getReferenceNo(),
+            'status' => $payment->getStatus(),
+            'paymentDate' => $payment->getPaymentDate()?->format('Y-m-d'),
+            'reservationId' => $reservation?->getId(),
+            'reservationStatus' => $reservation?->getReservationStatus(),
+        ];
+
+        if ($detailed && $reservation !== null) {
+            $items = [];
+            foreach ($reservation->getReservationDetails() as $detail) {
+                $items[] = [
+                    'flowerName' => $detail->getFlower()?->getName(),
+                    'quantity' => $detail->getQuantity(),
+                    'subtotal' => $detail->getSubtotal(),
+                ];
+            }
+            $payload['pickupDate'] = $reservation->getPickupDate()?->format('Y-m-d');
+            $payload['totalAmount'] = $reservation->getTotalAmount();
+            $payload['items'] = $items;
+        }
+
+        return $payload;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function serializeBouquet(Bouquet $bouquet, bool $includeItems = false): array
+    {
+        $payload = [
+            'id' => $bouquet->getId(),
+            'name' => $bouquet->getName(),
+            'description' => $bouquet->getDescription(),
+            'notes' => $bouquet->getNotes(),
+            'status' => $bouquet->getStatus(),
+            'totalPrice' => $bouquet->getTotalPrice(),
+            'createdAt' => $bouquet->getCreatedAt()?->format('Y-m-d H:i:s'),
+        ];
+
+        if ($includeItems) {
+            $items = [];
+            foreach ($bouquet->getItems() as $item) {
+                $items[] = [
+                    'flowerName' => $item->getFlower()?->getName(),
+                    'quantity' => $item->getQuantity(),
+                ];
+            }
+            $payload['items'] = $items;
+        }
+
+        return $payload;
+    }
 
     private function base64UrlEncode(string $data): string
     {

@@ -6,6 +6,7 @@ use App\Repository\UserRepository;
 use App\Service\GoogleIdTokenVerifier;
 use App\Service\GoogleTokenVerificationException;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Service\RefreshTokenService;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -30,6 +31,7 @@ class ApiFirebaseLoginController extends AbstractController
         JWTTokenManagerInterface $jwtManager,
         GoogleIdTokenVerifier $tokenVerifier,
         EntityManagerInterface $entityManager,
+        RefreshTokenService $refreshTokenService,
     ): JsonResponse {
         $data = json_decode($request->getContent(), true);
         $idToken = $data['firebase_token'] ?? null;
@@ -88,17 +90,18 @@ class ApiFirebaseLoginController extends AbstractController
             ], Response::HTTP_FORBIDDEN);
         }
 
-        $token = $jwtManager->create($user);
-
-        return $this->json([
-            'token' => $token,
-            'user'  => [
-                'id'       => $user->getId(),
-                'username' => $user->getUsername(),
-                'fullName' => $user->getFullName(),
-                'email'    => $user->getEmail(),
-                'roles'    => $user->getRoles(),
+        return $this->json(array_merge(
+            [
+                'token' => $jwtManager->create($user),
+                'user'  => [
+                    'id'       => $user->getId(),
+                    'username' => $user->getUsername(),
+                    'fullName' => $user->getFullName(),
+                    'email'    => $user->getEmail(),
+                    'roles'    => $user->getRoles(),
+                ],
             ],
-        ]);
+            $refreshTokenService->createForUser($user),
+        ));
     }
 }
