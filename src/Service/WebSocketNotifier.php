@@ -2,7 +2,6 @@
 
 namespace App\Service;
 
-use App\Entity\Reservation;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Mercure\HubInterface;
 use Symfony\Component\Mercure\Update;
@@ -24,15 +23,19 @@ class WebSocketNotifier
     /**
      * Broadcast a reservation status update to the customer's Mercure topic.
      */
-    public function broadcastReservationUpdate(int $reservationId, int $userId, string $status): void
-    {
+    public function broadcastReservationUpdate(
+        int $reservationId,
+        int $userId,
+        string $status,
+        string $event = 'reservation_updated',
+    ): void {
         try {
             $topic = "/reservations/{$userId}";
 
             $update = new Update(
                 $topic,
                 json_encode([
-                    'event'          => 'reservation_updated',
+                    'event'          => $event,
                     'reservation_id' => $reservationId,
                     'user_id'        => $userId,
                     'status'         => $status,

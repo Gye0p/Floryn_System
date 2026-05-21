@@ -2,9 +2,14 @@
 
 namespace App\Controller;
 
+use App\Entity\FlowerBatch;
+use App\Entity\Reservation;
+use App\Entity\ReservationDetail;
 use App\Entity\User;
 use App\Repository\FlowerRepository;
 use App\Repository\ReservationRepository;
+use App\Service\WebSocketNotifier;
+use Doctrine\DBAL\LockMode;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -239,6 +244,180 @@ class ApiCustomerController extends AbstractController
         }
 
         return $this->json(['reservations' => $data, 'total' => count($data)]);
+    }
+
+    /**
+     * POST /api/customer/reservations — Create a reservation for the logged-in customer
+     * Body: { "items": [{ "flowerId": 1, "quantity": 2 }], "pickupDate": "YYYY-MM-DD" }
+     */
+    #[Route('/reservations', name: 'reservation_create', methods: ['POST'])]
+    public function createReservation(
+        Request $request,
+        FlowerRepository $flowerRepo,
+        EntityManagerInterface $em,
+        ValidatorInterface $validator,
+        WebSocketNotifier $webSocketNotifier,
+    ): JsonResponse {
+        /** @var User $user */
+        $user = $this->getUser();
+        $data = json_decode($request->getContent(), true);
+
+        if (!is_array($data)) {
+            return $this->json(['error' => 'Invalid JSON body.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $items = $data['items'] ?? null;
+        if (!is_array($items) || count($items) === 0) {
+            return $this->json(['error' => 'At least one reservation item is required.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        try {
+            $pickupDate = !empty($data['pickupDate'])
+                ? new \DateTime((string) $data['pickupDate'])
+                : new \DateTime('tomorrow');
+        } catch (\Throwable) {
+            return $this->json(['error' => 'Pickup date must use YYYY-MM-DD format.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $reservation = (new Reservation())
+            ->setCustomer($user)
+            ->setPickupDate($pickupDate)
+            ->setPaymentStatus('Unpaid')
+            ->setReservationStatus('Pending')
+            ->setDateReserved(new \DateTime());
+
+        $em->beginTransaction();
+
+        try {
+            $totalAmount = 0.0;
+            $batchRepo = $em->getRepository(FlowerBatch::class);
+
+            foreach ($items as $item) {
+                $flowerId = $item['flowerId'] ?? null;
+                $quantity = (int) ($item['quantity'] ?? 0);
+
+                if (!$flowerId || $quantity < 1) {
+                    $em->rollback();
+
+                    return $this->json([
+                        'error' => 'Each item must include a valid flowerId and quantity.',
+                    ], Response::HTTP_BAD_REQUEST);
+                }
+
+                $flower = $flowerRepo->find($flowerId);
+                if (!$flower) {
+                    $em->rollback();
+
+                    return $this->json(['error' => 'Flower not found.'], Response::HTTP_NOT_FOUND);
+                }
+
+                $em->lock($flower, LockMode::PESSIMISTIC_WRITE);
+                $em->refresh($flower);
+
+                if ($flower->getStatus() !== 'Available' || $flower->getStockQuantity() < $quantity) {
+                    $em->rollback();
+
+                    return $this->json([
+                        'error' => sprintf(
+                            'Insufficient stock for "%s": requested %d, available %d.',
+                            $flower->getName(),
+                            $quantity,
+                            $flower->getStockQuantity()
+                        ),
+                    ], Response::HTTP_BAD_REQUEST);
+                }
+
+                $price = $flower->getDiscountPrice() > 0
+                    ? $flower->getDiscountPrice()
+                    : $flower->getPrice();
+                $subtotal = $price * $quantity;
+
+                $detail = (new ReservationDetail())
+                    ->setFlower($flower)
+                    ->setQuantity($quantity)
+                    ->setSubtotal($subtotal);
+
+                $reservation->addReservationDetail($detail);
+                $em->persist($detail);
+
+                if (!$flower->getBatches()->isEmpty()) {
+                    $deducted = $batchRepo->deductStock($flower, $quantity);
+                    if ($deducted < $quantity) {
+                        $em->rollback();
+
+                        return $this->json([
+                            'error' => sprintf('Insufficient batch stock for "%s".', $flower->getName()),
+                        ], Response::HTTP_BAD_REQUEST);
+                    }
+                } else {
+                    $flower->setStockQuantity($flower->getStockQuantity() - $quantity);
+                }
+
+                if ($flower->getStockQuantity() <= 0) {
+                    $flower->setStatus('Sold Out');
+                }
+
+                $totalAmount += $subtotal;
+            }
+
+            $reservation->setTotalAmount($totalAmount);
+
+            $errors = $validator->validate($reservation);
+            if (count($errors) > 0) {
+                $em->rollback();
+                $errorMessages = [];
+                foreach ($errors as $error) {
+                    $errorMessages[$error->getPropertyPath()] = $error->getMessage();
+                }
+
+                return $this->json([
+                    'error' => 'Validation failed.',
+                    'details' => $errorMessages,
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            $em->persist($reservation);
+            $em->flush();
+            $em->commit();
+
+            $webSocketNotifier->broadcastReservationUpdate(
+                $reservation->getId(),
+                $user->getId(),
+                $reservation->getReservationStatus(),
+                'reservation_created'
+            );
+
+            $responseItems = [];
+            foreach ($reservation->getReservationDetails() as $detail) {
+                $responseItems[] = [
+                    'flowerName' => $detail->getFlower()?->getName(),
+                    'quantity' => $detail->getQuantity(),
+                    'unitPrice' => $detail->getQuantity() > 0 ? $detail->getSubtotal() / $detail->getQuantity() : 0,
+                    'subtotal' => $detail->getSubtotal(),
+                ];
+            }
+
+            return $this->json([
+                'message' => 'Reservation created successfully.',
+                'reservation' => [
+                    'id' => $reservation->getId(),
+                    'pickupDate' => $reservation->getPickupDate()?->format('Y-m-d'),
+                    'totalAmount' => $reservation->getTotalAmount(),
+                    'paymentStatus' => $reservation->getPaymentStatus(),
+                    'reservationStatus' => $reservation->getReservationStatus(),
+                    'dateReserved' => $reservation->getDateReserved()?->format('Y-m-d H:i:s'),
+                    'items' => $responseItems,
+                ],
+            ], Response::HTTP_CREATED);
+        } catch (\Throwable) {
+            if ($em->getConnection()->isTransactionActive()) {
+                $em->rollback();
+            }
+
+            return $this->json([
+                'error' => 'An error occurred while creating the reservation.',
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
