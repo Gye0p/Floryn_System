@@ -8,6 +8,10 @@ This project follows [Semantic Versioning](https://semver.org/) and [Conventiona
 
 ## [Unreleased]
 
+### Fixed
+- Apache on Railway not forwarding `Authorization: Bearer` to PHP, causing `401 JWT Token not found` on all authenticated API routes while `/api/login` still worked
+- Added `public/.htaccess` rewrite rule and Dockerfile `SetEnvIf` for `HTTP_AUTHORIZATION`
+
 ---
 
 ## [1.5.0] – 2026-05-19
