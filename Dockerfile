@@ -54,6 +54,11 @@ RUN echo "opcache.enable=1\nopcache.memory_consumption=256\nopcache.validate_tim
 # ── Set working directory ────────────────────────────────────
 WORKDIR /var/www/html
 
+# ── Production defaults for Docker hosts (Render/Railway) ────
+ENV APP_ENV=prod \
+    APP_DEBUG=0 \
+    COMPOSER_ALLOW_SUPERUSER=1
+
 # ── Copy project files ───────────────────────────────────────
 COPY . .
 
@@ -62,7 +67,8 @@ RUN composer install \
     --no-dev \
     --optimize-autoloader \
     --no-interaction \
-    --no-progress
+    --no-progress \
+    --no-scripts
 
 # ── Install Node dependencies & build frontend assets ─────────
 RUN npm ci && npm run build
