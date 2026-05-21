@@ -13,6 +13,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -32,6 +34,7 @@ class ApiRegistrationController extends AbstractController
         UserRepository $userRepository,
         ValidatorInterface $validator,
         EmailNotificationService $emailNotifier,
+        EventDispatcherInterface $eventDispatcher,
     ): JsonResponse {
         $data = json_decode($request->getContent(), true);
 
@@ -74,8 +77,8 @@ class ApiRegistrationController extends AbstractController
             $username,
             $email,
             trim($data['full_name']),
-            $data['phone'] ?? '',
-            $data['address'] ?? '',
+            $this->normalizeOptionalString($data['phone'] ?? null),
+            $this->normalizeOptionalString($data['address'] ?? null),
         );
 
         $hashedPassword = $passwordHasher->hashPassword($user, $data['password']);
@@ -89,8 +92,12 @@ class ApiRegistrationController extends AbstractController
         $entityManager->persist($user);
         $entityManager->flush();
 
-        // Send registration pending approval email via Brevo SMTP
-        $emailNotifier->sendRegistrationPendingEmail($user->getEmail(), $user->getFullName());
+        $this->scheduleRegistrationEmail(
+            $eventDispatcher,
+            $emailNotifier,
+            $user->getEmail(),
+            $user->getFullName() ?? $username,
+        );
 
         return $this->registrationSuccessResponse($user);
     }
@@ -110,6 +117,7 @@ class ApiRegistrationController extends AbstractController
         ValidatorInterface $validator,
         GoogleIdTokenVerifier $tokenVerifier,
         EmailNotificationService $emailNotifier,
+        EventDispatcherInterface $eventDispatcher,
     ): JsonResponse {
         $data = json_decode($request->getContent(), true);
         $idToken = $data['firebase_token'] ?? null;
@@ -155,8 +163,8 @@ class ApiRegistrationController extends AbstractController
             $username,
             $email,
             $fullName,
-            $data['phone'] ?? '',
-            $data['address'] ?? '',
+            $this->normalizeOptionalString($data['phone'] ?? null),
+            $this->normalizeOptionalString($data['address'] ?? null),
         );
 
         if ($claims['googleId'] !== null) {
@@ -175,8 +183,12 @@ class ApiRegistrationController extends AbstractController
         $entityManager->persist($user);
         $entityManager->flush();
 
-        // Send registration pending approval email via Brevo SMTP
-        $emailNotifier->sendRegistrationPendingEmail($user->getEmail(), $user->getFullName());
+        $this->scheduleRegistrationEmail(
+            $eventDispatcher,
+            $emailNotifier,
+            $user->getEmail(),
+            $user->getFullName() ?? $username,
+        );
 
         return $this->registrationSuccessResponse($user);
     }
@@ -218,12 +230,45 @@ class ApiRegistrationController extends AbstractController
         ]);
     }
 
+    private function normalizeOptionalString(?string $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $trimmed = trim($value);
+
+        return $trimmed === '' ? null : $trimmed;
+    }
+
+    /**
+     * Send the pending-approval email after the HTTP response so mobile clients
+     * are not left waiting on slow SMTP (avoids 15s axios "Network Error").
+     */
+    private function scheduleRegistrationEmail(
+        EventDispatcherInterface $eventDispatcher,
+        EmailNotificationService $emailNotifier,
+        ?string $userEmail,
+        string $fullName,
+    ): void {
+        if ($userEmail === null || $userEmail === '') {
+            return;
+        }
+
+        $eventDispatcher->addListener(
+            KernelEvents::TERMINATE,
+            static function () use ($emailNotifier, $userEmail, $fullName): void {
+                $emailNotifier->sendRegistrationPendingEmail($userEmail, $fullName);
+            },
+        );
+    }
+
     private function buildCustomerUser(
         string $username,
         string $email,
         string $fullName,
-        string $phone,
-        string $address,
+        ?string $phone,
+        ?string $address,
     ): User {
         $user = new User();
         $user->setUsername($username);
