@@ -3,6 +3,9 @@ set -e
 
 echo "==> Starting Floryn Garden entrypoint..."
 
+export APP_ENV=prod
+export APP_DEBUG=0
+
 if [ ! -f .env ]; then
     echo "==> Creating minimal production .env file..."
     {
