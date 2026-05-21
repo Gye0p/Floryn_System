@@ -8,6 +8,8 @@ export APP_DEBUG=0
 export JWT_SECRET_KEY="${JWT_SECRET_KEY:-%kernel.project_dir%/config/jwt/private.pem}"
 export JWT_PUBLIC_KEY="${JWT_PUBLIC_KEY:-%kernel.project_dir%/config/jwt/public.pem}"
 export JWT_PASSPHRASE="${JWT_PASSPHRASE:-floryn-production-jwt}"
+export DEFAULT_URI="${DEFAULT_URI:-${RAILWAY_PUBLIC_DOMAIN:+https://${RAILWAY_PUBLIC_DOMAIN}}}"
+export DEFAULT_URI="${DEFAULT_URI:-http://localhost}"
 
 if [ ! -f .env ]; then
     echo "==> Creating minimal production .env file..."
@@ -17,6 +19,7 @@ if [ ! -f .env ]; then
         echo "JWT_SECRET_KEY=${JWT_SECRET_KEY}"
         echo "JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}"
         echo "JWT_PASSPHRASE=${JWT_PASSPHRASE}"
+        echo "DEFAULT_URI=${DEFAULT_URI}"
     } > .env
 fi
 
