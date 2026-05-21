@@ -62,6 +62,10 @@ class RegistrationFormType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => User::class ,
+            // Required for Symfony UX Turbo stateless CSRF (token_id: submit).
+            'csrf_token_options' => [
+                'attr' => ['data-controller' => 'csrf-protection'],
+            ],
         ]);
     }
 }
