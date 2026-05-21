@@ -13,6 +13,7 @@ export DEFAULT_URI="${DEFAULT_URI:-http://localhost}"
 export MERCURE_URL="${MERCURE_URL:-http://localhost/.well-known/mercure}"
 export MERCURE_PUBLIC_URL="${MERCURE_PUBLIC_URL:-${DEFAULT_URI}/.well-known/mercure}"
 export MERCURE_JWT_SECRET="${MERCURE_JWT_SECRET:-floryn-mercure-jwt-secret}"
+export MESSENGER_TRANSPORT_DSN="${MESSENGER_TRANSPORT_DSN:-doctrine://default?auto_setup=0}"
 
 if [ ! -f .env ]; then
     echo "==> Creating minimal production .env file..."
@@ -26,6 +27,7 @@ if [ ! -f .env ]; then
         echo "MERCURE_URL=${MERCURE_URL}"
         echo "MERCURE_PUBLIC_URL=${MERCURE_PUBLIC_URL}"
         echo "MERCURE_JWT_SECRET=${MERCURE_JWT_SECRET}"
+        echo "MESSENGER_TRANSPORT_DSN=${MESSENGER_TRANSPORT_DSN}"
     } > .env
 fi
 
