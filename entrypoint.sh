@@ -3,6 +3,14 @@ set -e
 
 echo "==> Starting Floryn Garden entrypoint..."
 
+if [ ! -f .env ]; then
+    echo "==> Creating minimal production .env file..."
+    {
+        echo "APP_ENV=${APP_ENV:-prod}"
+        echo "APP_DEBUG=${APP_DEBUG:-0}"
+    } > .env
+fi
+
 if [ -n "$PORT" ]; then
     echo "==> Configuring Apache to listen on port $PORT..."
     sed -i "s/Listen 80/Listen ${PORT}/g" /etc/apache2/ports.conf
