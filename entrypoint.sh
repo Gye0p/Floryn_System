@@ -5,6 +5,7 @@ echo "==> Starting Floryn Garden entrypoint..."
 
 export APP_ENV=prod
 export APP_DEBUG=0
+export APP_SECRET="${APP_SECRET:-floryn-production-secret-change-me}"
 export JWT_SECRET_KEY="${JWT_SECRET_KEY:-%kernel.project_dir%/config/jwt/private.pem}"
 export JWT_PUBLIC_KEY="${JWT_PUBLIC_KEY:-%kernel.project_dir%/config/jwt/public.pem}"
 export JWT_PASSPHRASE="${JWT_PASSPHRASE:-floryn-production-jwt}"
@@ -14,12 +15,17 @@ export MERCURE_URL="${MERCURE_URL:-http://localhost/.well-known/mercure}"
 export MERCURE_PUBLIC_URL="${MERCURE_PUBLIC_URL:-${DEFAULT_URI}/.well-known/mercure}"
 export MERCURE_JWT_SECRET="${MERCURE_JWT_SECRET:-floryn-mercure-jwt-secret}"
 export MESSENGER_TRANSPORT_DSN="${MESSENGER_TRANSPORT_DSN:-doctrine://default?auto_setup=0}"
+export MAILER_DSN="${MAILER_DSN:-null://null}"
+export CORS_ALLOW_ORIGIN="${CORS_ALLOW_ORIGIN:-^https?://.*$}"
+export GOOGLE_CLIENT_ID="${GOOGLE_CLIENT_ID:-disabled-google-client-id}"
+export GOOGLE_CLIENT_SECRET="${GOOGLE_CLIENT_SECRET:-disabled-google-client-secret}"
 
 if [ ! -f .env ]; then
     echo "==> Creating minimal production .env file..."
     {
         echo "APP_ENV=${APP_ENV:-prod}"
         echo "APP_DEBUG=${APP_DEBUG:-0}"
+        echo "APP_SECRET=${APP_SECRET}"
         echo "JWT_SECRET_KEY=${JWT_SECRET_KEY}"
         echo "JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}"
         echo "JWT_PASSPHRASE=${JWT_PASSPHRASE}"
@@ -28,6 +34,10 @@ if [ ! -f .env ]; then
         echo "MERCURE_PUBLIC_URL=${MERCURE_PUBLIC_URL}"
         echo "MERCURE_JWT_SECRET=${MERCURE_JWT_SECRET}"
         echo "MESSENGER_TRANSPORT_DSN=${MESSENGER_TRANSPORT_DSN}"
+        echo "MAILER_DSN=${MAILER_DSN}"
+        echo "CORS_ALLOW_ORIGIN=${CORS_ALLOW_ORIGIN}"
+        echo "GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}"
+        echo "GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}"
     } > .env
 fi
 
