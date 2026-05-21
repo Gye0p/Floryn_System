@@ -5,12 +5,18 @@ echo "==> Starting Floryn Garden entrypoint..."
 
 export APP_ENV=prod
 export APP_DEBUG=0
+export JWT_SECRET_KEY="${JWT_SECRET_KEY:-%kernel.project_dir%/config/jwt/private.pem}"
+export JWT_PUBLIC_KEY="${JWT_PUBLIC_KEY:-%kernel.project_dir%/config/jwt/public.pem}"
+export JWT_PASSPHRASE="${JWT_PASSPHRASE:-floryn-production-jwt}"
 
 if [ ! -f .env ]; then
     echo "==> Creating minimal production .env file..."
     {
         echo "APP_ENV=${APP_ENV:-prod}"
         echo "APP_DEBUG=${APP_DEBUG:-0}"
+        echo "JWT_SECRET_KEY=${JWT_SECRET_KEY}"
+        echo "JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}"
+        echo "JWT_PASSPHRASE=${JWT_PASSPHRASE}"
     } > .env
 fi
 
