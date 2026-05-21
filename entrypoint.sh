@@ -10,6 +10,9 @@ export JWT_PUBLIC_KEY="${JWT_PUBLIC_KEY:-%kernel.project_dir%/config/jwt/public.
 export JWT_PASSPHRASE="${JWT_PASSPHRASE:-floryn-production-jwt}"
 export DEFAULT_URI="${DEFAULT_URI:-${RAILWAY_PUBLIC_DOMAIN:+https://${RAILWAY_PUBLIC_DOMAIN}}}"
 export DEFAULT_URI="${DEFAULT_URI:-http://localhost}"
+export MERCURE_URL="${MERCURE_URL:-http://localhost/.well-known/mercure}"
+export MERCURE_PUBLIC_URL="${MERCURE_PUBLIC_URL:-${DEFAULT_URI}/.well-known/mercure}"
+export MERCURE_JWT_SECRET="${MERCURE_JWT_SECRET:-floryn-mercure-jwt-secret}"
 
 if [ ! -f .env ]; then
     echo "==> Creating minimal production .env file..."
@@ -20,6 +23,9 @@ if [ ! -f .env ]; then
         echo "JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}"
         echo "JWT_PASSPHRASE=${JWT_PASSPHRASE}"
         echo "DEFAULT_URI=${DEFAULT_URI}"
+        echo "MERCURE_URL=${MERCURE_URL}"
+        echo "MERCURE_PUBLIC_URL=${MERCURE_PUBLIC_URL}"
+        echo "MERCURE_JWT_SECRET=${MERCURE_JWT_SECRET}"
     } > .env
 fi
 
