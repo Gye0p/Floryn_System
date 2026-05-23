@@ -1,4 +1,4 @@
-# Enable stateless CSRF protection for forms and logins/logouts
+# Turbo Drive for navigation; forms use data-turbo="false" via DisableTurboOnFormsExtension.
 framework:
     csrf_protection:
-        check_header: true
+        check_header: false

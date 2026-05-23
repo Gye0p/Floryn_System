@@ -1,4 +1,5 @@
-# Enable stateless CSRF protection for forms and logins/logouts
+# Session-based CSRF for admin forms (reliable with Turbo).
+# Stateless CSRF only for logout; login uses authenticate token via security.yaml.
 framework:
     form:
         csrf_protection:
@@ -6,5 +7,4 @@ framework:
 
     csrf_protection:
         stateless_token_ids:
-            - submit
             - logout

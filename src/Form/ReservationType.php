@@ -76,7 +76,7 @@ class ReservationType extends AbstractType
             ])
         ;
 
-        $builder->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event): void {
+        $recalculateTotal = static function (FormEvent $event): void {
             $reservation = $event->getData();
             if (!$reservation instanceof Reservation) {
                 return;
@@ -91,9 +91,11 @@ class ReservationType extends AbstractType
                 if ($flower === null) {
                     continue;
                 }
-                $price = $flower->getEffectivePrice();
                 $qty = $detail->getQuantity() ?? 0;
-                $subtotal = $price * $qty;
+                if ($qty < 1) {
+                    continue;
+                }
+                $subtotal = $flower->getEffectivePrice() * $qty;
                 $detail->setSubtotal($subtotal);
                 $totalAmount += $subtotal;
             }
@@ -101,7 +103,9 @@ class ReservationType extends AbstractType
             if ($totalAmount > 0) {
                 $reservation->setTotalAmount($totalAmount);
             }
-        });
+        };
+
+        $builder->addEventListener(FormEvents::POST_SUBMIT, $recalculateTotal, 512);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

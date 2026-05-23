@@ -1,9 +1,8 @@
-{# Required for stateless CSRF (token_id: submit) with Turbo — see assets/controllers/csrf_protection_controller.js #}
+{# Standard session CSRF hidden field (no stateless JS required) #}
 {% block csrf_token_widget %}
 <input type="hidden"
        id="{{ id }}"
        name="{{ full_name }}"
-       data-controller="csrf-protection"
        value="{{ value }}"
 />
 {% endblock %}
