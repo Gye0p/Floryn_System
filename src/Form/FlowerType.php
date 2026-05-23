@@ -109,6 +109,8 @@ class FlowerType extends AbstractType
                 'class' => Supplier::class,
                 'choice_label' => 'supplierName',
                 'label' => 'Supplier',
+                'placeholder' => 'Select a supplier',
+                'required' => true,
                 'attr' => [
                     'class' => 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#39A8C9] focus:border-[#39A8C9]'
                 ]
@@ -149,6 +151,18 @@ class FlowerType extends AbstractType
 
             $data['category'] = self::FLOWER_CATEGORY_MAP[$name];
             $event->setData($data);
+        });
+
+        $builder->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event): void {
+            $flower = $event->getData();
+            if (!$flower instanceof Flower) {
+                return;
+            }
+
+            $name = $flower->getName();
+            if ($name && !$flower->getCategory() && isset(self::FLOWER_CATEGORY_MAP[$name])) {
+                $flower->setCategory(self::FLOWER_CATEGORY_MAP[$name]);
+            }
         });
     }
 

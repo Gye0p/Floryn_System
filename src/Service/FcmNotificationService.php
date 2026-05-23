@@ -22,16 +22,13 @@ class FcmNotificationService
 
     private ?string $accessToken = null;
     private ?int $tokenExpiresAt = null;
-    private string $projectId;
+    private ?string $projectId = null;
 
     public function __construct(
         private readonly HttpClientInterface $httpClient,
         private readonly EntityManagerInterface $em,
         private readonly LoggerInterface $logger,
-    ) {
-        $credentials = $this->loadCredentials();
-        $this->projectId = $credentials['project_id'];
-    }
+    ) {}
 
     // ── Public API ────────────────────────────────────────────────────────────
 
@@ -101,7 +98,7 @@ class FcmNotificationService
     {
         try {
             $token   = $this->getAccessToken();
-            $url     = sprintf(self::FCM_ENDPOINT, $this->projectId);
+            $url     = sprintf(self::FCM_ENDPOINT, $this->getProjectId());
 
             $payload = [
                 'message' => [
@@ -156,6 +153,9 @@ class FcmNotificationService
         }
 
         $credentials = $this->loadCredentials();
+        if ($credentials === null) {
+            throw new \RuntimeException('Firebase credentials are not configured.');
+        }
         $now         = time();
 
         // Build JWT assertion
@@ -187,18 +187,43 @@ class FcmNotificationService
         return $this->accessToken;
     }
 
-    private function loadCredentials(): array
+    private function getProjectId(): string
+    {
+        if ($this->projectId !== null) {
+            return $this->projectId;
+        }
+
+        $credentials = $this->loadCredentials();
+        if ($credentials === null) {
+            throw new \RuntimeException('Firebase credentials are not configured.');
+        }
+
+        $this->projectId = $credentials['project_id'];
+
+        return $this->projectId;
+    }
+
+    /**
+     * @return array<string, mixed>|null Null when credentials file is absent (push disabled).
+     */
+    private function loadCredentials(): ?array
     {
         $path = self::CREDENTIALS_PATH;
 
         if (!file_exists($path)) {
-            throw new \RuntimeException("Firebase credentials not found at: {$path}");
+            $this->logger->warning('FCM: credentials file not found — push notifications disabled', [
+                'path' => $path,
+            ]);
+
+            return null;
         }
 
         $credentials = json_decode(file_get_contents($path), true);
 
-        if (!$credentials || !isset($credentials['private_key'])) {
-            throw new \RuntimeException('Firebase credentials JSON is invalid or missing private_key.');
+        if (!$credentials || !isset($credentials['private_key'], $credentials['project_id'], $credentials['client_email'])) {
+            $this->logger->error('FCM: credentials JSON is invalid or incomplete');
+
+            return null;
         }
 
         return $credentials;

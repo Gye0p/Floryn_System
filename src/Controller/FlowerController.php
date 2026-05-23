@@ -4,8 +4,10 @@ namespace App\Controller;
 
 use App\Entity\Flower;
 use App\Entity\FlowerBatch;
+use App\Entity\Supplier;
 use App\Form\FlowerType;
 use App\Repository\FlowerRepository;
+use App\Repository\SupplierRepository;
 use App\Service\ActivityLogService;
 use App\Service\FlowerStatusUpdater;
 use Doctrine\ORM\EntityManagerInterface;
@@ -51,8 +53,15 @@ final class FlowerController extends AbstractController
     }
 
     #[Route('/new', name: 'app_flower_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, FlowerStatusUpdater $flowerStatusUpdater, ActivityLogService $activityLog): Response
-    {
+    public function new(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        FlowerStatusUpdater $flowerStatusUpdater,
+        ActivityLogService $activityLog,
+        SupplierRepository $supplierRepository,
+    ): Response {
+        $this->ensureDefaultSupplier($entityManager, $supplierRepository);
+
         $flower = new Flower();
         
         // Set default values — status is system-managed, always Available for new flowers
@@ -87,6 +96,10 @@ final class FlowerController extends AbstractController
             return $this->redirectToRoute('app_flower_index', [], Response::HTTP_SEE_OTHER);
         }
 
+        if ($form->isSubmitted()) {
+            $this->addFlash('danger', 'Could not save the flower. Check the highlighted fields (name, supplier, price, stock, dates).');
+        }
+
         return $this->render('flower/new.html.twig', [
             'flower' => $flower,
             'form' => $form,
@@ -102,8 +115,16 @@ final class FlowerController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_flower_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Flower $flower, EntityManagerInterface $entityManager, FlowerStatusUpdater $flowerStatusUpdater, ActivityLogService $activityLog): Response
-    {
+    public function edit(
+        Request $request,
+        Flower $flower,
+        EntityManagerInterface $entityManager,
+        FlowerStatusUpdater $flowerStatusUpdater,
+        ActivityLogService $activityLog,
+        SupplierRepository $supplierRepository,
+    ): Response {
+        $this->ensureDefaultSupplier($entityManager, $supplierRepository);
+
         $form = $this->createForm(FlowerType::class, $flower);
         $form->handleRequest($request);
 
@@ -203,5 +224,25 @@ final class FlowerController extends AbstractController
         $this->addFlash('success', sprintf('"%s" has been restocked with %d units!', $flower->getName(), $newStock));
 
         return $this->redirectToRoute('app_flower_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    /**
+     * Railway/production DBs may have zero suppliers; flowers require one.
+     */
+    private function ensureDefaultSupplier(EntityManagerInterface $em, SupplierRepository $supplierRepository): void
+    {
+        if ($supplierRepository->count([]) > 0) {
+            return;
+        }
+
+        $supplier = (new Supplier())
+            ->setSupplierName('Default Flower Supplier')
+            ->setContactPerson('Floryn Admin')
+            ->setPhoneNumber('+639000000000')
+            ->setEmail('supplier@floryn.local')
+            ->setAddress('Floryn Garden');
+
+        $em->persist($supplier);
+        $em->flush();
     }
 }
