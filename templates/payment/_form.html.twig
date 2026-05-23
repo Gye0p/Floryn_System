@@ -38,7 +38,7 @@
         {{ form_label(form.amountPaid, 'Amount Paid', {'label_attr': {'class': 'form-label'}}) }}
         {{ form_widget(form.amountPaid, {'attr': {'class': 'form-control', 'placeholder': '0.00', 'step': '0.01'}}) }}
         {{ form_errors(form.amountPaid) }}
-        <p class="form-hint">Enter the exact amount received</p>
+        <p class="form-hint">Optional on new payments — the reservation total is applied automatically.</p>
       </div>
       <div class="form-group">
         {{ form_label(form.paymentMethod, 'Payment Method', {'label_attr': {'class': 'form-label'}}) }}
@@ -51,11 +51,13 @@
         {{ form_errors(form.referenceNo) }}
         <p class="form-hint">Unique identifier for tracking this transaction</p>
       </div>
+      {% if form.status is defined %}
       <div class="form-group">
         {{ form_label(form.status, 'Payment Status', {'label_attr': {'class': 'form-label'}}) }}
         {{ form_widget(form.status, {'attr': {'class': 'form-select'}}) }}
         {{ form_errors(form.status) }}
       </div>
+      {% endif %}
     </div>
   </div>
 </div>

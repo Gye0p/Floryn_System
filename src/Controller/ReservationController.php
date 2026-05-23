@@ -77,7 +77,8 @@ final class ReservationController extends AbstractController
             $totalAmount = 0;
             foreach ($reservation->getReservationDetails() as $detail) {
                 $flower = $detail->getFlower();
-                $price = $flower->getDiscountPrice() > 0 ? $flower->getDiscountPrice() : $flower->getPrice();
+                $discount = $flower->getDiscountPrice();
+                $price = ($discount !== null && $discount > 0) ? $discount : $flower->getPrice();
                 $subtotal = $price * $detail->getQuantity();
                 $detail->setSubtotal($subtotal);
                 $detail->setReservation($reservation);
@@ -209,11 +210,12 @@ final class ReservationController extends AbstractController
             $totalAmount = 0;
             foreach ($reservation->getReservationDetails() as $detail) {
                 $flower = $detail->getFlower();
-                $price = $flower->getDiscountPrice() > 0 ? $flower->getDiscountPrice() : $flower->getPrice();
+                $discount = $flower->getDiscountPrice();
+                $price = ($discount !== null && $discount > 0) ? $discount : $flower->getPrice();
                 $subtotal = $price * $detail->getQuantity();
                 $detail->setSubtotal($subtotal);
                 $totalAmount += $subtotal;
-                
+
                 // Deduct new quantities from stock
                 if (!$flower->getBatches()->isEmpty()) {
                     $batchRepo->deductStock($flower, $detail->getQuantity());

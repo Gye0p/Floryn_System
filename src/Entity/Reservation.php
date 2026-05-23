@@ -177,8 +177,14 @@ class Reservation
         return $this->payment;
     }
 
-    public function setPayment(Payment $payment): static
+    public function setPayment(?Payment $payment): static
     {
+        if ($payment === null) {
+            $this->payment = null;
+
+            return $this;
+        }
+
         // set the owning side of the relation if necessary
         if ($payment->getReservation() !== $this) {
             $payment->setReservation($this);
