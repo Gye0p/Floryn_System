@@ -31,7 +31,7 @@ class Payment
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: "Payment method is required.")]
     #[Assert\Choice(
-        choices: ['Cash', 'PayPal'],
+        choices: ['Cash', 'Credit Card', 'Bank Transfer', 'GCash', 'PayPal'],
         message: "Please select a valid payment method."
     )]
     private ?string $paymentMethod = null;

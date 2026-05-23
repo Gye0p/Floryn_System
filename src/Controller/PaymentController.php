@@ -7,6 +7,7 @@ use App\Form\PaymentType;
 use App\Repository\PaymentRepository;
 use App\Service\ActivityLogService;
 use App\Service\EmailNotificationService;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -30,18 +31,25 @@ final class PaymentController extends AbstractController
     public function new(Request $request, EntityManagerInterface $entityManager, ActivityLogService $activityLog, EmailNotificationService $emailNotification): Response
     {
         $payment = new Payment();
+        $payment->setPaymentDate(new \DateTime());
+
         $form = $this->createForm(PaymentType::class, $payment);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $reservation = $payment->getReservation();
+            if (!$reservation) {
+                $this->addFlash('danger', 'Please select an unpaid reservation.');
+                return $this->render('payment/new.html.twig', [
+                    'payment' => $payment,
+                    'form' => $form,
+                ]);
+            }
 
-            // Enforce full payment: amount must equal the reservation total
-            if ($reservation && abs($payment->getAmountPaid() - $reservation->getTotalAmount()) > 0.01) {
+            if ($reservation->getPayment() !== null) {
                 $this->addFlash('danger', sprintf(
-                    'Full payment required. The reservation total is ₱%s but you entered ₱%s.',
-                    number_format($reservation->getTotalAmount(), 2),
-                    number_format($payment->getAmountPaid(), 2)
+                    'Reservation #%d already has a payment recorded. Edit or delete that payment first.',
+                    $reservation->getId()
                 ));
                 return $this->render('payment/new.html.twig', [
                     'payment' => $payment,
@@ -49,26 +57,37 @@ final class PaymentController extends AbstractController
                 ]);
             }
 
-            // Auto-set payment status to Paid
+            // Always record the full reservation total (avoids mismatch rejections)
+            $payment->setAmountPaid($reservation->getTotalAmount());
             $payment->setStatus('Paid');
 
-            $entityManager->persist($payment);
+            $reservation->setPayment($payment);
+            $reservation->setPaymentStatus('Paid');
 
-            // Sync reservation payment status
-            if ($reservation) {
-                $reservation->setPaymentStatus('Paid');
+            try {
+                $entityManager->persist($payment);
+                $entityManager->flush();
+            } catch (UniqueConstraintViolationException) {
+                $this->addFlash('danger', sprintf(
+                    'Reservation #%d already has a payment in the database.',
+                    $reservation->getId()
+                ));
+                return $this->render('payment/new.html.twig', [
+                    'payment' => $payment,
+                    'form' => $form,
+                ]);
             }
 
-            $entityManager->flush();
-
             $activityLog->logCreate('Payment', $payment->getId(), 'Payment #' . $payment->getId());
-            
-            // Send payment confirmation email
             $emailNotification->sendPaymentConfirmation($payment);
-            
+
             $this->addFlash('success', 'Payment recorded successfully! Reservation #' . $reservation->getId() . ' marked as Paid.');
 
             return $this->redirectToRoute('app_payment_index', [], Response::HTTP_SEE_OTHER);
+        }
+
+        if ($form->isSubmitted()) {
+            $this->addFlash('danger', 'Could not record payment. Select a reservation, payment method, and reference number.');
         }
 
         return $this->render('payment/new.html.twig', [
@@ -92,7 +111,6 @@ final class PaymentController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Sync reservation payment status based on payment status
             $reservation = $payment->getReservation();
             if ($reservation) {
                 if ($payment->getStatus() === 'Cancelled') {
@@ -110,6 +128,10 @@ final class PaymentController extends AbstractController
             return $this->redirectToRoute('app_payment_index', [], Response::HTTP_SEE_OTHER);
         }
 
+        if ($form->isSubmitted()) {
+            $this->addFlash('danger', 'Could not update payment. Check the highlighted fields.');
+        }
+
         return $this->render('payment/edit.html.twig', [
             'payment' => $payment,
             'form' => $form,
@@ -121,16 +143,16 @@ final class PaymentController extends AbstractController
     {
         if ($this->isCsrfTokenValid('delete'.$payment->getId(), $request->getPayload()->getString('_token'))) {
             $paymentId = $payment->getId();
-            
-            // Revert reservation payment status to Unpaid
+
             $reservation = $payment->getReservation();
             if ($reservation) {
                 $reservation->setPaymentStatus('Unpaid');
+                $reservation->setPayment(null);
             }
-            
+
             $entityManager->remove($payment);
             $entityManager->flush();
-            
+
             $activityLog->logDelete('Payment', $paymentId, 'Payment #' . $paymentId);
             $this->addFlash('success', 'Payment deleted successfully! Reservation reverted to Unpaid.');
         }
