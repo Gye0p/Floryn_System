@@ -69,7 +69,9 @@ final class FlowerController extends AbstractController
         $flower->setStatus('Available');
         $flower->setFreshnessStatus('Fresh'); // Will be recalculated by FlowerStatusUpdater
         
-        $form = $this->createForm(FlowerType::class, $flower);
+        $form = $this->createForm(FlowerType::class, $flower, [
+            'validation_groups' => ['Default', 'Create'],
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -96,7 +98,7 @@ final class FlowerController extends AbstractController
             return $this->redirectToRoute('app_flower_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        if ($form->isSubmitted()) {
+        if ($form->isSubmitted() && !$form->isValid()) {
             $this->addFlash('danger', 'Could not save the flower. Check the highlighted fields (name, supplier, price, stock, dates).');
         }
 
@@ -125,10 +127,15 @@ final class FlowerController extends AbstractController
     ): Response {
         $this->ensureDefaultSupplier($entityManager, $supplierRepository);
 
-        $form = $this->createForm(FlowerType::class, $flower);
+        $form = $this->createForm(FlowerType::class, $flower, [
+            'validation_groups' => ['Default', 'Edit'],
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            if ($flower->usesActiveBatchStock()) {
+                $flower->syncFromBatches();
+            }
             $entityManager->flush();
             
             // Log activity
@@ -139,6 +146,10 @@ final class FlowerController extends AbstractController
 
             $this->addFlash('success', 'Flower updated successfully!');
             return $this->redirectToRoute('app_flower_index', [], Response::HTTP_SEE_OTHER);
+        }
+
+        if ($form->isSubmitted() && !$form->isValid()) {
+            $this->addFlash('danger', 'Could not update the flower. Check the highlighted fields.');
         }
 
         return $this->render('flower/edit.html.twig', [

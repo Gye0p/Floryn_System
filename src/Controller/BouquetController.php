@@ -111,9 +111,11 @@ class BouquetController extends AbstractController
             return $this->json(['success' => false, 'error' => 'Flower not found.'], 404);
         }
 
+        $em->beginTransaction();
         try {
             $item = $bouquetService->addFlowerToBouquet($bouquet, $flower, $quantity);
             $em->flush();
+            $em->commit();
 
             return $this->json([
                 'success' => true,
@@ -126,7 +128,13 @@ class BouquetController extends AbstractController
                 'stockRemaining' => $flower->getStockQuantity(),
             ]);
         } catch (\InvalidArgumentException $e) {
+            $em->rollback();
+
             return $this->json(['success' => false, 'error' => $e->getMessage()], 400);
+        } catch (\Throwable $e) {
+            $em->rollback();
+
+            return $this->json(['success' => false, 'error' => 'Could not add flower to bouquet.'], 500);
         }
     }
 
@@ -161,8 +169,16 @@ class BouquetController extends AbstractController
             return $this->json(['success' => false, 'error' => 'Item not found in this bouquet.'], 404);
         }
 
-        $bouquetService->removeItemFromBouquet($bouquet, $item);
-        $em->flush();
+        $em->beginTransaction();
+        try {
+            $bouquetService->removeItemFromBouquet($bouquet, $item);
+            $em->flush();
+            $em->commit();
+        } catch (\Throwable $e) {
+            $em->rollback();
+
+            return $this->json(['success' => false, 'error' => 'Could not remove item from bouquet.'], 500);
+        }
 
         return $this->json([
             'success' => true,

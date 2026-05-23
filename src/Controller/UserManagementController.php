@@ -75,8 +75,9 @@ class UserManagementController extends AbstractController
             $hashedPassword = $passwordHasher->hashPassword($user, $plainPassword);
             $user->setPassword($hashedPassword);
 
-            // Admin-created users are auto-approved
+            // Admin-created users are auto-approved and verified (no email flow required)
             $user->setIsApproved(true);
+            $user->setIsVerified(true);
             $user->setCreatedAt(new \DateTime());
 
             $entityManager->persist($user);

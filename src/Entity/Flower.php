@@ -65,8 +65,9 @@ class Flower
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Assert\NotBlank(message: "Expiry date is required.")]
     #[Assert\GreaterThanOrEqual(
-        "today",
-        message: "Expiry date must be today or in the future."
+        value: "today",
+        message: "Expiry date must be today or in the future.",
+        groups: ['Create'],
     )]
     private ?\DateTime $expiryDate = null;
 
@@ -157,6 +158,16 @@ class Flower
     public function getDiscountPrice(): ?float
     {
         return $this->discountPrice ? (float) $this->discountPrice : null;
+    }
+
+    public function getEffectivePrice(): float
+    {
+        $discount = $this->getDiscountPrice();
+        if ($discount !== null && $discount > 0) {
+            return $discount;
+        }
+
+        return (float) ($this->price ?? 0);
     }
 
     public function setDiscountPrice(?float $discountPrice): static
@@ -315,6 +326,11 @@ class Flower
         return $this->batches->filter(
             fn(FlowerBatch $b) => $b->isActive() && $b->getQuantityRemaining() > 0
         )->toArray();
+    }
+
+    public function usesActiveBatchStock(): bool
+    {
+        return count($this->getActiveBatches()) > 0;
     }
 
     /**

@@ -14,6 +14,7 @@ use App\Service\WebSocketNotifier;
 use Doctrine\DBAL\LockMode;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -77,8 +78,7 @@ final class ReservationController extends AbstractController
             $totalAmount = 0;
             foreach ($reservation->getReservationDetails() as $detail) {
                 $flower = $detail->getFlower();
-                $discount = $flower->getDiscountPrice();
-                $price = ($discount !== null && $discount > 0) ? $discount : $flower->getPrice();
+                $price = $flower->getEffectivePrice();
                 $subtotal = $price * $detail->getQuantity();
                 $detail->setSubtotal($subtotal);
                 $detail->setReservation($reservation);
@@ -86,7 +86,7 @@ final class ReservationController extends AbstractController
                 
                 // Update flower stock — use FIFO batch deduction if batches exist
                 $batchRepo = $entityManager->getRepository(FlowerBatch::class);
-                if (!$flower->getBatches()->isEmpty()) {
+                if ($flower->usesActiveBatchStock()) {
                     $batchRepo->deductStock($flower, $detail->getQuantity());
                 } else {
                     $newStock = $flower->getStockQuantity() - $detail->getQuantity();
@@ -121,6 +121,10 @@ final class ReservationController extends AbstractController
                     'form' => $form,
                 ]);
             }
+        }
+
+        if ($form->isSubmitted() && !$form->isValid()) {
+            $this->addFlash('danger', $this->formatFormErrors($form));
         }
 
         return $this->render('reservation/new.html.twig', [
@@ -163,7 +167,7 @@ final class ReservationController extends AbstractController
             // Restore stock for ALL original details first
             $batchRepo = $entityManager->getRepository(FlowerBatch::class);
             foreach ($originalDetails as $detailId => $original) {
-                if (!$original['flower']->getBatches()->isEmpty()) {
+                if ($original['flower']->usesActiveBatchStock()) {
                     $batchRepo->restoreStock($original['flower'], $original['quantity']);
                 } else {
                     $original['flower']->setStockQuantity(
@@ -189,7 +193,7 @@ final class ReservationController extends AbstractController
             if (!empty($stockErrors)) {
                 // Rollback: re-deduct the restored stock
                 foreach ($originalDetails as $detailId => $original) {
-                    if (!$original['flower']->getBatches()->isEmpty()) {
+                    if ($original['flower']->usesActiveBatchStock()) {
                         $batchRepo->deductStock($original['flower'], $original['quantity']);
                     } else {
                         $original['flower']->setStockQuantity(
@@ -197,6 +201,7 @@ final class ReservationController extends AbstractController
                         );
                     }
                 }
+                $entityManager->rollback();
                 foreach ($stockErrors as $error) {
                     $this->addFlash('danger', $error);
                 }
@@ -210,14 +215,13 @@ final class ReservationController extends AbstractController
             $totalAmount = 0;
             foreach ($reservation->getReservationDetails() as $detail) {
                 $flower = $detail->getFlower();
-                $discount = $flower->getDiscountPrice();
-                $price = ($discount !== null && $discount > 0) ? $discount : $flower->getPrice();
+                $price = $flower->getEffectivePrice();
                 $subtotal = $price * $detail->getQuantity();
                 $detail->setSubtotal($subtotal);
                 $totalAmount += $subtotal;
 
                 // Deduct new quantities from stock
-                if (!$flower->getBatches()->isEmpty()) {
+                if ($flower->usesActiveBatchStock()) {
                     $batchRepo->deductStock($flower, $detail->getQuantity());
                 } else {
                     $newStock = $flower->getStockQuantity() - $detail->getQuantity();
@@ -262,6 +266,10 @@ final class ReservationController extends AbstractController
             }
         }
 
+        if ($form->isSubmitted() && !$form->isValid()) {
+            $this->addFlash('danger', $this->formatFormErrors($form));
+        }
+
         return $this->render('reservation/edit.html.twig', [
             'reservation' => $reservation,
             'form' => $form,
@@ -278,7 +286,7 @@ final class ReservationController extends AbstractController
             $batchRepo = $entityManager->getRepository(FlowerBatch::class);
             foreach ($reservation->getReservationDetails() as $detail) {
                 $flower = $detail->getFlower();
-                if (!$flower->getBatches()->isEmpty()) {
+                if ($flower->usesActiveBatchStock()) {
                     $batchRepo->restoreStock($flower, $detail->getQuantity());
                 } else {
                     $flower->setStockQuantity(
@@ -299,5 +307,22 @@ final class ReservationController extends AbstractController
         }
 
         return $this->redirectToRoute('app_reservation_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    private function formatFormErrors(FormInterface $form): string
+    {
+        $messages = [];
+        foreach ($form->getErrors(true) as $error) {
+            $messages[] = $error->getMessage();
+        }
+        foreach ($form as $child) {
+            foreach ($child->getErrors() as $error) {
+                $messages[] = ucfirst($child->getName()) . ': ' . $error->getMessage();
+            }
+        }
+
+        return $messages === []
+            ? 'Could not save reservation. Check all required fields.'
+            : 'Could not save reservation — ' . implode(' ', array_unique($messages));
     }
 }

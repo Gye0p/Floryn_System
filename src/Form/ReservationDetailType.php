@@ -21,8 +21,7 @@ class ReservationDetailType extends AbstractType
             ->add('flower', EntityType::class, [
                 'class' => Flower::class,
                 'choice_label' => function (Flower $flower) {
-                    $discount = $flower->getDiscountPrice();
-                    $price = ($discount !== null && $discount > 0) ? $discount : $flower->getPrice();
+                    $price = $flower->getEffectivePrice();
                     return sprintf('%s - ₱%.2f (Stock: %d)', 
                         $flower->getName(), 
                         $price, 

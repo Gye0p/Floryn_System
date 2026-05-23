@@ -2,15 +2,20 @@
 
 namespace App\Form;
 
-use App\Entity\User;
 use App\Entity\Reservation;
+use App\Entity\ReservationDetail;
+use App\Entity\User;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Count;
 
 class ReservationType extends AbstractType
 {
@@ -32,6 +37,7 @@ class ReservationType extends AbstractType
             ])
             ->add('pickupDate', DateType::class, [
                 'widget' => 'single_text',
+                'html5' => true,
                 'attr' => ['class' => 'form-control'],
                 'label' => 'Pickup Date',
             ])
@@ -43,6 +49,9 @@ class ReservationType extends AbstractType
                 'by_reference' => false,
                 'label' => false,
                 'attr' => ['class' => 'reservation-details-collection'],
+                'constraints' => [
+                    new Count(min: 1, minMessage: 'Add at least one flower to the reservation.'),
+                ],
             ])
             ->add('paymentStatus', ChoiceType::class, [
                 'choices' => [
@@ -66,12 +75,46 @@ class ReservationType extends AbstractType
                 'label' => 'Reservation Status',
             ])
         ;
+
+        $builder->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event): void {
+            $reservation = $event->getData();
+            if (!$reservation instanceof Reservation) {
+                return;
+            }
+
+            $totalAmount = 0.0;
+            foreach ($reservation->getReservationDetails() as $detail) {
+                if (!$detail instanceof ReservationDetail) {
+                    continue;
+                }
+                $flower = $detail->getFlower();
+                if ($flower === null) {
+                    continue;
+                }
+                $price = $flower->getEffectivePrice();
+                $qty = $detail->getQuantity() ?? 0;
+                $subtotal = $price * $qty;
+                $detail->setSubtotal($subtotal);
+                $totalAmount += $subtotal;
+            }
+
+            if ($totalAmount > 0) {
+                $reservation->setTotalAmount($totalAmount);
+            }
+        });
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => Reservation::class,
+            'validation_groups' => function (FormInterface $form): array {
+                $reservation = $form->getData();
+
+                return ($reservation instanceof Reservation && $reservation->getId() !== null)
+                    ? ['Default', 'Edit']
+                    : ['Default', 'Create'];
+            },
         ]);
     }
 }

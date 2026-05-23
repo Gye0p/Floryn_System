@@ -20,15 +20,16 @@ class Reservation
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Assert\NotBlank(message: "Pickup date is required.")]
     #[Assert\GreaterThanOrEqual(
-        "today",
-        message: "Pickup date must not be in the past."
+        value: "today",
+        message: "Pickup date must not be in the past.",
+        groups: ['Create'],
     )]
     private ?\DateTime $pickupDate = null;
 
     #[ORM\Column]
-    #[Assert\NotBlank(message: "Total amount is required.")]
-    #[Assert\Type(type: "numeric", message: "Total amount must be a number.")]
-    #[Assert\GreaterThan(value: 0, message: "Total amount must be greater than zero.")]
+    #[Assert\NotBlank(message: "Total amount is required.", groups: ['Default'])]
+    #[Assert\Type(type: "numeric", message: "Total amount must be a number.", groups: ['Default'])]
+    #[Assert\GreaterThan(value: 0, message: "Total amount must be greater than zero.", groups: ['Default'])]
     private ?float $totalAmount = null;
 
     #[ORM\Column(length: 255)]

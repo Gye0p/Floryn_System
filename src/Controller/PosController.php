@@ -66,7 +66,7 @@ class PosController extends AbstractController
 
         $data = [];
         foreach ($flowers as $flower) {
-            $effectivePrice = $flower->getDiscountPrice() > 0 ? $flower->getDiscountPrice() : $flower->getPrice();
+            $effectivePrice = $flower->getEffectivePrice();
             $data[] = [
                 'id' => $flower->getId(),
                 'name' => $flower->getName(),
@@ -206,7 +206,7 @@ class PosController extends AbstractController
                     continue;
                 }
 
-                $effectivePrice = $flower->getDiscountPrice() > 0 ? $flower->getDiscountPrice() : $flower->getPrice();
+                $effectivePrice = $flower->getEffectivePrice();
                 $subtotal = $effectivePrice * $qty;
 
                 $detail = new ReservationDetail();
@@ -218,7 +218,7 @@ class PosController extends AbstractController
 
                 // Deduct stock — use FIFO batch deduction if batches exist
                 $batchRepo = $em->getRepository(\App\Entity\FlowerBatch::class);
-                if (!$flower->getBatches()->isEmpty()) {
+                if ($flower->usesActiveBatchStock()) {
                     $batchRepo->deductStock($flower, $qty);
                 } else {
                     $flower->setStockQuantity($flower->getStockQuantity() - $qty);
@@ -253,6 +253,7 @@ class PosController extends AbstractController
             $payment->setPaymentMethod($data['paymentMethod']);
             $payment->setReferenceNo('POS-' . date('Ymd') . '-' . str_pad(random_int(1, 99999), 5, '0', STR_PAD_LEFT));
             $payment->setStatus('Paid');
+            $reservation->setPayment($payment);
             $em->persist($payment);
 
             // 5. Flush everything in one transaction

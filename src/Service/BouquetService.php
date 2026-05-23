@@ -45,7 +45,7 @@ class BouquetService
         }
 
         // Deduct stock using FEFO (First Expiry First Out) if batches exist, else simple deduction
-        if (!$flower->getBatches()->isEmpty()) {
+        if ($flower->usesActiveBatchStock()) {
             $this->flowerBatchRepository->deductStock($flower, $quantity);
         } else {
             $flower->setStockQuantity($flower->getStockQuantity() - $quantity);
@@ -53,9 +53,7 @@ class BouquetService
         }
 
         // Snapshot the effective unit price at the time of adding
-        $unitPrice = $flower->getDiscountPrice() > 0
-            ? $flower->getDiscountPrice()
-            : $flower->getPrice();
+        $unitPrice = $flower->getEffectivePrice();
 
         $item = new BouquetItem();
         $item->setFlower($flower);
@@ -87,7 +85,7 @@ class BouquetService
 
         // Restore stock
         if ($flower !== null && $quantity > 0) {
-            if (!$flower->getBatches()->isEmpty()) {
+            if ($flower->usesActiveBatchStock()) {
                 $this->flowerBatchRepository->restoreStock($flower, $quantity);
             } else {
                 $flower->setStockQuantity($flower->getStockQuantity() + $quantity);
@@ -157,7 +155,7 @@ class BouquetService
             $quantity = $item->getQuantity();
 
             if ($flower !== null && $quantity > 0) {
-                if (!$flower->getBatches()->isEmpty()) {
+                if ($flower->usesActiveBatchStock()) {
                     $this->flowerBatchRepository->restoreStock($flower, $quantity);
                 } else {
                     $flower->setStockQuantity($flower->getStockQuantity() + $quantity);

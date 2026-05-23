@@ -333,9 +333,7 @@ class ApiCustomerController extends AbstractController
                     ], Response::HTTP_BAD_REQUEST);
                 }
 
-                $price = $flower->getDiscountPrice() > 0
-                    ? $flower->getDiscountPrice()
-                    : $flower->getPrice();
+                $price = $flower->getEffectivePrice();
                 $subtotal = $price * $quantity;
 
                 $detail = (new ReservationDetail())
@@ -346,7 +344,7 @@ class ApiCustomerController extends AbstractController
                 $reservation->addReservationDetail($detail);
                 $em->persist($detail);
 
-                if (!$flower->getBatches()->isEmpty()) {
+                if ($flower->usesActiveBatchStock()) {
                     $deducted = $batchRepo->deductStock($flower, $quantity);
                     if ($deducted < $quantity) {
                         $em->rollback();
@@ -576,7 +574,7 @@ class ApiCustomerController extends AbstractController
                 if ($flower === null) {
                     continue;
                 }
-                if (!$flower->getBatches()->isEmpty()) {
+                if ($flower->usesActiveBatchStock()) {
                     $batchRepo->restoreStock($flower, $detail->getQuantity());
                 } else {
                     $flower->setStockQuantity($flower->getStockQuantity() + $detail->getQuantity());
