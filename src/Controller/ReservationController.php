@@ -13,6 +13,7 @@ use App\Service\FcmNotificationService;
 use App\Service\WebSocketNotifier;
 use Doctrine\DBAL\LockMode;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -33,7 +34,7 @@ final class ReservationController extends AbstractController
     }
 
     #[Route('/new', name: 'app_reservation_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, ActivityLogService $activityLog, EmailNotificationService $emailNotification): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, ActivityLogService $activityLog, EmailNotificationService $emailNotification, LoggerInterface $logger): Response
     {
         $reservation = new Reservation();
         $reservation->setDateReserved(new \DateTime());
@@ -87,35 +88,49 @@ final class ReservationController extends AbstractController
                 // Update flower stock — use FIFO batch deduction if batches exist
                 $batchRepo = $entityManager->getRepository(FlowerBatch::class);
                 if ($flower->usesActiveBatchStock()) {
-                    $batchRepo->deductStock($flower, $detail->getQuantity());
+                    $deducted = $batchRepo->deductStock($flower, $detail->getQuantity());
+                    if ($deducted < $detail->getQuantity()) {
+                        throw new \RuntimeException(sprintf(
+                            'Insufficient batch stock for "%s".',
+                            $flower->getName()
+                        ));
+                    }
                 } else {
                     $newStock = $flower->getStockQuantity() - $detail->getQuantity();
                     $flower->setStockQuantity($newStock);
                 }
 
-                // Mark as Sold Out if no stock remaining
                 if ($flower->getStockQuantity() <= 0) {
                     $flower->setStatus('Sold Out');
                 }
             }
-            
+
             $reservation->setTotalAmount($totalAmount);
-            
+
+            foreach ($reservation->getReservationDetails() as $detail) {
+                $entityManager->persist($detail);
+            }
             $entityManager->persist($reservation);
             $entityManager->flush();
             $entityManager->commit();
 
-            $activityLog->logCreate('Reservation', $reservation->getId(), 'Reservation #' . $reservation->getId() . ' for ' . $reservation->getCustomer()->getFullName());
-            
-            // Send reservation confirmation email
+            $customerLabel = $reservation->getCustomer()?->getFullName()
+                ?? $reservation->getCustomer()?->getUsername()
+                ?? 'Customer';
+            $activityLog->logCreate('Reservation', $reservation->getId(), 'Reservation #' . $reservation->getId() . ' for ' . $customerLabel);
+
             $emailNotification->sendReservationConfirmation($reservation);
-            
+
             $this->addFlash('success', 'Reservation created successfully! Total: ₱' . number_format($totalAmount, 2));
 
             return $this->redirectToRoute('app_reservation_index', [], Response::HTTP_SEE_OTHER);
-            } catch (\Exception $e) {
-                $entityManager->rollback();
-                $this->addFlash('danger', 'An error occurred while creating the reservation. Please try again.');
+            } catch (\Throwable $e) {
+                if ($entityManager->getConnection()->isTransactionActive()) {
+                    $entityManager->rollback();
+                }
+                $logger->error('Reservation create failed', ['exception' => $e]);
+                $this->addFlash('danger', 'Could not create reservation: ' . $e->getMessage());
+
                 return $this->render('reservation/new.html.twig', [
                     'reservation' => $reservation,
                     'form' => $form,

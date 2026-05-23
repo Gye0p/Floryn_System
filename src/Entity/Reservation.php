@@ -48,7 +48,7 @@ class Reservation
     /**
      * @var Collection<int, ReservationDetail>
      */
-    #[ORM\OneToMany(targetEntity: ReservationDetail::class, mappedBy: 'reservation')]
+    #[ORM\OneToMany(targetEntity: ReservationDetail::class, mappedBy: 'reservation', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $reservationDetails;
 
     #[ORM\OneToOne(mappedBy: 'reservation', cascade: ['persist', 'remove'])]
