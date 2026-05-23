@@ -1,6 +1,9 @@
 const nameCheck = /^[-_a-zA-Z0-9]{4,22}$/;
 const tokenCheck = /^[-_/+a-zA-Z0-9]{24,}$/;
 
+/** Symfony forms use payment[_token]; login uses _csrf_token */
+const CSRF_FIELD_SELECTOR = 'input[data-controller="csrf-protection"], input[name="_csrf_token"], input[name$="[_token]"]';
+
 // Generate and double-submit a CSRF token in a form field and a cookie, as defined by Symfony's SameOriginCsrfTokenManager
 document.addEventListener('submit', function (event) {
     generateCsrfToken(event.target);
@@ -21,7 +24,7 @@ document.addEventListener('turbo:submit-end', function (event) {
 });
 
 export function generateCsrfToken (formElement) {
-    const csrfField = formElement.querySelector('input[data-controller="csrf-protection"], input[name="_csrf_token"]');
+    const csrfField = formElement.querySelector(CSRF_FIELD_SELECTOR);
 
     if (!csrfField) {
         return;
@@ -44,7 +47,7 @@ export function generateCsrfToken (formElement) {
 
 export function generateCsrfHeaders (formElement) {
     const headers = {};
-    const csrfField = formElement.querySelector('input[data-controller="csrf-protection"], input[name="_csrf_token"]');
+    const csrfField = formElement.querySelector(CSRF_FIELD_SELECTOR);
 
     if (!csrfField) {
         return headers;
@@ -60,7 +63,7 @@ export function generateCsrfHeaders (formElement) {
 }
 
 export function removeCsrfToken (formElement) {
-    const csrfField = formElement.querySelector('input[data-controller="csrf-protection"], input[name="_csrf_token"]');
+    const csrfField = formElement.querySelector(CSRF_FIELD_SELECTOR);
 
     if (!csrfField) {
         return;
