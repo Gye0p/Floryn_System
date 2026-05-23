@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\PaymentRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 #[ORM\Entity(repositoryClass: PaymentRepository::class)]
 class Payment
@@ -16,10 +17,6 @@ class Payment
 
     #[ORM\Column]
     #[Assert\NotBlank(message: "Payment date is required.")]
-    #[Assert\LessThanOrEqual(
-        "today",
-        message: "Payment date cannot be in the future."
-    )]
     private ?\DateTime $paymentDate = null;
 
     #[ORM\Column]
@@ -128,5 +125,22 @@ class Payment
         $this->reservation = $reservation;
 
         return $this;
+    }
+
+    #[Assert\Callback]
+    public function validatePaymentDate(ExecutionContextInterface $context): void
+    {
+        if ($this->paymentDate === null) {
+            return;
+        }
+
+        $paymentDay = (clone $this->paymentDate)->setTime(0, 0, 0);
+        $today = new \DateTime('today');
+
+        if ($paymentDay > $today) {
+            $context->buildViolation('Payment date cannot be in the future.')
+                ->atPath('paymentDate')
+                ->addViolation();
+        }
     }
 }

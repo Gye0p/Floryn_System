@@ -1,5 +1,13 @@
 {{ form_start(form) }}
 
+{% if form.vars.errors|length > 0 %}
+  <div class="alert alert-danger" style="margin-bottom:16px;">
+    {% for error in form.vars.errors %}
+      <div>{{ error.message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
 <div class="form-section">
   <div class="form-section-header">
     <div class="section-icon green"><i class="fas fa-receipt"></i></div>

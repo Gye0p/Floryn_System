@@ -9,6 +9,7 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
@@ -23,12 +24,16 @@ class PaymentType extends AbstractType
         $builder
             ->add('paymentDate', DateType::class, [
                 'widget' => 'single_text',
+                'html5' => true,
+                'input' => 'datetime',
                 'label' => 'Payment Date',
                 'attr' => ['class' => 'form-control'],
             ])
-            ->add('amountPaid', null, [
+            ->add('amountPaid', NumberType::class, [
                 'label' => 'Amount Paid',
                 'required' => false,
+                'scale' => 2,
+                'html5' => true,
                 'attr' => [
                     'class' => 'form-control',
                     'placeholder' => 'Auto-filled from reservation total',
@@ -92,10 +97,9 @@ class PaymentType extends AbstractType
                     );
                 },
                 'query_builder' => function (ReservationRepository $repo) {
+                    // Unpaid only; duplicate payment is blocked in PaymentController
                     return $repo->createQueryBuilder('r')
-                        ->leftJoin('r.payment', 'existingPayment')
                         ->where('r.paymentStatus = :status')
-                        ->andWhere('existingPayment.id IS NULL')
                         ->setParameter('status', 'Unpaid')
                         ->orderBy('r.id', 'DESC');
                 },

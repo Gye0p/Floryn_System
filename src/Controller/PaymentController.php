@@ -87,7 +87,7 @@ final class PaymentController extends AbstractController
         }
 
         if ($form->isSubmitted()) {
-            $this->addFlash('danger', 'Could not record payment. Select a reservation, payment method, and reference number.');
+            $this->addFlash('danger', $this->formatPaymentFormErrors($form));
         }
 
         return $this->render('payment/new.html.twig', [
@@ -129,7 +129,7 @@ final class PaymentController extends AbstractController
         }
 
         if ($form->isSubmitted()) {
-            $this->addFlash('danger', 'Could not update payment. Check the highlighted fields.');
+            $this->addFlash('danger', $this->formatPaymentFormErrors($form));
         }
 
         return $this->render('payment/edit.html.twig', [
@@ -158,5 +158,27 @@ final class PaymentController extends AbstractController
         }
 
         return $this->redirectToRoute('app_payment_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    private function formatPaymentFormErrors(\Symfony\Component\Form\FormInterface $form): string
+    {
+        $messages = [];
+
+        foreach ($form->getErrors(true) as $error) {
+            $messages[] = $error->getMessage();
+        }
+
+        foreach ($form as $child) {
+            foreach ($child->getErrors() as $error) {
+                $label = ucfirst($child->getName());
+                $messages[] = $label . ': ' . $error->getMessage();
+            }
+        }
+
+        if ($messages === []) {
+            return 'Could not save payment. Check reservation, payment date, method, and reference number.';
+        }
+
+        return 'Could not save payment — ' . implode(' ', array_unique($messages));
     }
 }
