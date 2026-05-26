@@ -7,6 +7,8 @@ use App\Form\PaymentType;
 use App\Repository\PaymentRepository;
 use App\Service\ActivityLogService;
 use App\Service\EmailNotificationService;
+use App\Service\FcmNotificationService;
+use App\Service\WebSocketNotifier;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -28,7 +30,14 @@ final class PaymentController extends AbstractController
     }
 
     #[Route('/new', name: 'app_payment_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, ActivityLogService $activityLog, EmailNotificationService $emailNotification): Response
+    public function new(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        ActivityLogService $activityLog,
+        EmailNotificationService $emailNotification,
+        FcmNotificationService $fcmNotification,
+        WebSocketNotifier $webSocketNotifier,
+    ): Response
     {
         $payment = new Payment();
         $payment->setPaymentDate(new \DateTime());
@@ -80,6 +89,17 @@ final class PaymentController extends AbstractController
 
             $activityLog->logCreate('Payment', $payment->getId(), 'Payment #' . $payment->getId());
             $emailNotification->sendPaymentConfirmation($payment);
+
+            $customer = $reservation->getCustomer();
+            if ($customer !== null) {
+                $fcmNotification->sendPaymentStatusUpdate($customer, $reservation);
+                $webSocketNotifier->broadcastReservationUpdate(
+                    $reservation->getId(),
+                    $customer->getId(),
+                    $reservation->getReservationStatus(),
+                    'payment_recorded',
+                );
+            }
 
             $this->addFlash('success', 'Payment recorded successfully! Reservation #' . $reservation->getId() . ' marked as Paid.');
 

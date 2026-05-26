@@ -14,6 +14,7 @@ use App\Repository\FlowerRepository;
 use App\Repository\PaymentRepository;
 use App\Repository\ReservationRepository;
 use App\Service\FcmNotificationService;
+use App\Service\PaymentSyncService;
 use App\Service\WebSocketNotifier;
 use Doctrine\DBAL\LockMode;
 use Doctrine\ORM\EntityManagerInterface;
@@ -243,7 +244,7 @@ class ApiCustomerController extends AbstractController
                 'id' => $reservation->getId(),
                 'pickupDate' => $reservation->getPickupDate()?->format('Y-m-d'),
                 'totalAmount' => $reservation->getTotalAmount(),
-                'paymentStatus' => $reservation->getPaymentStatus(),
+                'paymentStatus' => $this->resolvePaymentStatus($reservation),
                 'reservationStatus' => $reservation->getReservationStatus(),
                 'dateReserved' => $reservation->getDateReserved()?->format('Y-m-d H:i:s'),
                 'items' => $items,
@@ -501,15 +502,47 @@ class ApiCustomerController extends AbstractController
      * GET /api/customer/payments — Payment history for own reservations
      */
     #[Route('/payments', name: 'payments', methods: ['GET'])]
-    public function payments(PaymentRepository $paymentRepo): JsonResponse
-    {
+    public function payments(
+        PaymentRepository $paymentRepo,
+        ReservationRepository $reservationRepo,
+        PaymentSyncService $paymentSync,
+    ): JsonResponse {
         /** @var User $user */
         $user = $this->getUser();
         $data = [];
+        $seenReservationIds = [];
 
         foreach ($paymentRepo->findForCustomer($user) as $payment) {
             $data[] = $this->serializePayment($payment);
+            $reservationId = $payment->getReservation()?->getId();
+            if ($reservationId !== null) {
+                $seenReservationIds[$reservationId] = true;
+            }
         }
+
+        // Reservations marked Paid in admin without a Payment row (legacy / edit form only)
+        $paidReservations = $reservationRepo->findBy([
+            'customer' => $user,
+            'paymentStatus' => 'Paid',
+        ]);
+
+        foreach ($paidReservations as $reservation) {
+            $reservationId = $reservation->getId();
+            if ($reservationId === null || isset($seenReservationIds[$reservationId])) {
+                continue;
+            }
+
+            $payment = $paymentSync->ensurePaymentRecord($reservation, flush: true);
+            if ($payment !== null) {
+                $data[] = $this->serializePayment($payment);
+                $seenReservationIds[$reservationId] = true;
+            }
+        }
+
+        usort($data, static fn (array $a, array $b) => strcmp(
+            (string) ($b['paymentDate'] ?? ''),
+            (string) ($a['paymentDate'] ?? '')
+        ));
 
         return $this->json(['payments' => $data, 'total' => count($data)]);
     }
@@ -691,6 +724,16 @@ class ApiCustomerController extends AbstractController
     }
 
     // ── Helpers ──
+
+    private function resolvePaymentStatus(Reservation $reservation): string
+    {
+        $payment = $reservation->getPayment();
+        if ($payment !== null && $payment->getStatus() === 'Paid') {
+            return 'Paid';
+        }
+
+        return $reservation->getPaymentStatus() ?? 'Unpaid';
+    }
 
     /**
      * @return array<string, mixed>

@@ -10,6 +10,7 @@ use App\Repository\FlowerBatchRepository;
 use App\Service\ActivityLogService;
 use App\Service\EmailNotificationService;
 use App\Service\FcmNotificationService;
+use App\Service\PaymentSyncService;
 use App\Service\WebSocketNotifier;
 use Doctrine\DBAL\LockMode;
 use Doctrine\ORM\EntityManagerInterface;
@@ -164,6 +165,7 @@ final class ReservationController extends AbstractController
         ActivityLogService $activityLog,
         FcmNotificationService $fcmNotification,
         WebSocketNotifier $webSocketNotifier,
+        PaymentSyncService $paymentSync,
     ): Response {
         $originalDetails = [];
         foreach ($reservation->getReservationDetails() as $detail) {
@@ -250,6 +252,11 @@ final class ReservationController extends AbstractController
             }
             
             $reservation->setTotalAmount($totalAmount);
+
+            if ($reservation->getPaymentStatus() === 'Paid') {
+                $paymentSync->ensurePaymentRecord($reservation);
+            }
+
             $entityManager->flush();
             $entityManager->commit();
 
@@ -258,14 +265,19 @@ final class ReservationController extends AbstractController
             // Notify customer via FCM push notification (works when app is closed)
             $customer = $reservation->getCustomer();
             if ($customer) {
-                $fcmNotification->sendReservationStatusUpdate($customer, $reservation);
+                if ($reservation->getPaymentStatus() === 'Paid') {
+                    $fcmNotification->sendPaymentStatusUpdate($customer, $reservation);
+                } else {
+                    $fcmNotification->sendReservationStatusUpdate($customer, $reservation);
+                }
             }
 
             // Notify customer via WebSocket (works when app is open)
             $webSocketNotifier->broadcastReservationUpdate(
                 $reservation->getId(),
                 $customer?->getId() ?? 0,
-                $reservation->getReservationStatus()
+                $reservation->getReservationStatus(),
+                $reservation->getPaymentStatus() === 'Paid' ? 'payment_recorded' : 'reservation_updated',
             );
 
             $this->addFlash('success', 'Reservation updated successfully! New Total: ₱' . number_format($totalAmount, 2));
