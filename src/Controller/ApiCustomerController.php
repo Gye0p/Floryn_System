@@ -22,6 +22,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mercure\HubInterface;
+use Symfony\Component\Mercure\Jwt\TokenFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -676,26 +677,14 @@ class ApiCustomerController extends AbstractController
      * and receive instant push updates when a reservation status changes.
      */
     #[Route('/mercure-token', name: 'mercure_token', methods: ['GET'])]
-    public function mercureToken(HubInterface $hub): JsonResponse
+    public function mercureToken(HubInterface $hub, TokenFactoryInterface $tokenFactory): JsonResponse
     {
         /** @var User $user */
         $user  = $this->getUser();
         $topic = '/reservations/' . $user->getId();
 
-        // Build a Mercure subscriber JWT (HS256) scoped to this user's topic.
-        $secret  = $_ENV['MERCURE_JWT_SECRET'] ?? '!ChangeThisMercureHubJWTSecretKey!';
-        $header  = $this->base64UrlEncode(json_encode(['typ' => 'JWT', 'alg' => 'HS256']));
-        $payload = $this->base64UrlEncode(json_encode([
-            'mercure' => ['subscribe' => [$topic]],
-            'exp'     => time() + 3600, // valid for 1 hour
-        ]));
-        $signature = $this->base64UrlEncode(
-            hash_hmac('sha256', "$header.$payload", $secret, true)
-        );
-        $jwt = "$header.$payload.$signature";
-
         return $this->json([
-            'token'   => $jwt,
+            'token'   => $tokenFactory->create(subscribe: [$topic]),
             'hub_url' => $hub->getPublicUrl(),
             'topic'   => $topic,
         ]);
@@ -764,10 +753,5 @@ class ApiCustomerController extends AbstractController
         }
 
         return $payload;
-    }
-
-    private function base64UrlEncode(string $data): string
-    {
-        return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
     }
 }

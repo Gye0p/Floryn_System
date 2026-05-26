@@ -1,0 +1,14 @@
+# Mercure hub — listens on :3000, proxied by Apache at /.well-known/mercure
+{
+	admin off
+}
+
+:3000 {
+	mercure {
+		publisher_jwt {env.MERCURE_PUBLISHER_JWT_KEY} {env.MERCURE_PUBLISHER_JWT_ALG}
+		subscriber_jwt {env.MERCURE_SUBSCRIBER_JWT_KEY} {env.MERCURE_SUBSCRIBER_JWT_ALG}
+		cors_origins *
+	}
+
+	respond /healthz 200
+}

@@ -11,9 +11,13 @@ export JWT_PUBLIC_KEY="${JWT_PUBLIC_KEY:-%kernel.project_dir%/config/jwt/public.
 export JWT_PASSPHRASE="${JWT_PASSPHRASE:-floryn-production-jwt}"
 export DEFAULT_URI="${DEFAULT_URI:-${RAILWAY_PUBLIC_DOMAIN:+https://${RAILWAY_PUBLIC_DOMAIN}}}"
 export DEFAULT_URI="${DEFAULT_URI:-http://localhost}"
-export MERCURE_URL="${MERCURE_URL:-http://localhost/.well-known/mercure}"
+export MERCURE_URL="${MERCURE_URL:-http://127.0.0.1:3000/.well-known/mercure}"
 export MERCURE_PUBLIC_URL="${MERCURE_PUBLIC_URL:-${DEFAULT_URI}/.well-known/mercure}"
 export MERCURE_JWT_SECRET="${MERCURE_JWT_SECRET:-floryn-mercure-jwt-secret}"
+export MERCURE_PUBLISHER_JWT_KEY="${MERCURE_PUBLISHER_JWT_KEY:-${MERCURE_JWT_SECRET}}"
+export MERCURE_SUBSCRIBER_JWT_KEY="${MERCURE_SUBSCRIBER_JWT_KEY:-${MERCURE_JWT_SECRET}}"
+export MERCURE_PUBLISHER_JWT_ALG="${MERCURE_PUBLISHER_JWT_ALG:-HS256}"
+export MERCURE_SUBSCRIBER_JWT_ALG="${MERCURE_SUBSCRIBER_JWT_ALG:-HS256}"
 export MESSENGER_TRANSPORT_DSN="${MESSENGER_TRANSPORT_DSN:-doctrine://default?auto_setup=0}"
 export MAILER_DSN="${MAILER_DSN:-null://null}"
 export CORS_ALLOW_ORIGIN="${CORS_ALLOW_ORIGIN:-^https?://.*$}"
@@ -69,6 +73,16 @@ php bin/console doctrine:migrations:migrate --no-interaction --env=prod
 if [ "$RUN_PROD_SEED" = "1" ]; then
     echo "==> Seeding production data..."
     php bin/console app:seed-production --env=prod
+fi
+
+echo "==> Starting Mercure hub on :3000..."
+/usr/bin/mercure-caddy run --config /etc/mercure/Caddyfile &
+MERCURE_PID=$!
+sleep 2
+if ! kill -0 "$MERCURE_PID" 2>/dev/null; then
+    echo "WARNING: Mercure hub failed to start — real-time updates will not work."
+else
+    echo "==> Mercure hub running (pid $MERCURE_PID)"
 fi
 
 echo "==> Startup complete. Starting Apache..."

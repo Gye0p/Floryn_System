@@ -1,6 +1,8 @@
 # ============================================================
 # Floryn Garden – Production Dockerfile for Railway
 # ============================================================
+FROM dunglas/mercure:v0.19 AS mercure
+
 FROM php:8.4-apache
 
 # ── System dependencies ──────────────────────────────────────
@@ -39,7 +41,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # ── Apache: enable mod_rewrite + set DocumentRoot to /public ─
 RUN a2dismod -f mpm_event mpm_worker \
-    && a2enmod mpm_prefork rewrite
+    && a2enmod mpm_prefork rewrite proxy proxy_http
 RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|g' \
         /etc/apache2/sites-available/000-default.conf \
     && echo '<Directory /var/www/html/public>\n\
@@ -60,6 +62,12 @@ WORKDIR /var/www/html
 ENV APP_ENV=prod \
     APP_DEBUG=0 \
     COMPOSER_ALLOW_SUPERUSER=1
+
+# ── Mercure hub binary (Caddy with mercure module) ─────────────
+COPY --from=mercure /usr/bin/caddy /usr/bin/mercure-caddy
+COPY docker/mercure/Caddyfile /etc/mercure/Caddyfile
+COPY docker/apache/mercure-proxy.conf /etc/apache2/conf-available/mercure-proxy.conf
+RUN a2enconf mercure-proxy
 
 # ── Copy project files ───────────────────────────────────────
 COPY . .
