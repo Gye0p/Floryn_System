@@ -212,5 +212,5 @@ This project is proprietary software developed as an academic project.
 
 ## 👤 Author
 
-**[Your Name]** — Web Development 2 Final Project  
-[Your School] | [Your Section/Course]
+**[JOSHUA GEOFF T. BABOR]** — Web Development 2 Final Project  
+[NORSU] | [INFOTECH]
